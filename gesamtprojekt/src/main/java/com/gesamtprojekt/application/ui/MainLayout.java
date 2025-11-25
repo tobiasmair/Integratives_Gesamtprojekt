@@ -1,4 +1,4 @@
-package com.gesamtprojekt.application.views;
+package com.gesamtprojekt.application.ui;
 
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;

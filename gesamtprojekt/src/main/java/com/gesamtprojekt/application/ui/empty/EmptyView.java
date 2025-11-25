@@ -1,4 +1,4 @@
-package com.gesamtprojekt.application.views.empty;
+package com.gesamtprojekt.application.ui.empty;
 
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
