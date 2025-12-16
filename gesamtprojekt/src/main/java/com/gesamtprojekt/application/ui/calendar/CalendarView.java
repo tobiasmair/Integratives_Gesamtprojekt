@@ -1,0 +1,20 @@
+package com.gesamtprojekt.application.ui.calendar;
+
+import com.gesamtprojekt.application.ui.MainLayout;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
+
+@Route(value = "calendar", layout = MainLayout.class)
+@PageTitle("Calendar")
+@AnonymousAllowed
+public class CalendarView extends VerticalLayout {
+
+    public CalendarView() {
+
+        add(new H1("Calendar"));
+    }
+}

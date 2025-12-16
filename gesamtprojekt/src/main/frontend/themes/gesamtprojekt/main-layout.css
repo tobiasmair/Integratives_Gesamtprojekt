@@ -1,20 +1,109 @@
-vaadin-scroller[slot="drawer"] {
-  padding: var(--lumo-space-s);
+/*APP LAYOUT / DRAWER – Grundkonfiguration
+Steuert die Breite der Sidebar (AppLayout Drawer)*/
+
+/* Standardbreite der Sidebar */
+vaadin-app-layout {
+  --vaadin-app-layout-drawer-width: 280px;
 }
 
-vaadin-side-nav-item vaadin-icon {
-  padding: 0;
+/* Breite der Sidebar im eingeklappten Zustand */
+vaadin-app-layout.drawer-collapsed {
+  --vaadin-app-layout-drawer-width: 60px;
 }
 
-[slot="drawer"]:is(header, footer) {
+
+/*DRAWER CONTAINER (Wrapper um Header, Profil, Nav, Footer)
+Entspricht: <FlexLayout class="drawer">*/
+
+.drawer {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/*DRAWER HEADER (App-Name + Collapse-Button)
+Entspricht: <Header class="drawer-header">*/
+
+.drawer-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  padding: var(--lumo-space-s);
   gap: var(--lumo-space-s);
-  padding: var(--lumo-space-s) var(--lumo-space-m);
-  min-height: var(--lumo-size-xl);
-  box-sizing: border-box;
 }
 
-[slot="drawer"]:is(header, footer):is(:empty) {
+/* Collapse / Expand Button */
+.collapse-btn {
+  width: 30px;
+  height: 30px;
+}
+
+
+/*PROFILBEREICH (Avatar + Name + Rolle)
+Entspricht: <Div class="profile-box">*/
+
+.profile-box {
+  display: flex;
+  align-items: center;
+  margin: 0 0 10px 0;
+  padding: var(--lumo-space-s) var(--lumo-space-s);
+  background: var(--lumo-contrast-5pct);
+}
+
+.profile-name {
+  font-weight: 600;
+}
+
+.profile-role {
+  color: var(--lumo-secondary-text-color);
+  font-size: var(--lumo-font-size-s);
+}
+
+
+/*5) NAVIGATION (SideNav + SideNavItems)
+Entspricht: <SideNav class="sidenav">*/
+
+.sidenav {
+  padding: 0 var(--lumo-space-s);
+}
+
+
+/*FOOTER (My Profile / Logout / Help)
+Entspricht: <Footer class="drawer-footer">*/
+
+.drawer-footer {
+  padding: var(--lumo-space-m);
+  color: var(--lumo-secondary-text-color);
+  font-size: var(--lumo-font-size-s);
+}
+
+
+/*COLLAPSED STATE – Sidebar eingeklappt
+Texte ausblenden
+Icons sichtbar lassen
+Platz sparen
+WICHTIG: Wenn wir definieren wie wir was im Menü anzeigen - unbedingt anpassen!!!!
+*/
+
+/* App-Name, Profil & Footer im collapsed Zustand ausblenden */
+vaadin-app-layout.drawer-collapsed .app-name,
+vaadin-app-layout.drawer-collapsed .profile-box,
+vaadin-app-layout.drawer-collapsed .drawer-footer {
   display: none;
+}
+
+/* Text-Label der Navigation ausblenden (nur Icons sichtbar) */
+vaadin-app-layout.drawer-collapsed vaadin-side-nav-item::part(label) {
+  display: none;
+}
+
+/* Submenu-Pfeile ausblenden (Admin-Accordion etc.) */
+vaadin-app-layout.drawer-collapsed vaadin-side-nav-item::part(toggle) {
+  display: none;
+}
+
+/* Padding der Navigation reduzieren */
+vaadin-app-layout.drawer-collapsed vaadin-side-nav {
+  padding-left: 0;
+  padding-right: 0;
 }
