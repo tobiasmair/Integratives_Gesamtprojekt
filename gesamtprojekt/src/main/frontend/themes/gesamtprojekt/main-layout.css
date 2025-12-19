@@ -1,20 +1,99 @@
-vaadin-scroller[slot="drawer"] {
-  padding: var(--lumo-space-s);
+vaadin-app-layout {
+  --vaadin-app-layout-drawer-width: 280px;
 }
 
-vaadin-side-nav-item vaadin-icon {
-  padding: 0;
+vaadin-app-layout.drawer-collapsed {
+  --vaadin-app-layout-drawer-width: 50px;
 }
 
-[slot="drawer"]:is(header, footer) {
+.drawer {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.collapse-btn {
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.profile-box {
+  display: flex;
+  align-items: center;
+  margin-top: var(--lumo-space-m);
+  margin-bottom: var(--lumo-space-m);
+  padding: var(--lumo-space-s) var(--lumo-space-s);
+  background: var(--lumo-contrast-5pct);
+  min-height: 40px;
+}
+
+.profile-name {
+  font-weight: 600;
+  font-size: var(--lumo-font-size-s);
+}
+
+.profile-role {
+  color: var(--lumo-secondary-text-color);
+  font-size: var(--lumo-font-size-xs);
+}
+
+vaadin-app-layout.drawer-collapsed .profile-text {
+  display: none;
+}
+
+vaadin-app-layout.drawer-collapsed .profile-box {
+  display: flex;
+  align-items: center;
+  margin-top: var(--lumo-space-m);
+  margin-bottom: var(--lumo-space-m);
+  padding: var(--lumo-space-s) var(--lumo-space-s);
+  background: var(--lumo-contrast-5pct);
+  min-height: 40px;
+}
+
+vaadin-app-layout.drawer-collapsed .sidenav-section-title {
+  display: none;
+}
+
+.sidenav {
+  padding: var(--lumo-space-xs);
+}
+
+.drawer-footer {
+  margin-top: auto;
+  padding: var(--lumo-space-xs);
+  color: var(--lumo-secondary-text-color);
+  font-size: var(--lumo-font-size-s);
+}
+
+.footer-item {
   display: flex;
   align-items: center;
   gap: var(--lumo-space-s);
-  padding: var(--lumo-space-s) var(--lumo-space-m);
-  min-height: var(--lumo-size-xl);
-  box-sizing: border-box;
+  padding: var(--lumo-space-s) var(--lumo-space-s);
+  cursor: pointer;
 }
 
-[slot="drawer"]:is(header, footer):is(:empty) {
+.footer-icon {
+  color: var(--lumo-secondary-text-color);
+}
+
+vaadin-app-layout.drawer-collapsed .footer-text {
+  display: none;
+}
+
+vaadin-app-layout.drawer-collapsed .app-name {
+  display: none;
+}
+
+vaadin-app-layout.drawer-collapsed vaadin-side-nav-item::part(label) {
   display: none;
 }
