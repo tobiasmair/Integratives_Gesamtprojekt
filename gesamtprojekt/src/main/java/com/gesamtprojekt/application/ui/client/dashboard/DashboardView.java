@@ -1,6 +1,6 @@
-package com.gesamtprojekt.application.ui.dashboard;
+package com.gesamtprojekt.application.ui.client.dashboard;
 
-import com.gesamtprojekt.application.ui.MainLayout;
+import com.gesamtprojekt.application.ui.client.MainLayout;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;

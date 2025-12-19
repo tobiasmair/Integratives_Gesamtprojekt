@@ -1,4 +1,4 @@
-package com.gesamtprojekt.application.ui;
+package com.gesamtprojekt.application.ui.client;
 
 import com.gesamtprojekt.application.ui.components.navigation.SideNavbar;
 import com.vaadin.flow.component.applayout.AppLayout;
@@ -8,10 +8,11 @@ import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.Layout;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.menu.MenuConfiguration;
+import jakarta.annotation.security.PermitAll;
 
 @CssImport("./themes/gesamtprojekt/main-layout.css")
 @Layout
-@AnonymousAllowed
+//@PermitAll
 public class MainLayout extends AppLayout implements AfterNavigationObserver {
 
     private SideNavbar sideNavbar;
