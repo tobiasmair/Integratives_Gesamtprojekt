@@ -97,3 +97,51 @@ vaadin-app-layout.drawer-collapsed .app-name {
 vaadin-app-layout.drawer-collapsed vaadin-side-nav-item::part(label) {
   display: none;
 }
+
+.dashboard-view {
+  /*background: aqua;*/
+}
+
+.quick-booking-container {
+  padding: var(--lumo-space-m);
+  border: 4px solid var(--lumo-contrast-10pct);
+  border-radius: 8px;
+  /*margin-bottom: var(--lumo-space-l);*/
+}
+
+.my-bookings-container {
+  padding: var(--lumo-space-m);
+  border: 4px solid var(--lumo-contrast-10pct);
+  border-radius: 8px;
+  /*margin-bottom: var(--lumo-space-l);*/
+}
+
+.quick-rooms-box {
+  border: 1px solid var(--lumo-contrast-20pct);
+  border-radius: var(--lumo-border-radius-l);
+  padding: var(--lumo-space-s);
+  width: stretch;
+}
+
+.rooms-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lumo-space-s);
+  margin-top: var(--lumo-space-s);
+}
+
+.room-card {
+  border: 1px solid var(--lumo-contrast-20pct);
+  border-radius: var(--lumo-border-radius-m);
+  padding: var(--lumo-space-s);
+  background: var(--lumo-base-color);
+}
+
+.room-card-title {
+  font-weight: 600;
+}
+
+.room-card-subtitle {
+  font-size: var(--lumo-font-size-s);
+  color: var(--lumo-secondary-text-color);
+}
