@@ -18,6 +18,7 @@ import com.vaadin.flow.component.orderedlayout.Scroller;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -38,7 +39,7 @@ public class MyBookingsContainer extends Div {
 
     private final List<DummyBooking> dummyBookings = createDummyBookings();
 
-    private LocalDate customSelected = LocalDate.now();
+    //private LocalDate customSelected = LocalDate.now();
 
     public MyBookingsContainer() {
         addClassName("my-bookings-container");
@@ -173,36 +174,6 @@ public class MyBookingsContainer extends Div {
         return date.format(fmt);
     }
 
-    private void loadDummyBookings() {
-        bookingsList.removeAll();
-
-        bookingsList.add(
-                new BookingItem(
-                        "meeting A",
-                        "meeting Room A",
-                        formatShort(LocalDate.now()),
-                        "09:00 - 11:00"
-                ),
-                new BookingItem(
-                        "meeting B",
-                        "meeting Room A",
-                        formatShort(LocalDate.now()),
-                        "11:00 - 12:00"
-                ),
-                new BookingItem(
-                        "meeting C",
-                        "meeting Room A",
-                        formatShort(LocalDate.now()),
-                        "14:00 - 14:30"
-                ),
-                new BookingItem(
-                        "Lecture DiBSE",
-                        "online lecture room A",
-                        formatShort(LocalDate.now()),
-                        "18:00 - 20:30"
-                )
-        );
-    }
 
     private List<DummyBooking> createDummyBookings() {
         var list = new ArrayList<DummyBooking>();
@@ -236,10 +207,7 @@ public class MyBookingsContainer extends Div {
 
         dummyBookings.stream()
                 .filter(b -> !b.date().isBefore(from) && !b.date().isAfter(to))
-                .sorted((a, c) -> {
-                    int d = a.date().compareTo(c.date());
-                    return d != 0 ? d : a.start().compareTo(c.start());
-                })
+                .sorted(Comparator.comparing(DummyBooking::date).thenComparing(DummyBooking::start))
                 .forEach(b -> bookingsList.add(toBookingItem(b)));
 
         if (bookingsList.getChildren().findAny().isEmpty()) {

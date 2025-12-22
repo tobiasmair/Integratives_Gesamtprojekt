@@ -1,6 +1,6 @@
 package com.gesamtprojekt.application.ui.components.dashboard;
 
-import com.vaadin.flow.component.Component;
+
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
@@ -12,16 +12,14 @@ import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
-import com.vaadin.flow.data.provider.DataProvider;
+
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.textfield.TextArea;
+
 
 
 import java.time.Duration;
@@ -133,7 +131,7 @@ public class QuickBookingContainer extends Div {
 
     private void setRooms(List<RoomItem> rooms) {
         roomGroup.setItems(rooms);
-        roomGroup.setValue(rooms.isEmpty() ? null : rooms.get(0));
+        roomGroup.setValue(rooms.isEmpty() ? null : rooms.getFirst());
     }
 
 
