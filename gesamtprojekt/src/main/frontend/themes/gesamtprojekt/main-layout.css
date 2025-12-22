@@ -145,3 +145,85 @@ vaadin-app-layout.drawer-collapsed vaadin-side-nav-item::part(label) {
   font-size: var(--lumo-font-size-s);
   color: var(--lumo-secondary-text-color);
 }
+
+/* Radio-Items untereinander + volle Breite */
+.rooms-radio vaadin-radio-button {
+  display: block;
+  width: 100%;
+  margin-bottom: var(--lumo-space-s);
+}
+
+/* Letztes Item ohne extra Abstand */
+.rooms-radio vaadin-radio-button:last-child {
+  margin-bottom: 0;
+}
+
+/* Label soll die volle Breite nutzen (damit unsere Row „card-like“ wirkt) */
+.rooms-radio vaadin-radio-button::part(label) {
+  width: 100%;
+}
+
+
+.my-bookings-calendar-box {
+  border: 1px solid var(--lumo-contrast-20pct);
+  border-radius: var(--lumo-border-radius-l);
+  padding: var(--lumo-space-s);
+}
+
+.selected-date-text {
+  font-size: var(--lumo-font-size-s);
+  color: var(--lumo-secondary-text-color);
+}
+
+.bookings-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lumo-space-s);
+}
+
+.booking-item {
+  border: 1px solid var(--lumo-contrast-20pct);
+  border-radius: var(--lumo-border-radius-m);
+  padding: var(--lumo-space-s);
+  background: var(--lumo-base-color);
+}
+
+.booking-title {
+  font-weight: 600;
+}
+
+.booking-subtitle {
+  font-size: var(--lumo-font-size-xs);
+  color: var(--lumo-secondary-text-color);
+}
+
+.booking-time-badge {
+  background: var(--lumo-primary-color);
+  color: var(--lumo-primary-contrast-color);
+  border-radius: var(--lumo-border-radius-m);
+  padding: 2px 8px;
+  font-size: var(--lumo-font-size-xs);
+  font-weight: 600;
+}
+
+.my-bookings-container vaadin-date-picker {
+  max-width: 220px;
+}
+
+.bookings-list {
+  width: 100%;
+}
+
+.booking-item {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.booking-date {
+  font-size: var(--lumo-font-size-xs);
+  color: var(--lumo-tertiary-text-color);
+}
+
+.bookings-scroller {
+  border-radius: var(--lumo-border-radius-m);
+}
