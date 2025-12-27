@@ -1,4 +1,4 @@
-package com.gesamtprojekt.application.ui;
+package com.gesamtprojekt.application.ui.client;
 
 import com.gesamtprojekt.application.ui.components.navigation.SideNavbar;
 import com.vaadin.flow.component.applayout.AppLayout;

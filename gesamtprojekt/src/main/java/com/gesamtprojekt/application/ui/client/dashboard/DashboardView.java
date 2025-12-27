@@ -1,16 +1,13 @@
-package com.gesamtprojekt.application.ui.dashboard;
+package com.gesamtprojekt.application.ui.client.dashboard;
 
-import com.gesamtprojekt.application.ui.MainLayout;
+import com.gesamtprojekt.application.ui.client.MainLayout;
 import com.gesamtprojekt.application.ui.components.dashboard.MyBookingsContainer;
 import com.gesamtprojekt.application.ui.components.dashboard.QuickBookingContainer;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import jakarta.annotation.security.RolesAllowed;
 
 //@RolesAllowed({"USER", "ADMIN"})
 @Route(value = "dashboard", layout = MainLayout.class)
