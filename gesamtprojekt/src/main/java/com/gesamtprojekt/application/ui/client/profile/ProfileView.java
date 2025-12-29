@@ -1,4 +1,4 @@
-package com.gesamtprojekt.application.ui.client.dashboard;
+package com.gesamtprojekt.application.ui.client.profile;
 
 import com.gesamtprojekt.application.ui.client.MainLayout;
 import com.vaadin.flow.component.html.H1;
@@ -7,13 +7,14 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 
-@Route(value = "", layout = MainLayout.class)
-@PageTitle("Dashboard")
+@Route(value = "profile", layout = MainLayout.class)
+@PageTitle("Profile")
 @PermitAll
-public class DashboardView extends VerticalLayout {
+public class ProfileView extends VerticalLayout {
 
-    public DashboardView() {
+    public ProfileView() {
 
-        add(new H1("Dashboard"));
+        add(new H1("Profile"));
     }
+
 }

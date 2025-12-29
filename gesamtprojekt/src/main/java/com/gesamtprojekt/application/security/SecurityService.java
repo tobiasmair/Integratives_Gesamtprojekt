@@ -25,18 +25,7 @@ public class SecurityService {
         this.usersRepository = usersRepository;
     }
 
-    /*
-    public UserDetails getAuthenticatedUser() {
-        SecurityContext context = SecurityContextHolder.getContext();
-        Object principal = context.getAuthentication().getPrincipal();
-        if (principal instanceof UserDetails) {
-            return (UserDetails) context.getAuthentication().getPrincipal();
-        }
-        // Anonymous or no authentication.
-        return null;
-    }
-     */
-
+    // Authentifizierten User zurückgeben
     public Optional<UserDetails> getAuthenticatedUser() {
         SecurityContext context = SecurityContextHolder.getContext();
         Object principal = context.getAuthentication().getPrincipal();
@@ -46,11 +35,13 @@ public class SecurityService {
         return Optional.empty();
     }
 
+    // Client Klasse zurückgeben
     public Optional<Client> getAuthenticatedClient() {
         return authenticationContext.getAuthenticatedUser(UserDetails.class)
                 .flatMap(userDetails -> usersRepository.findByUsername(userDetails.getUsername()));
     }
 
+    // Logout
     public void logout() {
         UI.getCurrent().getPage().setLocation(LOGOUT_SUCCESS_URL);
         SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
@@ -58,4 +49,12 @@ public class SecurityService {
                 VaadinServletRequest.getCurrent().getHttpServletRequest(), null,
                 null);
     }
+
+    // Hilfsmethode für Sidebar
+    public boolean isAdmin() {
+        return getAuthenticatedClient()
+                .map(client -> "ADMIN".equalsIgnoreCase(client.getRole()))
+                .orElse(false);
+    }
+
 }

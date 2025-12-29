@@ -1,10 +1,9 @@
 
 package com.gesamtprojekt.application.ui.components.navigation;
 
-import com.gesamtprojekt.application.model.Client;
-import com.gesamtprojekt.application.repositories.UsersRepository;
 import com.gesamtprojekt.application.security.SecurityService;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Footer;
@@ -16,7 +15,6 @@ import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
@@ -25,11 +23,9 @@ public class SideNavbar extends FlexLayout {
 
     private final Button collapseButton;
     private final SecurityService securityService;
-    private final UsersRepository usersRepository;
 
-    public SideNavbar(Runnable onToggleCollapse, SecurityService securityService, UsersRepository usersRepository) {
+    public SideNavbar(Runnable onToggleCollapse, SecurityService securityService) {
         this.securityService = securityService;
-        this.usersRepository = usersRepository;
 
         addClassName("drawer");
         setFlexDirection(FlexLayout.FlexDirection.COLUMN);
@@ -123,8 +119,6 @@ public class SideNavbar extends FlexLayout {
         return ("" + parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
     }
 
-
-
     private SideNav buildNavigation() {
         SideNav nav = new SideNav();
         nav.addClassName("sidenav");
@@ -139,9 +133,7 @@ public class SideNavbar extends FlexLayout {
     }
 
     private boolean isAdminUser() {
-        return securityService.getAuthenticatedClient()
-                .map(user -> "ADMIN".equals(user.getRole()))
-                .orElse(false);
+        return securityService.isAdmin();
     }
 
     private void addDefaultItems(SideNav nav) {
@@ -151,8 +143,6 @@ public class SideNavbar extends FlexLayout {
     }
 
     private void addAdminSection(SideNav nav) {
-
-
         nav.addItem(new SideNavItem("Statistics & Reports", "statistics", VaadinIcon.CHART.create()));
         nav.addItem(new SideNavItem("Room Management", "roommanagement", VaadinIcon.BUILDING.create()));
         nav.addItem(new SideNavItem("User Management", "usermanagement", VaadinIcon.USERS.create()));
@@ -169,8 +159,13 @@ public class SideNavbar extends FlexLayout {
         });
         logoutItem.getStyle().set("cursor", "pointer");
 
+        Component profileItem = buildFooterItem(VaadinIcon.USER, "My Profile");
+        profileItem.getElement().addEventListener("click", e -> {
+            UI.getCurrent().navigate("profile");
+        });
+
         footer.add(
-                buildFooterItem(VaadinIcon.USER, "My Profile"),
+                profileItem,
                 logoutItem
         );
         footer.addClassNames(

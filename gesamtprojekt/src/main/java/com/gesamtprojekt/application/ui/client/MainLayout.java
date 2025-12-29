@@ -21,11 +21,9 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
 
     private final SecurityService securityService;
     private SideNavbar sideNavbar;
-    private final UsersRepository usersRepository;
 
-    public MainLayout(SecurityService securityService, UsersRepository usersRepository) {
+    public MainLayout(SecurityService securityService) {
         this.securityService = securityService;
-        this.usersRepository = usersRepository;
 
         setPrimarySection(Section.DRAWER);
         getStyle().setHeight("100%");
@@ -33,7 +31,7 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
     }
 
     private void addDrawerContent() {
-        sideNavbar = new SideNavbar(this::toggleCollapsed, securityService, usersRepository);
+        sideNavbar = new SideNavbar(this::toggleCollapsed, securityService);
         addToDrawer(sideNavbar);
         syncCollapsedIcon();
     }
