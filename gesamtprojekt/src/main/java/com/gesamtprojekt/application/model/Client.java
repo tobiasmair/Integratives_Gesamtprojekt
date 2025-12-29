@@ -32,4 +32,10 @@ public class Client {
     // Relation to Booking
     @OneToMany(mappedBy = "client")
     private List<Booking> bookings  = new ArrayList<>();
+
+    public Client(String username, String password, String role) {
+        setUsername(username);
+        setPassword(password);
+        setRole(role);
+    }
 }
