@@ -227,3 +227,78 @@ vaadin-app-layout.drawer-collapsed vaadin-side-nav-item::part(label) {
 .bookings-scroller {
   border-radius: var(--lumo-border-radius-m);
 }
+
+.calendar-room-card {
+  width: 240px;
+  border: 1px solid var(--lumo-contrast-10pct);
+  border-radius: 12px;
+  background: var(--lumo-base-color);
+  overflow: hidden;
+}
+
+
+.calendar-filters vaadin-details {
+  border: 1px solid var(--lumo-contrast-10pct);
+  border-radius: 12px;
+  padding: 8px;
+}
+
+
+/* obere Sektion bleibt fix, nur unten scrollt */
+.calendar-rooms-scroll {
+  overflow: auto;
+  min-height: 0; /* extrem wichtig bei flex layouts */
+  padding-right: 6px; /* damit scrollbar nicht am rand klebt */
+}
+
+/* Date/Time & Filter kompakter */
+.calendar-controls-small vaadin-date-picker,
+.calendar-controls-small vaadin-time-picker,
+.calendar-controls-small vaadin-combo-box {
+  font-size: 12px;
+}
+
+.calendar-controls-small vaadin-input-container {
+  min-height: 34px;
+}
+
+.calendar-controls-small vaadin-details::part(summary) {
+  font-size: 13px;
+  padding: 6px 10px;
+}
+
+.calendar-controls-small vaadin-details::part(content) {
+  padding: 8px 10px;
+}
+
+/* nur rooms scrollt */
+.calendar-rooms-scroll {
+  overflow: auto;
+  min-height: 0;
+  padding-right: 6px;
+}
+
+/* controls kompakter */
+.calendar-controls vaadin-date-picker,
+.calendar-controls vaadin-time-picker,
+.calendar-controls vaadin-combo-box {
+  font-size: 12px;
+}
+
+.calendar-controls vaadin-input-container {
+  min-height: 34px;
+}
+
+/* labels kleiner */
+.calendar-controls vaadin-date-picker::part(label),
+.calendar-controls vaadin-time-picker::part(label),
+.calendar-controls vaadin-combo-box::part(label) {
+  font-size: 12px;
+}
+
+/* etwas weniger luft im form layout */
+.calendar-controls vaadin-form-layout {
+  row-gap: 6px;
+  column-gap: 10px;
+}
+

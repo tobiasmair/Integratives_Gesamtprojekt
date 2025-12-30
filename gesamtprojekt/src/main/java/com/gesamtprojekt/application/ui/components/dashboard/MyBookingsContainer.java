@@ -39,8 +39,6 @@ public class MyBookingsContainer extends Div {
 
     private final List<DummyBooking> dummyBookings = createDummyBookings();
 
-    //private LocalDate customSelected = LocalDate.now();
-
     public MyBookingsContainer() {
         addClassName("my-bookings-container");
         add(createContent());
@@ -95,7 +93,6 @@ public class MyBookingsContainer extends Div {
         return bookingsScroller;
     }
 
-
     private void initControls() {
         customDate.setValue(LocalDate.now());
         customDate.addValueChangeListener(e -> onCustomDatePicked(e.getValue()));
@@ -120,7 +117,6 @@ public class MyBookingsContainer extends Div {
         }
         showCustomDate(date);
     }
-
 
     private void showToday() {
         var day = LocalDate.now();
@@ -147,12 +143,10 @@ public class MyBookingsContainer extends Div {
         loadBookings(start, end);
     }
 
-
     private void showCustomDate(LocalDate date) {
         setRangeText("Custom date: " + formatDay(date));
         loadBookingsForDay(date);
     }
-
 
     private LocalDate startOfWeek(LocalDate date) {
         var dow = date.getDayOfWeek();

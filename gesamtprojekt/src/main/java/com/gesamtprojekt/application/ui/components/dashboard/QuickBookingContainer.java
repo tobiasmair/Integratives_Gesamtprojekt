@@ -134,8 +134,6 @@ public class QuickBookingContainer extends Div {
         roomGroup.setValue(rooms.isEmpty() ? null : rooms.getFirst());
     }
 
-
-
     private HorizontalLayout createRoomRow(RoomItem room) {
         var title = new Span(room.name());
         title.addClassName("room-title");
