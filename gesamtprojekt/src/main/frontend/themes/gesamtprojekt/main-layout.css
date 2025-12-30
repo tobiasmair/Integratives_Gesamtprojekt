@@ -97,3 +97,208 @@ vaadin-app-layout.drawer-collapsed .app-name {
 vaadin-app-layout.drawer-collapsed vaadin-side-nav-item::part(label) {
   display: none;
 }
+
+.dashboard-view {
+  /*background: aqua;*/
+}
+
+.quick-booking-container {
+  padding: var(--lumo-space-m);
+  border: 4px solid var(--lumo-contrast-10pct);
+  border-radius: 8px;
+  /*margin-bottom: var(--lumo-space-l);*/
+}
+
+.my-bookings-container {
+  padding: var(--lumo-space-m);
+  border: 4px solid var(--lumo-contrast-10pct);
+  border-radius: 8px;
+  /*margin-bottom: var(--lumo-space-l);*/
+}
+
+.quick-rooms-box {
+  border: 1px solid var(--lumo-contrast-20pct);
+  border-radius: var(--lumo-border-radius-l);
+  padding: var(--lumo-space-s);
+  width: stretch;
+}
+
+.rooms-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lumo-space-s);
+  margin-top: var(--lumo-space-s);
+}
+
+.room-card {
+  border: 1px solid var(--lumo-contrast-20pct);
+  border-radius: var(--lumo-border-radius-m);
+  padding: var(--lumo-space-s);
+  background: var(--lumo-base-color);
+}
+
+.room-card-title {
+  font-weight: 600;
+}
+
+.room-card-subtitle {
+  font-size: var(--lumo-font-size-s);
+  color: var(--lumo-secondary-text-color);
+}
+
+/* Radio-Items untereinander + volle Breite */
+.rooms-radio vaadin-radio-button {
+  display: block;
+  width: 100%;
+  margin-bottom: var(--lumo-space-s);
+}
+
+/* Letztes Item ohne extra Abstand */
+.rooms-radio vaadin-radio-button:last-child {
+  margin-bottom: 0;
+}
+
+/* Label soll die volle Breite nutzen (damit unsere Row „card-like“ wirkt) */
+.rooms-radio vaadin-radio-button::part(label) {
+  width: 100%;
+}
+
+
+.my-bookings-calendar-box {
+  border: 1px solid var(--lumo-contrast-20pct);
+  border-radius: var(--lumo-border-radius-l);
+  padding: var(--lumo-space-s);
+}
+
+.selected-date-text {
+  font-size: var(--lumo-font-size-s);
+  color: var(--lumo-secondary-text-color);
+}
+
+.bookings-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lumo-space-s);
+}
+
+.booking-item {
+  border: 1px solid var(--lumo-contrast-20pct);
+  border-radius: var(--lumo-border-radius-m);
+  padding: var(--lumo-space-s);
+  background: var(--lumo-base-color);
+}
+
+.booking-title {
+  font-weight: 600;
+}
+
+.booking-subtitle {
+  font-size: var(--lumo-font-size-xs);
+  color: var(--lumo-secondary-text-color);
+}
+
+.booking-time-badge {
+  background: var(--lumo-primary-color);
+  color: var(--lumo-primary-contrast-color);
+  border-radius: var(--lumo-border-radius-m);
+  padding: 2px 8px;
+  font-size: var(--lumo-font-size-xs);
+  font-weight: 600;
+}
+
+.my-bookings-container vaadin-date-picker {
+  max-width: 220px;
+}
+
+.bookings-list {
+  width: 100%;
+}
+
+.booking-item {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.booking-date {
+  font-size: var(--lumo-font-size-xs);
+  color: var(--lumo-tertiary-text-color);
+}
+
+.bookings-scroller {
+  border-radius: var(--lumo-border-radius-m);
+}
+
+.calendar-room-card {
+  width: 240px;
+  border: 1px solid var(--lumo-contrast-10pct);
+  border-radius: 12px;
+  background: var(--lumo-base-color);
+  overflow: hidden;
+}
+
+
+.calendar-filters vaadin-details {
+  border: 1px solid var(--lumo-contrast-10pct);
+  border-radius: 12px;
+  padding: 8px;
+}
+
+
+/* obere Sektion bleibt fix, nur unten scrollt */
+.calendar-rooms-scroll {
+  overflow: auto;
+  min-height: 0; /* extrem wichtig bei flex layouts */
+  padding-right: 6px; /* damit scrollbar nicht am rand klebt */
+}
+
+/* Date/Time & Filter kompakter */
+.calendar-controls-small vaadin-date-picker,
+.calendar-controls-small vaadin-time-picker,
+.calendar-controls-small vaadin-combo-box {
+  font-size: 12px;
+}
+
+.calendar-controls-small vaadin-input-container {
+  min-height: 34px;
+}
+
+.calendar-controls-small vaadin-details::part(summary) {
+  font-size: 13px;
+  padding: 6px 10px;
+}
+
+.calendar-controls-small vaadin-details::part(content) {
+  padding: 8px 10px;
+}
+
+/* nur rooms scrollt */
+.calendar-rooms-scroll {
+  overflow: auto;
+  min-height: 0;
+  padding-right: 6px;
+}
+
+/* controls kompakter */
+.calendar-controls vaadin-date-picker,
+.calendar-controls vaadin-time-picker,
+.calendar-controls vaadin-combo-box {
+  font-size: 12px;
+}
+
+.calendar-controls vaadin-input-container {
+  min-height: 34px;
+}
+
+/* labels kleiner */
+.calendar-controls vaadin-date-picker::part(label),
+.calendar-controls vaadin-time-picker::part(label),
+.calendar-controls vaadin-combo-box::part(label) {
+  font-size: 12px;
+}
+
+/* etwas weniger luft im form layout */
+.calendar-controls vaadin-form-layout {
+  row-gap: 6px;
+  column-gap: 10px;
+}
+
