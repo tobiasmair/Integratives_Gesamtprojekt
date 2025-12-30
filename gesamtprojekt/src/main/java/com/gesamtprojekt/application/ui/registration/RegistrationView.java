@@ -60,7 +60,7 @@ public class RegistrationView extends VerticalLayout {
         registerButton.addClickListener(e -> {
             if (password.getValue().equals(confirmPassword.getValue())) {
                 try {
-                    clientService.createCustomer(username.getValue(), password.getValue(), "USER");
+                    clientService.createClient(username.getValue(), password.getValue(), "USER");
                     Notification.show("Registrierung erfolgreich!", 3000, Notification.Position.TOP_CENTER)
                             .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                     UI.getCurrent().navigate(LoginView.class);

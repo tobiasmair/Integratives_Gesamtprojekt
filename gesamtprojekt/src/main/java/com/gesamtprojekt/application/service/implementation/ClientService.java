@@ -1,27 +1,28 @@
 package com.gesamtprojekt.application.service.implementation;
 
 import com.gesamtprojekt.application.model.Client;
-import com.gesamtprojekt.application.repositories.UsersRepository;
+import com.gesamtprojekt.application.repositories.ClientRepository;
+import com.gesamtprojekt.application.service.ClientServiceInterface;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
-public class ClientService {
+public class ClientService implements ClientServiceInterface {
 
-    private final UsersRepository usersRepository;
+    private final ClientRepository clientRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public Client createCustomer(String username, String password, String role) {
-        if (usersRepository.findByUsername(username).isPresent()) {
+    public Client createClient(String username, String password, String role) {
+        if (clientRepository.findByUsername(username).isPresent()) {
             throw new RuntimeException("Benutzername bereits vergeben.");
         }
 
         String hashedPassword = passwordEncoder.encode(password);
 
         Client newUser = new Client(username, hashedPassword, role);
-        usersRepository.save(newUser);
+        clientRepository.save(newUser);
 
         return newUser;
     }

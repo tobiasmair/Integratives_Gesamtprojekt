@@ -4,7 +4,7 @@ import com.gesamtprojekt.application.model.Client;
 
 public interface ClientServiceInterface {
 
-    Client createCustomer(String username,
+    Client createClient(String username,
                           String password,
                           String role);
 

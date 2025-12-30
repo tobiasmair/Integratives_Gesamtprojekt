@@ -1,7 +1,7 @@
 package com.gesamtprojekt.application.security;
 
 import com.gesamtprojekt.application.model.Client;
-import com.gesamtprojekt.application.repositories.UsersRepository;
+import com.gesamtprojekt.application.repositories.ClientRepository;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.spring.security.AuthenticationContext;
@@ -18,11 +18,11 @@ public class SecurityService {
 
     private static final String LOGOUT_SUCCESS_URL = "/";
     private final AuthenticationContext authenticationContext;
-    private final UsersRepository usersRepository;
+    private final ClientRepository clientRepository;
 
-    public SecurityService(AuthenticationContext authenticationContext, UsersRepository usersRepository) {
+    public SecurityService(AuthenticationContext authenticationContext, ClientRepository clientRepository) {
         this.authenticationContext = authenticationContext;
-        this.usersRepository = usersRepository;
+        this.clientRepository = clientRepository;
     }
 
     // Authentifizierten User zurückgeben
@@ -38,7 +38,7 @@ public class SecurityService {
     // Client Klasse zurückgeben
     public Optional<Client> getAuthenticatedClient() {
         return authenticationContext.getAuthenticatedUser(UserDetails.class)
-                .flatMap(userDetails -> usersRepository.findByUsername(userDetails.getUsername()));
+                .flatMap(userDetails -> clientRepository.findByUsername(userDetails.getUsername()));
     }
 
     // Logout
