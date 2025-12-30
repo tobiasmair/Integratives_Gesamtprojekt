@@ -4,9 +4,10 @@ import com.gesamtprojekt.application.model.Client;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UsersRepository extends JpaRepository<Client, Long> {
 
-    //List<Client> findUsersBy(Long userId);
+    Optional<Client> findByUsername(String username);
 
 }
