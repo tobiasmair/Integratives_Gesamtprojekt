@@ -20,7 +20,7 @@ public class Client {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
-    @Column(name = "username")
+    @Column(name = "username", unique = true, nullable = false)
     private String username;
 
     @Column(name = "password")
@@ -32,4 +32,10 @@ public class Client {
     // Relation to Booking
     @OneToMany(mappedBy = "client")
     private List<Booking> bookings  = new ArrayList<>();
+
+    public Client(String username, String password, String role) {
+        setUsername(username);
+        setPassword(password);
+        setRole(role);
+    }
 }

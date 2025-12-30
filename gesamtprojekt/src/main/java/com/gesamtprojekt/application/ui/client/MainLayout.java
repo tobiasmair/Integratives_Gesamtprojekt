@@ -1,29 +1,37 @@
-package com.gesamtprojekt.application.ui;
+package com.gesamtprojekt.application.ui.client;
 
+import com.gesamtprojekt.application.repositories.UsersRepository;
+import com.gesamtprojekt.application.security.SecurityService;
+import com.gesamtprojekt.application.service.implementation.AuthService;
 import com.gesamtprojekt.application.ui.components.navigation.SideNavbar;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.Layout;
+import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.menu.MenuConfiguration;
+import jakarta.annotation.security.PermitAll;
 
 @CssImport("./themes/gesamtprojekt/main-layout.css")
-@Layout
-@AnonymousAllowed
+//@Layout
+@PermitAll
 public class MainLayout extends AppLayout implements AfterNavigationObserver {
 
+    private final SecurityService securityService;
     private SideNavbar sideNavbar;
 
-    public MainLayout() {
+    public MainLayout(SecurityService securityService) {
+        this.securityService = securityService;
+
         setPrimarySection(Section.DRAWER);
         getStyle().setHeight("100%");
         addDrawerContent();
     }
 
     private void addDrawerContent() {
-        sideNavbar = new SideNavbar(this::toggleCollapsed);
+        sideNavbar = new SideNavbar(this::toggleCollapsed, securityService);
         addToDrawer(sideNavbar);
         syncCollapsedIcon();
     }

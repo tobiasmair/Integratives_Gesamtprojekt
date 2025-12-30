@@ -1,7 +1,9 @@
 
 package com.gesamtprojekt.application.ui.components.navigation;
 
+import com.gesamtprojekt.application.security.SecurityService;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Footer;
@@ -20,9 +22,11 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 public class SideNavbar extends FlexLayout {
 
     private final Button collapseButton;
+    private final SecurityService securityService;
 
+    public SideNavbar(Runnable onToggleCollapse, SecurityService securityService) {
+        this.securityService = securityService;
 
-    public SideNavbar(Runnable onToggleCollapse) {
         addClassName("drawer");
         setFlexDirection(FlexLayout.FlexDirection.COLUMN);
         setSizeFull();
@@ -67,29 +71,35 @@ public class SideNavbar extends FlexLayout {
     }
 
     private Component buildProfileSection() {
-        String academicTitle = "Dr.";
-        String fullName = "Max Mustermann";
-        String roleText = "Admin";
+        // UserDetails von Spring Security
+        return securityService.getAuthenticatedClient().map(user -> {
 
-        Avatar avatar = buildAvatar(fullName);
-        avatar.getStyle().set("margin-right", "var(--lumo-space-s)");
+            if (user == null) return new Div();
 
-        Span name = new Span(academicTitle +" " + fullName);
-        name.addClassName("profile-name");
+            String fullName = user.getUsername();
+            String roleText = user.getRole();
 
-        Span role = new Span(roleText);
-        role.addClassName("profile-role");
+            Avatar avatar = buildAvatar(fullName);
+            avatar.getStyle().set("margin-right", "var(--lumo-space-s)");
 
-        VerticalLayout text = new VerticalLayout(name, role);
-        text.setPadding(false);
-        text.setSpacing(false);
-        text.setMargin(false);
-        text.addClassName("profile-text");
+            Span name = new Span(fullName);
+            name.addClassName("profile-name");
 
-        Div box = new Div(avatar, text);
-        box.addClassName("profile-box");
-        box.getStyle().setHeight("50px");
-        return box;
+            Span role = new Span(roleText);
+            role.addClassName("profile-role");
+
+            VerticalLayout text = new VerticalLayout(name, role);
+            text.setPadding(false);
+            text.setSpacing(false);
+            text.setMargin(false);
+            text.addClassName("profile-text");
+
+            Div box = new Div(avatar, text);
+            box.addClassName("profile-box");
+            box.getStyle().setHeight("50px");
+            return box;
+
+        }).orElse(new Div());
     }
 
     private Avatar buildAvatar(String fullName) {
@@ -109,8 +119,6 @@ public class SideNavbar extends FlexLayout {
         return ("" + parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
     }
 
-
-
     private SideNav buildNavigation() {
         SideNav nav = new SideNav();
         nav.addClassName("sidenav");
@@ -125,18 +133,16 @@ public class SideNavbar extends FlexLayout {
     }
 
     private boolean isAdminUser() {
-        return true;
+        return securityService.isAdmin();
     }
 
     private void addDefaultItems(SideNav nav) {
-        nav.addItem(new SideNavItem("My Dashboard", "dashboard", VaadinIcon.DASHBOARD.create()));
+        nav.addItem(new SideNavItem("My Dashboard", "", VaadinIcon.DASHBOARD.create()));
         nav.addItem(new SideNavItem("Calendar", "calendar", VaadinIcon.CALENDAR.create()));
         nav.addItem(new SideNavItem("Browse Rooms", "browserooms", VaadinIcon.SEARCH.create()));
     }
 
     private void addAdminSection(SideNav nav) {
-
-
         nav.addItem(new SideNavItem("Statistics & Reports", "statistics", VaadinIcon.CHART.create()));
         nav.addItem(new SideNavItem("Room Management", "roommanagement", VaadinIcon.BUILDING.create()));
         nav.addItem(new SideNavItem("User Management", "usermanagement", VaadinIcon.USERS.create()));
@@ -147,10 +153,20 @@ public class SideNavbar extends FlexLayout {
         Footer footer = new Footer();
         footer.addClassName("drawer-footer");
 
+        Component logoutItem = buildFooterItem(VaadinIcon.SIGN_OUT, "Logout");
+        logoutItem.getElement().addEventListener("click", e -> {
+            securityService.logout();
+        });
+        logoutItem.getStyle().set("cursor", "pointer");
+
+        Component profileItem = buildFooterItem(VaadinIcon.USER, "My Profile");
+        profileItem.getElement().addEventListener("click", e -> {
+            UI.getCurrent().navigate("profile");
+        });
+
         footer.add(
-                buildFooterItem(VaadinIcon.USER, "My Profile"),
-                buildFooterItem(VaadinIcon.SIGN_OUT, "Logout"),
-                buildFooterItem(VaadinIcon.QUESTION_CIRCLE, "Help")
+                profileItem,
+                logoutItem
         );
         footer.addClassNames(
                 LumoUtility.Display.FLEX,
