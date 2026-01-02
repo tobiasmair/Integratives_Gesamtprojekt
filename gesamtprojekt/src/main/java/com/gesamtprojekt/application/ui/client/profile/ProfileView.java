@@ -1,7 +1,15 @@
 package com.gesamtprojekt.application.ui.client.profile;
 
+import com.gesamtprojekt.application.model.Client;
+import com.gesamtprojekt.application.security.SecurityService;
+import com.gesamtprojekt.application.service.implementation.ClientService;
 import com.gesamtprojekt.application.ui.client.MainLayout;
-import com.vaadin.flow.component.html.H1;
+import com.gesamtprojekt.application.ui.components.admin.RegistrationForm;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -12,9 +20,74 @@ import jakarta.annotation.security.PermitAll;
 @PermitAll
 public class ProfileView extends VerticalLayout {
 
-    public ProfileView() {
+    private final ClientService clientService;
+    private final SecurityService securityService;
+    private final RegistrationForm registrationForm = new RegistrationForm();
+    private Client currentClient;
 
-        add(new H1("Profile"));
+    public ProfileView(ClientService clientService, SecurityService securityService) {
+        this.clientService = clientService;
+        this.securityService = securityService;
+
+        setAlignItems(Alignment.CENTER);
+
+        // Aktuellen Nutzer laden
+        securityService.getAuthenticatedClient().ifPresent(client -> {
+            this.currentClient = client;
+            registrationForm.setClient(client);
+        });
+
+        // Felder für Ansicht anpassen
+        configureFormForProfile();
+
+        Button saveButton = new Button("Save Profile", e -> saveProfile());
+        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+
+        VerticalLayout content = new VerticalLayout(new H2("Personal Data"), registrationForm, saveButton);
+        content.setMaxWidth("500px");
+        content.setPadding(true);
+
+        add(content);
     }
 
+    private void configureFormForProfile() {
+        // Username + Rolle nicht änderbar
+        registrationForm.username.setReadOnly(true);
+        registrationForm.role.setReadOnly(true);
+
+        registrationForm.password.setPlaceholder("Simply fill in to modify");
+        registrationForm.confirmPassword.setPlaceholder("Confirm password");
+    }
+
+    private void saveProfile() {
+        if (currentClient == null) return;
+
+        String pass = registrationForm.password.getValue();
+
+        if (registrationForm.isValid()) {
+            try {
+                currentClient.setEmail(registrationForm.email.getValue());
+                currentClient.setDepartment(registrationForm.department.getValue());
+                currentClient.setUserType(registrationForm.userType.getValue());
+
+                // Speichern
+                if (pass.isEmpty()) {
+                    clientService.updateClient(currentClient);
+                } else {
+                    clientService.updateClientWithPassword(currentClient, pass);
+                }
+
+                Notification.show("Profile successfully updated!")
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+
+                // Felder leeren
+                registrationForm.password.clear();
+                registrationForm.confirmPassword.clear();
+
+            } catch (Exception ex) {
+                Notification.show("Error: " + ex.getMessage())
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            }
+        }
+    }
 }

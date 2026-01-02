@@ -2,6 +2,8 @@ package com.gesamtprojekt.application.ui.components.admin;
 
 import com.gesamtprojekt.application.model.Client;
 import com.gesamtprojekt.application.service.implementation.ClientService;
+import com.gesamtprojekt.application.ui.login.LoginView;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -112,16 +114,18 @@ public class UserTableSection extends VerticalLayout {
         dialog.add(dialogLayout);
 
         Button saveButton = new Button("Save", event -> {
-            client.setUsername(form.username.getValue());
-            client.setEmail(form.email.getValue());
-            client.setDepartment(form.department.getValue());
-            client.setUserType(form.userType.getValue());
-            client.setRole(form.role.getValue());
+            if (form.isValid()) {
+                client.setUsername(form.username.getValue());
+                client.setEmail(form.email.getValue());
+                client.setDepartment(form.department.getValue());
+                client.setUserType(form.userType.getValue());
+                client.setRole(form.role.getValue());
 
-            clientService.updateClient(client);
-            updateList();
-            dialog.close();
-            Notification.show("User updated.");
+                clientService.updateClient(client);
+                updateList();
+                dialog.close();
+                Notification.show("User updated.");
+            }
         });
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
@@ -170,18 +174,16 @@ public class UserTableSection extends VerticalLayout {
 
         // Click Logik für Registrierung
         registerButton.addClickListener(e -> {
-            if (form.password.getValue().equals(form.confirmPassword.getValue())) {
+            if (form.isValid()) {
                 try {
-                    clientService.createClient(form.username.getValue(), form.password.getValue(), form.email.getValue(), form.department.getValue(), form.userType.getValue(), form.role.getValue());
-                    updateList();
-                    dialog.close();
-                    Notification.show("User added successfully.");
+                    clientService.createClient(form.username.getValue(), form.password.getValue(), form.email.getValue(), form.department.getValue(), form.userType.getValue(),"USER");
+                    Notification.show("Registration success!", 3000, Notification.Position.TOP_CENTER)
+                            .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                    UI.getCurrent().navigate(LoginView.class);
                 } catch (Exception ex) {
                     Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_CENTER)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 }
-            } else {
-                Notification.show("Passwords do not match!");
             }
         });
 

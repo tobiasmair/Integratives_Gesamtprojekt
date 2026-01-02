@@ -12,6 +12,8 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
 
     List<Client> findByIsActiveTrue();
 
+    Optional<Client> findByUsername(String username);
+
     Optional<Client> findByUsernameAndIsActiveTrue(String username);
 
     @Query("select c from Client c " +

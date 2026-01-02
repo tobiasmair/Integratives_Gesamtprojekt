@@ -53,7 +53,7 @@ public class RegistrationView extends VerticalLayout {
         registerButton.setWidthFull();
 
         registerButton.addClickListener(e -> {
-            if (form.password.getValue().equals(form.confirmPassword.getValue())) {
+            if (form.isValid()) {
                 try {
                     clientService.createClient(form.username.getValue(), form.password.getValue(), form.email.getValue(), form.department.getValue(), form.userType.getValue(),"USER");
                     Notification.show("Registration success!", 3000, Notification.Position.TOP_CENTER)
@@ -63,8 +63,6 @@ public class RegistrationView extends VerticalLayout {
                     Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_CENTER)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 }
-            } else {
-                Notification.show("Passwords do not match!");
             }
         });
 

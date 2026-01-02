@@ -18,8 +18,8 @@ public class ClientService implements ClientServiceInterface {
 
     // Neuen Client anlegen
     public Client createClient(String username, String password, String email, String department, String userType, String role) {
-        if (clientRepository.findByUsernameAndIsActiveTrue(username).isPresent()) {
-            throw new RuntimeException("Benutzername bereits vergeben.");
+        if (clientRepository.findByUsername(username).isPresent()) {
+            throw new RuntimeException("Username already in use.");
         }
 
         String hashedPassword = passwordEncoder.encode(password);
@@ -60,6 +60,13 @@ public class ClientService implements ClientServiceInterface {
 
     // Client updaten
     public void updateClient(Client client) {
+        clientRepository.save(client);
+    }
+
+    // Client updaten mit Passwort
+    public void updateClientWithPassword(Client client, String newPassword) {
+        String hashedPassword = passwordEncoder.encode(newPassword);
+        client.setPassword(hashedPassword);
         clientRepository.save(client);
     }
 
