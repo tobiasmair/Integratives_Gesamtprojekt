@@ -17,8 +17,8 @@ public class UserManagementStatsBar extends HorizontalLayout {
 
         add(
                 createStatCard("Total Users", String.valueOf(clientService.countUsers()), VaadinIcon.USERS),
-                createStatCard("Total Lecturers", "DUMMY", VaadinIcon.ACADEMY_CAP),
-                createStatCard("Total Students", "DUMMY", VaadinIcon.CHAT),
+                createStatCard("Total Lecturers", String.valueOf(clientService.countByUserTypeAndIsActiveTrue("LECTURER")), VaadinIcon.ACADEMY_CAP),
+                createStatCard("Total Students", String.valueOf(clientService.countByUserTypeAndIsActiveTrue("STUDENT")), VaadinIcon.CHAT),
                 createStatCard("Active bookings", "DUMMY", VaadinIcon.CALENDAR)
         );
     }

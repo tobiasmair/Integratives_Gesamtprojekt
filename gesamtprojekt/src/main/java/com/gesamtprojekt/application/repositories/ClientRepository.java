@@ -10,16 +10,21 @@ import java.util.Optional;
 
 public interface ClientRepository extends JpaRepository<Client, Long> {
 
-    Optional<Client> findByUsername(String username);
+    List<Client> findByIsActiveTrue();
+
+    Optional<Client> findByUsernameAndIsActiveTrue(String username);
 
     @Query("select c from Client c " +
-            "where lower(c.username) like lower(concat('%', :searchTerm, '%'))")
-    List<Client> search(@Param("searchTerm") String searchTerm);
-
-    @Query("select c from Client c " +
-            "where (lower(c.username) like lower(concat('%', :searchTerm, '%'))) " +
+            "where c.isActive = true " +
+            "and (lower(c.username) like lower(concat('%', :searchTerm, '%')) " +
+            "or lower(c.email) like lower(concat('%', :searchTerm, '%'))) " +
             "and (:role = '' or c.role = :role)")
-    List<Client> searchByFilters(@Param("searchTerm") String searchTerm,
-                                 @Param("role") String role);
+    List<Client> searchByFilters(@Param("searchTerm") String searchTerm, @Param("role") String role);
+
+    // Anzahl aktive Clients zählen
+    long countByisActiveTrue();
+
+    // Anzahl aktive Clients nach Benutzertyp zählen
+    long countByUserTypeAndIsActiveTrue(String userType);
 
 }
