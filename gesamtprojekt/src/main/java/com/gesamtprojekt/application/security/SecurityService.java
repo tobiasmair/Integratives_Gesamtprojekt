@@ -25,20 +25,10 @@ public class SecurityService {
         this.clientRepository = clientRepository;
     }
 
-    // Authentifizierten User zurückgeben
-    public Optional<UserDetails> getAuthenticatedUser() {
-        SecurityContext context = SecurityContextHolder.getContext();
-        Object principal = context.getAuthentication().getPrincipal();
-        if (principal instanceof UserDetails) {
-            return Optional.of((UserDetails) principal);
-        }
-        return Optional.empty();
-    }
-
     // Client Klasse zurückgeben
     public Optional<Client> getAuthenticatedClient() {
         return authenticationContext.getAuthenticatedUser(UserDetails.class)
-                .flatMap(userDetails -> clientRepository.findByUsername(userDetails.getUsername()));
+                .flatMap(userDetails -> clientRepository.findByUsernameAndIsActiveTrue(userDetails.getUsername()));
     }
 
     // Logout

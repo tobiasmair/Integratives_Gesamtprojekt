@@ -6,6 +6,6 @@ public interface ClientServiceInterface {
 
     Client createClient(String username,
                           String password,
-                          String role);
+                          String email, String department, String userType, String role);
 
 }
