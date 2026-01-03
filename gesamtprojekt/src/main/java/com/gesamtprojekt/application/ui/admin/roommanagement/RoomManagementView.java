@@ -1,12 +1,12 @@
 package com.gesamtprojekt.application.ui.admin.roommanagement;
 
+import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.gesamtprojekt.application.ui.client.MainLayout;
-import com.vaadin.flow.component.html.H1;
+import com.gesamtprojekt.application.ui.components.admin.RoomManagementStatsBar;
+import com.gesamtprojekt.application.ui.components.admin.RoomTableSection;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
-import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 
 @Route(value = "roommanagement", layout = MainLayout.class)
@@ -14,8 +14,17 @@ import jakarta.annotation.security.RolesAllowed;
 @RolesAllowed("ADMIN")
 public class RoomManagementView extends VerticalLayout {
 
-    public RoomManagementView() {
+    public RoomManagementView(MeetingRoomService meetingRoomService) {
+        setSizeFull();
+        setPadding(true);
+        setSpacing(true);
 
-        add(new H1("Room Management"));
+        // Komponente hinzufügen
+        var stats = new RoomManagementStatsBar(meetingRoomService);
+        var table = new RoomTableSection(meetingRoomService);
+
+        // Aufbau View
+        add(stats, table);
+        setFlexGrow(1, table);
     }
 }

@@ -20,18 +20,23 @@ public class MeetingRoom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roomId;
 
+    // Raum-Name
     @Column(name = "name")
     private String name;
 
+    // Sitz-/Personenkapazität
     @Column(name = "capacity")
     private Integer capacity;
 
+    // Gebäude/Standort
     @Column(name = "location")
     private String location;
 
+    // Status (ACTIVE / INACTIVE) - wird für Soft-Delete/Filter verwendet
     @Column(name = "status")
     private String status;
 
+    // Steuerungs-Flags
     @Column(name = "hasDoorControl")
     private Boolean hasDoorControl;
 
@@ -41,11 +46,11 @@ public class MeetingRoom {
     @Column(name = "hasVentilationControl")
     private Boolean hasVentilationControl;
 
-    // Relation to Booking
+    // Relation zu Buchungen (1:n)
     @OneToMany(mappedBy = "meetingRoom")
     private List<Booking> bookings  = new ArrayList<>();
 
-    // Relation to Equipment
+    // Relation zu Equipment (n:m)
     @ManyToMany
     @JoinTable(
             name = "equipment",
