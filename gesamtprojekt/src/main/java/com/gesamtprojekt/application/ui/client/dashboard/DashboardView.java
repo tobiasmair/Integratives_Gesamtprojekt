@@ -1,5 +1,8 @@
 package com.gesamtprojekt.application.ui.client.dashboard;
 
+import com.gesamtprojekt.application.security.SecurityService;
+import com.gesamtprojekt.application.service.implementation.BookingService;
+import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.gesamtprojekt.application.ui.client.MainLayout;
 import com.gesamtprojekt.application.ui.components.dashboard.MyBookingsContainer;
 import com.gesamtprojekt.application.ui.components.dashboard.QuickBookingContainer;
@@ -14,7 +17,15 @@ import jakarta.annotation.security.PermitAll;
 @PermitAll
 public class DashboardView extends VerticalLayout {
 
-    public DashboardView() {
+    private final BookingService bookingService;
+    private final MeetingRoomService meetingRoomService;
+    private final SecurityService securityService;
+
+    public DashboardView(BookingService bookingService, MeetingRoomService meetingRoomService, SecurityService securityService) {
+        this.bookingService = bookingService;
+        this.meetingRoomService = meetingRoomService;
+        this.securityService = securityService;
+
         addClassName("dashboard-view");
         setSizeFull();
 
@@ -23,7 +34,7 @@ public class DashboardView extends VerticalLayout {
     }
 
     private HorizontalLayout createTwoColumnLayout() {
-        var quick = new QuickBookingContainer();
+        var quick = new QuickBookingContainer(bookingService, meetingRoomService, securityService);
         var bookings = new MyBookingsContainer();
 
 

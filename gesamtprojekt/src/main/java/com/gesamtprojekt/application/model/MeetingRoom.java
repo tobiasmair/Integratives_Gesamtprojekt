@@ -41,6 +41,9 @@ public class MeetingRoom {
     @Column(name = "hasVentilationControl")
     private Boolean hasVentilationControl;
 
+    @Column(name = "isActive")
+    private Boolean isActive = true;
+
     // Relation to Booking
     @OneToMany(mappedBy = "meetingRoom")
     private List<Booking> bookings  = new ArrayList<>();
