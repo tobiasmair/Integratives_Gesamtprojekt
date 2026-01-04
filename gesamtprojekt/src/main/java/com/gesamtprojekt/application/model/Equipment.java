@@ -8,6 +8,8 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -24,5 +26,5 @@ public class Equipment {
     private String description;
 
     @ManyToMany(mappedBy = "equipment")
-    private List<MeetingRoom> meetingRooms = new ArrayList<>();
+    private Set<MeetingRoom> meetingRooms = new LinkedHashSet<>();
 }

@@ -8,6 +8,8 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -53,9 +55,9 @@ public class MeetingRoom {
     // Relation zu Equipment (n:m)
     @ManyToMany
     @JoinTable(
-            name = "equipment",
-            joinColumns = @JoinColumn(name = "roomId"),
-            inverseJoinColumns = @JoinColumn(name = "equipmentId")
+            name = "meeting_room_equipment",
+            joinColumns = @JoinColumn(name = "room_id", referencedColumnName = "roomId"),
+            inverseJoinColumns = @JoinColumn(name = "equipment_id", referencedColumnName = "equipmentId")
     )
-    private List<Equipment> equipment = new ArrayList<>();
+    private Set<Equipment> equipment = new LinkedHashSet<>();
 }
