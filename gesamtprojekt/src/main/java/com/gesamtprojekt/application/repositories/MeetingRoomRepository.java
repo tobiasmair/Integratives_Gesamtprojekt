@@ -15,7 +15,7 @@ public interface MeetingRoomRepository extends JpaRepository<MeetingRoom, Long> 
     // Alle freien Räume in einem bestimmten Zeitraum finden
     @Query("SELECT r FROM MeetingRoom r WHERE r.isActive = true AND r.roomId NOT IN (" +
             "SELECT b.meetingRoom.roomId FROM Booking b " +
-            "WHERE b.startTime < :endTime AND b.endTime > :startTime)")
+            "WHERE b.isActive = true AND b.startTime < :endTime AND b.endTime > :startTime)")
     List<MeetingRoom> findAvailableRoomsInTimeframe(
             @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime);

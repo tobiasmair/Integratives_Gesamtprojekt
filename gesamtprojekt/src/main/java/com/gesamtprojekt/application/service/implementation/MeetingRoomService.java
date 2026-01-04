@@ -19,11 +19,12 @@ public class MeetingRoomService {
         return meetingRoomRepository.findByIsActiveTrue();
     }
 
+    // Aktive Räume in Zeitabschnitt
     public List<MeetingRoom> findAvailableRoomsInTimeframe(
             LocalDateTime startTime,
             LocalDateTime endTime) {
         if (startTime == null || endTime == null) {
-            return meetingRoomRepository.findByIsActiveTrue();
+            return findAvailableRooms();
         }
         return meetingRoomRepository.findAvailableRoomsInTimeframe(startTime, endTime);
     }

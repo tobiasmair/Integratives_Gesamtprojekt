@@ -29,14 +29,12 @@ public class DashboardView extends VerticalLayout {
         addClassName("dashboard-view");
         setSizeFull();
 
-        //add(new H1("Dashboard!!!"));
         add(createTwoColumnLayout());
     }
 
     private HorizontalLayout createTwoColumnLayout() {
         var quick = new QuickBookingContainer(bookingService, meetingRoomService, securityService);
-        var bookings = new MyBookingsContainer();
-
+        var bookings = new MyBookingsContainer(bookingService, securityService);
 
         quick.setWidthFull();
         bookings.setWidthFull();

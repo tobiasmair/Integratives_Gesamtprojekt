@@ -283,6 +283,8 @@ public class QuickBookingContainer extends Div {
             booking.setStartTime(datePicker.getValue().atTime(startTime.getValue()));   // startTime
             booking.setEndTime(datePicker.getValue().atTime(endTime.getValue()));   // endTime
 
+            booking.setPurpose(purposeField.getValue());  // purpose
+
             booking.setBookingStatus("CONFIRMED");  // status
 
             bookingService.createBooking(booking);

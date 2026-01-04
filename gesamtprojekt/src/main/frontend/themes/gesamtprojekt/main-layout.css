@@ -224,6 +224,11 @@ vaadin-app-layout.drawer-collapsed vaadin-side-nav-item::part(label) {
   color: var(--lumo-tertiary-text-color);
 }
 
+.booking-status {
+  font-size: var(--lumo-font-size-xs);
+  color: var(--lumo-tertiary-text-color);
+}
+
 .bookings-scroller {
   border-radius: var(--lumo-border-radius-m);
 }

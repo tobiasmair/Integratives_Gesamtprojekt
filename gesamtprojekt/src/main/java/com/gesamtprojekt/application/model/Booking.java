@@ -34,6 +34,9 @@ public class Booking {
     @Column(name = "purpose")
     private String purpose;
 
+    @Column(name = "isActive")
+    private Boolean isActive = true;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "userId")
     private Client client;

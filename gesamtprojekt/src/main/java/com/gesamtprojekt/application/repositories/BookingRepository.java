@@ -14,7 +14,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     // Zeitraum überlappende Buchungen prüfen
     @Query("SELECT COUNT(b) > 0 FROM Booking b " +
-            "WHERE b.meetingRoom.roomId = :roomId " +
+            "WHERE b.isActive = true " +
+            "AND b.meetingRoom.roomId = :roomId " +
             "AND b.startTime < :endTime " +
             "AND b.endTime > :startTime")
     boolean existsOverlappingBooking(
@@ -22,5 +23,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime
     );
+
+    // Buchungen eines Clients finden
+    @Query("SELECT b FROM Booking b WHERE b.isActive = true AND b.client.userId = :clientId")
+    List<Booking> findBookingByClientId (@Param("clientId") Long clientId);
 
 }

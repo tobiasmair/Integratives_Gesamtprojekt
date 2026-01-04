@@ -1,5 +1,8 @@
 package com.gesamtprojekt.application.ui.components.dashboard;
 
+import com.gesamtprojekt.application.model.Booking;
+import com.gesamtprojekt.application.security.SecurityService;
+import com.gesamtprojekt.application.service.implementation.BookingService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.html.Div;
@@ -9,11 +12,10 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
+
+import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import com.vaadin.flow.component.orderedlayout.Scroller;
-
-
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -23,6 +25,9 @@ import java.util.List;
 import java.util.Locale;
 
 public class MyBookingsContainer extends Div {
+
+    private final BookingService bookingService;
+    private final SecurityService securityService;
 
     private final Tab todayTab = new Tab("Today");
     private final Tab weekTab = new Tab("This week");
@@ -34,12 +39,10 @@ public class MyBookingsContainer extends Div {
     private final Div bookingsList = new Div();
     private final Scroller bookingsScroller = new Scroller();
 
+    public MyBookingsContainer(BookingService bookingService, SecurityService securityService) {
+        this.bookingService = bookingService;
+        this.securityService = securityService;
 
-    private record DummyBooking(String title, String room, LocalDate date, LocalTime start, LocalTime end) {}
-
-    private final List<DummyBooking> dummyBookings = createDummyBookings();
-
-    public MyBookingsContainer() {
         addClassName("my-bookings-container");
         add(createContent());
         initControls();
@@ -87,7 +90,7 @@ public class MyBookingsContainer extends Div {
 
         bookingsScroller.setContent(bookingsList);
         bookingsScroller.setWidthFull();
-        bookingsScroller.setHeight("520px"); // kannst du später feinjustieren
+        bookingsScroller.setHeight("520px");
         bookingsScroller.addClassName("bookings-scroller");
 
         return bookingsScroller;
@@ -133,7 +136,6 @@ public class MyBookingsContainer extends Div {
         loadBookings(start, end);
     }
 
-
     private void showThisMonth() {
         var today = LocalDate.now();
         var start = today.withDayOfMonth(1);
@@ -168,30 +170,6 @@ public class MyBookingsContainer extends Div {
         return date.format(fmt);
     }
 
-
-    private List<DummyBooking> createDummyBookings() {
-        var list = new ArrayList<DummyBooking>();
-        var today = LocalDate.now();
-
-        list.add(new DummyBooking("Daily standup", "Meeting Room A", today, LocalTime.of(9, 0), LocalTime.of(9, 30)));
-        list.add(new DummyBooking("Project sync", "Meeting Room B", today, LocalTime.of(11, 0), LocalTime.of(12, 0)));
-
-        list.add(new DummyBooking("Retro", "Meeting Room A", today.plusDays(1), LocalTime.of(14, 0), LocalTime.of(15, 0)));
-        list.add(new DummyBooking("Client call", "Online room A", today.plusDays(2), LocalTime.of(18, 0), LocalTime.of(19, 0)));
-
-        list.add(new DummyBooking("Workshop", "Lecture Room D", today.minusDays(1), LocalTime.of(10, 0), LocalTime.of(12, 0)));
-        list.add(new DummyBooking("Planning", "Meeting Room C", today.minusDays(3), LocalTime.of(15, 30), LocalTime.of(16, 30)));
-
-        var firstOfMonth = today.withDayOfMonth(1);
-        list.add(new DummyBooking("All-hands", "Main Hall", firstOfMonth, LocalTime.of(16, 0), LocalTime.of(17, 0)));
-        list.add(new DummyBooking("Budget review", "Meeting Room B", firstOfMonth.plusDays(10), LocalTime.of(9, 0), LocalTime.of(10, 30)));
-
-        var nextMonth = today.plusMonths(1).withDayOfMonth(3);
-        list.add(new DummyBooking("Next month kickoff", "Meeting Room A", nextMonth, LocalTime.of(10, 0), LocalTime.of(11, 0)));
-
-        return list;
-    }
-
     private void loadBookingsForDay(LocalDate day) {
         loadBookings(day, day);
     }
@@ -199,28 +177,43 @@ public class MyBookingsContainer extends Div {
     private void loadBookings(LocalDate from, LocalDate to) {
         bookingsList.removeAll();
 
-        dummyBookings.stream()
-                .filter(b -> !b.date().isBefore(from) && !b.date().isAfter(to))
-                .sorted(Comparator.comparing(DummyBooking::date).thenComparing(DummyBooking::start))
-                .forEach(b -> bookingsList.add(toBookingItem(b)));
+        securityService.getAuthenticatedClient().ifPresent(client -> {
+            List<Booking> allBookings = bookingService.findBookingByClientId(client.getUserId());
 
-        if (bookingsList.getChildren().findAny().isEmpty()) {
-            bookingsList.add(new Span("No bookings in this period."));
-        }
+            // Zeit Filter
+            LocalDateTime startofDay = from.atStartOfDay();
+            LocalDateTime endofDay = to.atTime(LocalTime.MAX);
+
+            // Filtern
+            allBookings.stream()
+                    .filter(b -> !b.getStartTime().isBefore(startofDay) && !b.getEndTime().isAfter(endofDay))
+                    .sorted(Comparator.comparing(Booking::getStartTime))
+                    .forEach(b -> bookingsList.add(toBookingItem(b)));
+
+            if (bookingsList.getChildren().findAny().isEmpty()) {
+                bookingsList.add(new Span("No bookings in this period."));
+            }
+        });
     }
 
-    private BookingItem toBookingItem(DummyBooking b) {
+    private BookingItem toBookingItem(Booking booking) {
+        String meetingRoomName = booking.getMeetingRoom() != null ? booking.getMeetingRoom().getName() : "Unknown Room";
+
+        // Formatiere Datum und Uhrzeit
+        String dateString = booking.getStartTime().toLocalDate().format(DateTimeFormatter.ofPattern("dd MMM yyyy"));
+        String timeString = booking.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm"))
+                + " - " +
+                booking.getEndTime().format(DateTimeFormatter.ofPattern("HH:mm"));
+
         return new BookingItem(
-                b.title(),
-                b.room(),
-                formatShort(b.date()),
-                formatTimeRange(b.start(), b.end())
+                booking,
+                bookingService,
+                booking.getPurpose(),
+                meetingRoomName,
+                dateString,
+                timeString,
+                booking.getBookingStatus()
         );
     }
-
-    private String formatTimeRange(LocalTime start, LocalTime end) {
-        return start.toString() + " - " + end.toString();
-    }
-
 
 }
