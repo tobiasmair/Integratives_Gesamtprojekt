@@ -3,6 +3,8 @@ package com.gesamtprojekt.application.ui.components.admin;
 import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.service.implementation.EquipmentService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
+import com.gesamtprojekt.application.service.implementation.RoomImageStorageService;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -24,6 +26,8 @@ public class RoomTableSection extends VerticalLayout {
 
     private final MeetingRoomService meetingRoomService;
     private final EquipmentService equipmentService;
+    private final RoomImageStorageService imageStorage;
+
 
     private final Grid<MeetingRoom> grid = new Grid<>(MeetingRoom.class, false);
     private final TextField searchField = new TextField();
@@ -33,9 +37,10 @@ public class RoomTableSection extends VerticalLayout {
             new ComboBox<>("", List.of("All Status", "ACTIVE", "INACTIVE"));
     private final Button addRoomBtn = new Button("Add Room");
 
-    public RoomTableSection(MeetingRoomService meetingRoomService, EquipmentService equipmentService) {
+    public RoomTableSection(MeetingRoomService meetingRoomService, EquipmentService equipmentService, RoomImageStorageService imageStorage) {
         this.meetingRoomService = meetingRoomService;
         this.equipmentService = equipmentService;
+        this.imageStorage = imageStorage;
 
         setSizeFull();
         setPadding(false);
@@ -103,7 +108,7 @@ public class RoomTableSection extends VerticalLayout {
         MeetingRoom roomForEdit = meetingRoomService.findRoomForEdit(room.getRoomId());
 
         Dialog dialog = new Dialog();
-        RoomForm form = new RoomForm(equipmentService);
+        RoomForm form = new RoomForm(equipmentService, imageStorage);
         form.setRoom(roomForEdit);
 
         dialog.setHeaderTitle("Edit Room: " + roomForEdit.getName());
@@ -157,7 +162,7 @@ public class RoomTableSection extends VerticalLayout {
 
     private void addRoomDialog() {
         Dialog dialog = new Dialog();
-        RoomForm form = new RoomForm(equipmentService);
+        RoomForm form = new RoomForm(equipmentService, imageStorage);
 
         dialog.setHeaderTitle("Create new Room");
         dialog.add(new VerticalLayout(form));

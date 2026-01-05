@@ -3,6 +3,7 @@ package com.gesamtprojekt.application.ui.components.admin;
 import com.gesamtprojekt.application.model.Equipment;
 import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.service.implementation.EquipmentService;
+import com.gesamtprojekt.application.service.implementation.RoomImageStorageService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -18,6 +19,16 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import java.util.Comparator;
+import com.vaadin.flow.component.upload.Upload;
+
+import com.vaadin.flow.component.html.Image;
+import java.util.Base64;
+import com.vaadin.flow.server.streams.UploadHandler;
+import com.vaadin.flow.server.streams.InMemoryUploadHandler;
+import com.vaadin.flow.component.UI;
+
+import java.io.ByteArrayInputStream;
+
 
 
 import java.util.LinkedHashSet;
@@ -26,6 +37,15 @@ import java.util.List;
 public class RoomForm extends FormLayout {
 
     private final EquipmentService equipmentService;
+    private final RoomImageStorageService imageStorage;
+
+    private final Upload imageUpload;
+    private final Image imagePreview = new Image();
+
+    private String stagedImagePath;
+    private String stagedImageMime;
+    private String stagedImageOriginalName;
+    private String stagedImageDataUrl;
 
     public final TextField name = new TextField("Room Name *");
     public final IntegerField capacity = new IntegerField("Capacity *");
@@ -36,14 +56,17 @@ public class RoomForm extends FormLayout {
 
     private final CheckboxGroup<Equipment> equipmentGroup = new CheckboxGroup<>();
 
-    public RoomForm(EquipmentService equipmentService) {
+    public RoomForm(EquipmentService equipmentService, RoomImageStorageService imageStorage) {
         this.equipmentService = equipmentService;
+        this.imageStorage = imageStorage;
+        this.imageUpload = buildImageUpload();
 
         setResponsiveSteps(new ResponsiveStep("0", 2));
         setupFields();
 
         add(name, capacity, building, floor, status);
         add(new Hr(), 2);
+        add(roomImageSection(), 2);
         add(equipmentSection(), 2);
     }
 
@@ -55,8 +78,18 @@ public class RoomForm extends FormLayout {
         building.setValue(n(r.getLocation()));
         status.setValue(n(r.getStatus()));
         floor.setValue(r.getFloor());
+
         setSelectedEquipmentFromRoom(r);
+
+        stagedImagePath = r.getImagePath();
+        stagedImageMime = r.getImageMime();
+        stagedImageOriginalName = r.getImageOriginalName();
+
+        if (stagedImagePath != null && !stagedImagePath.isBlank()) {
+            imagePreview.setVisible(false);
+        }
     }
+
 
 
     public void apply(MeetingRoom r) {
@@ -66,7 +99,11 @@ public class RoomForm extends FormLayout {
         r.setFloor(floor.getValue());
         r.setStatus(status.getValue());
         r.setEquipment(new java.util.LinkedHashSet<>(equipmentGroup.getValue()));
-    }
+        r.setImagePath(stagedImagePath);
+        r.setImageMime(stagedImageMime);
+        r.setImageOriginalName(stagedImageOriginalName);
+
+        }
 
     public boolean isValid() {
         return !name.isEmpty() && capacity.getValue() != null && !building.isEmpty();
@@ -173,6 +210,67 @@ public class RoomForm extends FormLayout {
                 .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
 
         equipmentGroup.setValue(selected);
+    }
+
+    private Component roomImageSection() {
+        Span title = new Span("Room Image");
+        title.getStyle().set("font-weight", "600");
+
+        setupPreview();
+
+        VerticalLayout wrap = new VerticalLayout(title, imageUpload, imagePreview);
+        wrap.setPadding(false);
+        wrap.setSpacing(true);
+        wrap.setWidthFull();
+        return wrap;
+    }
+
+    private Upload buildImageUpload() {
+        InMemoryUploadHandler handler = UploadHandler.inMemory((meta, data) -> {
+            var stored = imageStorage.save(
+                    new ByteArrayInputStream(data),
+                    meta.fileName(),
+                    meta.contentType()
+            );
+
+            String mime = meta.contentType() == null ? "image/png" : meta.contentType();
+            String b64 = Base64.getEncoder().encodeToString(data);
+            String dataUrl = "data:" + mime + ";base64," + b64;
+
+            UI ui = UI.getCurrent();
+            if (ui != null) ui.access(() -> applyStoredImage(stored, dataUrl));
+            else applyStoredImage(stored, dataUrl);
+        });
+
+        Upload upload = new Upload(handler);
+        upload.setMaxFiles(1);
+        upload.setAcceptedFileTypes("image/png", "image/jpeg", "image/jpg", "image/webp");
+        upload.addFileRejectedListener(e -> clearStagedImage());
+        return upload;
+    }
+
+
+    private void applyStoredImage(RoomImageStorageService.StoredImage stored, String dataUrl) {
+        stagedImagePath = stored.path();
+        stagedImageMime = stored.mime();
+        stagedImageOriginalName = stored.originalName();
+        stagedImageDataUrl = dataUrl;
+
+        imagePreview.setSrc(stagedImageDataUrl);
+        imagePreview.setVisible(true);
+    }
+
+    private void clearStagedImage() {
+        stagedImagePath = null;
+        stagedImageMime = null;
+        stagedImageOriginalName = null;
+        imagePreview.setVisible(false);
+    }
+
+    private void setupPreview() {
+        imagePreview.setVisible(false);
+        imagePreview.setMaxWidth("420px");
+        imagePreview.getStyle().set("border-radius", "10px");
     }
 
 

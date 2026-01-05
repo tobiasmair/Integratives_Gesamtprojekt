@@ -3,6 +3,7 @@ package com.gesamtprojekt.application.ui.components.admin;
 import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.service.implementation.EquipmentService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
+import com.gesamtprojekt.application.service.implementation.RoomImageStorageService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -21,13 +22,14 @@ public class RoomDialog extends Dialog {
     public RoomDialog(String title,
                       MeetingRoomService roomService,
                       EquipmentService equipmentService,
+                      RoomImageStorageService imageStorage,
                       MeetingRoom room,
                       Runnable onSaved) {
         this.roomService = roomService;
         this.onSaved = onSaved;
         this.existingRoom = room;
 
-        this.form = new RoomForm(equipmentService);
+        this.form = new RoomForm(equipmentService, imageStorage);
 
         setHeaderTitle(title);
         add(new VerticalLayout(form));

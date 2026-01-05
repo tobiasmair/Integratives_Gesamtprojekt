@@ -52,6 +52,16 @@ public class MeetingRoom {
     @Column(name = "hasVentilationControl")
     private Boolean hasVentilationControl;
 
+    @Column(name = "image_path")
+    private String imagePath;
+
+    @Column(name = "image_mime")
+    private String imageMime;
+
+    @Column(name = "image_original_name")
+    private String imageOriginalName;
+
+
     // Relation zu Buchungen (1:n)
     @OneToMany(mappedBy = "meetingRoom")
     private List<Booking> bookings  = new ArrayList<>();
