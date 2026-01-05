@@ -29,8 +29,6 @@ import com.vaadin.flow.component.UI;
 
 import java.io.ByteArrayInputStream;
 
-
-
 import java.util.LinkedHashSet;
 import java.util.List;
 
@@ -61,8 +59,15 @@ public class RoomForm extends FormLayout {
         this.imageStorage = imageStorage;
         this.imageUpload = buildImageUpload();
 
-        setResponsiveSteps(new ResponsiveStep("0", 2));
+        setResponsiveSteps(new ResponsiveStep("0", 2), new ResponsiveStep("900px", 4));
         setupFields();
+
+        setColspan(name, 2);
+        setColspan(capacity, 1);
+        setColspan(building, 1);
+
+        setColspan(floor, 1);
+        setColspan(status, 1);
 
         add(name, capacity, building, floor, status);
         add(new Hr(), 2);
@@ -154,21 +159,21 @@ public class RoomForm extends FormLayout {
     private void setupFields() {
         name.setPlaceholder("Enter room name");
         name.setRequiredIndicatorVisible(true);
-
+        name.setWidthFull();
         capacity.setMin(1);
         capacity.setRequiredIndicatorVisible(true);
-
+        capacity.setWidthFull();
         building.setItems("MCI I", "MCI II", "MCI III");
         building.setRequiredIndicatorVisible(true);
-
+        building.setWidthFull();
         status.setItems("ACTIVE", "INACTIVE");
         status.setValue("ACTIVE");
-
+        status.setWidthFull();
         floor.setStepButtonsVisible(true);
         floor.setMin(-10);
         floor.setMax(50);
-        floor.setHelperText("e.g. 0 = Ground floor, 1 = 1st floor");
-
+        floor.setHelperText(null);
+        floor.setWidthFull();
 
     }
 
