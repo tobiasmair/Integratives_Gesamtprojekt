@@ -59,7 +59,7 @@ public class RoomForm extends FormLayout {
         this.imageStorage = imageStorage;
         this.imageUpload = buildImageUpload();
 
-        setResponsiveSteps(new ResponsiveStep("0", 2), new ResponsiveStep("900px", 4));
+        setResponsiveSteps(new ResponsiveStep("0", 2), new ResponsiveStep("900px", 6));
         setupFields();
 
         setColspan(name, 2);
@@ -70,9 +70,17 @@ public class RoomForm extends FormLayout {
         setColspan(status, 1);
 
         add(name, capacity, building, floor, status);
-        add(new Hr(), 2);
-        add(roomImageSection(), 2);
-        add(equipmentSection(), 2);
+        Hr divider = new Hr();
+        setColspan(divider, 6);
+
+        Component img = roomImageSection();
+        setColspan(img, 3);
+
+        Component eq = equipmentSection();
+        setColspan(eq, 3);
+
+        add(divider, img, eq);
+
     }
 
     public void setRoom(MeetingRoom r) {
@@ -122,7 +130,7 @@ public class RoomForm extends FormLayout {
         reloadEquipmentSorted();
 
         equipmentGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
-        equipmentGroup.getStyle().set("columns", "2"); // 2 columns left
+        equipmentGroup.getStyle().set("columns", "2");
 
         var left = new VerticalLayout(title, equipmentGroup);
         left.setPadding(false);
