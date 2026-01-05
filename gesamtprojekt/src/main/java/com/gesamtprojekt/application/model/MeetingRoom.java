@@ -38,7 +38,7 @@ public class MeetingRoom {
     @Column(name = "floor")
     private Integer floor;
 
-    // Status (ACTIVE / INACTIVE) - wird für Soft-Delete/Filter verwendet
+    // Status (ACTIVE / INACTIVE)
     @Column(name = "status")
     private String status;
 
@@ -52,6 +52,7 @@ public class MeetingRoom {
     @Column(name = "hasVentilationControl")
     private Boolean hasVentilationControl;
 
+    // wird für Soft-Delete/Filter verwendet
     @Column(name = "isActive")
     private Boolean isActive = true;
 
@@ -64,7 +65,6 @@ public class MeetingRoom {
 
     @Column(name = "image_original_name")
     private String imageOriginalName;
-
 
     // Relation zu Buchungen (1:n)
     @OneToMany(mappedBy = "meetingRoom")

@@ -2,15 +2,18 @@ package com.gesamtprojekt.application.service.implementation;
 
 import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.repositories.MeetingRoomRepository;
+import com.gesamtprojekt.application.service.MeetingRoomServiceInterface;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
-public class MeetingRoomService {
+public class MeetingRoomService implements MeetingRoomServiceInterface {
 
     private final MeetingRoomRepository meetingRoomRepository;
 
@@ -37,20 +40,6 @@ public class MeetingRoomService {
             return findAvailableRooms();
         }
         return meetingRoomRepository.findAvailableRoomsExcludingBooking(startTime, endTime, excludeBookingId);
-import com.gesamtprojekt.application.service.MeetingRoomServiceInterface;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Objects;
-
-@Service
-public class MeetingRoomService implements MeetingRoomServiceInterface {
-
-    private final MeetingRoomRepository meetingRoomRepository;
-
-    public MeetingRoomService(MeetingRoomRepository meetingRoomRepository) {
-        this.meetingRoomRepository = meetingRoomRepository;
     }
 
     public MeetingRoom findRoomForEdit(Long roomId) {

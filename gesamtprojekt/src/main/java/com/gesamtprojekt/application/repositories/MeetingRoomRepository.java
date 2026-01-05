@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface MeetingRoomRepository extends JpaRepository<MeetingRoom, Long> {
 
@@ -32,11 +33,6 @@ public interface MeetingRoomRepository extends JpaRepository<MeetingRoom, Long> 
             @Param("endTime") LocalDateTime endTime,
             @Param("excludeBookingId") Long excludeBookingId
     );
-
-import java.util.List;
-import java.util.Optional;
-
-public interface MeetingRoomRepository extends JpaRepository<MeetingRoom, Long> {
 
     // Standard-Filter: Räume nach Status (z. B. ACTIVE)
     @EntityGraph(attributePaths = "equipment")
