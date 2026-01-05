@@ -34,6 +34,10 @@ public class MeetingRoom {
     @Column(name = "location")
     private String location;
 
+    // Stockwerk
+    @Column(name = "floor")
+    private Integer floor;
+
     // Status (ACTIVE / INACTIVE) - wird für Soft-Delete/Filter verwendet
     @Column(name = "status")
     private String status;

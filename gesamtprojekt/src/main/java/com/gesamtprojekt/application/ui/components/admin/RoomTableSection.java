@@ -72,8 +72,9 @@ public class RoomTableSection extends VerticalLayout {
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_ROW_STRIPES);
 
         grid.addColumn(MeetingRoom::getName).setHeader("Room").setSortable(true);
-        grid.addColumn(MeetingRoom::getLocation).setHeader("Building");
         grid.addColumn(MeetingRoom::getCapacity).setHeader("Capacity");
+        grid.addColumn(MeetingRoom::getLocation).setHeader("Building");
+        grid.addColumn(MeetingRoom::getFloor).setHeader("Floor");
         grid.addColumn(MeetingRoom::getStatus).setHeader("Status");
 
         grid.addComponentColumn(room -> {

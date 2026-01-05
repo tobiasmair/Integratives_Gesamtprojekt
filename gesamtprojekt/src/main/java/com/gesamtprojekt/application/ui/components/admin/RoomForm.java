@@ -30,6 +30,8 @@ public class RoomForm extends FormLayout {
     public final TextField name = new TextField("Room Name *");
     public final IntegerField capacity = new IntegerField("Capacity *");
     public final ComboBox<String> building = new ComboBox<>("Building *");
+    public final IntegerField floor = new IntegerField("Floor");
+
     public final ComboBox<String> status = new ComboBox<>("Status");
 
     private final CheckboxGroup<Equipment> equipmentGroup = new CheckboxGroup<>();
@@ -40,7 +42,7 @@ public class RoomForm extends FormLayout {
         setResponsiveSteps(new ResponsiveStep("0", 2));
         setupFields();
 
-        add(name, capacity, building, status);
+        add(name, capacity, building, floor, status);
         add(new Hr(), 2);
         add(equipmentSection(), 2);
     }
@@ -52,7 +54,7 @@ public class RoomForm extends FormLayout {
         capacity.setValue(r.getCapacity());
         building.setValue(n(r.getLocation()));
         status.setValue(n(r.getStatus()));
-
+        floor.setValue(r.getFloor());
         setSelectedEquipmentFromRoom(r);
     }
 
@@ -61,6 +63,7 @@ public class RoomForm extends FormLayout {
         r.setName(name.getValue());
         r.setCapacity(capacity.getValue());
         r.setLocation(building.getValue());
+        r.setFloor(floor.getValue());
         r.setStatus(status.getValue());
         r.setEquipment(new java.util.LinkedHashSet<>(equipmentGroup.getValue()));
     }
@@ -123,6 +126,13 @@ public class RoomForm extends FormLayout {
 
         status.setItems("ACTIVE", "INACTIVE");
         status.setValue("ACTIVE");
+
+        floor.setStepButtonsVisible(true);
+        floor.setMin(-10);
+        floor.setMax(50);
+        floor.setHelperText("e.g. 0 = Ground floor, 1 = 1st floor");
+
+
     }
 
     private void reloadEquipmentSorted() {
