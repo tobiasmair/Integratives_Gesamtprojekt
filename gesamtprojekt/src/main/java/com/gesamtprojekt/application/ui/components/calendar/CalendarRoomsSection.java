@@ -1,34 +1,73 @@
 package com.gesamtprojekt.application.ui.components.calendar;
 
+import com.gesamtprojekt.application.model.MeetingRoom;
+import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
+import java.util.List;
+
 public class CalendarRoomsSection extends VerticalLayout {
 
-    public CalendarRoomsSection() {
+    private final MeetingRoomService meetingRoomService;
+    private final FlexLayout grid = new FlexLayout();
+
+    public CalendarRoomsSection(MeetingRoomService meetingRoomService) {
+        this.meetingRoomService = meetingRoomService;
+
         setWidthFull();
         setPadding(false);
         setSpacing(true);
 
         add(new H4("available Meeting Rooms"));
         add(buildGrid());
+
+        reload();
     }
 
-
     private FlexLayout buildGrid() {
-        FlexLayout grid = new FlexLayout();
         grid.setWidthFull();
         grid.getStyle().set("gap", "12px");
         grid.getStyle().set("flex-wrap", "wrap");
-
-        CalendarDummyRooms.rooms().forEach(r -> grid.add(buildCard(r)));
         return grid;
     }
 
-    private CalendarRoomCard buildCard(CalendarDummyRooms.Room r) {
+    public void reload() {
+        grid.removeAll();
+        loadRooms().forEach(r -> grid.add(buildCard(mapToCardModel(r))));
+    }
+
+    private List<MeetingRoom> loadRooms() {
+        return meetingRoomService.findAllRooms("", "All Buildings", "ACTIVE");
+    }
+
+    private CalendarRoomCard buildCard(CalendarRoomCardModel r) {
         CalendarRoomCard card = new CalendarRoomCard(r);
         card.getStyle().set("width", "260px");
         return card;
+    }
+
+    private CalendarRoomCardModel mapToCardModel(MeetingRoom r) {
+        return new CalendarRoomCardModel(
+                r.getRoomId(),
+                r.getName(),
+                r.getLocation(),
+                r.getCapacity(),
+                r.getFloor(),
+                tagsFromRoom(r),
+                r.getImagePath()
+        );
+    }
+
+    private List<String> tagsFromRoom(MeetingRoom r) {
+        if (r.getEquipment() == null || r.getEquipment().isEmpty()) return List.of();
+
+        return r.getEquipment().stream()
+                .map(e -> e.getDescription() == null ? "" : e.getDescription().trim())
+                .filter(s -> !s.isBlank())
+                .sorted(String.CASE_INSENSITIVE_ORDER)
+                .limit(5)
+                .toList();
     }
 }

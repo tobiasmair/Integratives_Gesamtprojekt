@@ -8,6 +8,8 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -20,18 +22,27 @@ public class MeetingRoom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roomId;
 
+    // Raum-Name
     @Column(name = "name")
     private String name;
 
+    // Sitz-/Personenkapazität
     @Column(name = "capacity")
     private Integer capacity;
 
+    // Gebäude/Standort
     @Column(name = "location")
     private String location;
 
+    // Stockwerk
+    @Column(name = "floor")
+    private Integer floor;
+
+    // Status (ACTIVE / INACTIVE) - wird für Soft-Delete/Filter verwendet
     @Column(name = "status")
     private String status;
 
+    // Steuerungs-Flags
     @Column(name = "hasDoorControl")
     private Boolean hasDoorControl;
 
@@ -41,16 +52,26 @@ public class MeetingRoom {
     @Column(name = "hasVentilationControl")
     private Boolean hasVentilationControl;
 
-    // Relation to Booking
+    @Column(name = "image_path")
+    private String imagePath;
+
+    @Column(name = "image_mime")
+    private String imageMime;
+
+    @Column(name = "image_original_name")
+    private String imageOriginalName;
+
+
+    // Relation zu Buchungen (1:n)
     @OneToMany(mappedBy = "meetingRoom")
     private List<Booking> bookings  = new ArrayList<>();
 
-    // Relation to Equipment
+    // Relation zu Equipment (n:m)
     @ManyToMany
     @JoinTable(
-            name = "equipment",
-            joinColumns = @JoinColumn(name = "roomId"),
-            inverseJoinColumns = @JoinColumn(name = "equipmentId")
+            name = "meeting_room_equipment",
+            joinColumns = @JoinColumn(name = "room_id", referencedColumnName = "roomId"),
+            inverseJoinColumns = @JoinColumn(name = "equipment_id", referencedColumnName = "equipmentId")
     )
-    private List<Equipment> equipment = new ArrayList<>();
+    private Set<Equipment> equipment = new LinkedHashSet<>();
 }
