@@ -4,6 +4,7 @@ import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.repositories.MeetingRoomRepository;
 import com.gesamtprojekt.application.service.MeetingRoomServiceInterface;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -84,4 +85,11 @@ public class MeetingRoomService implements MeetingRoomServiceInterface {
                 .distinct()
                 .count();
     }
+
+    @Transactional(readOnly = true)
+    public List<MeetingRoom> findRoomsForCalendar() {
+        // z.B. nur ACTIVE, inkl. equipment (weil findByStatus jetzt @EntityGraph hat)
+        return meetingRoomRepository.findByStatus("ACTIVE");
+    }
+
 }

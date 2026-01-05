@@ -1,5 +1,6 @@
 package com.gesamtprojekt.application.ui.client.calendar;
 
+import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.gesamtprojekt.application.ui.client.MainLayout;
 import com.gesamtprojekt.application.ui.components.calendar.CalendarControlsBar;
 import com.gesamtprojekt.application.ui.components.calendar.CalendarRoomsSection;
@@ -8,19 +9,18 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 
-
 @Route(value = "calendar", layout = MainLayout.class)
 @PageTitle("Calendar")
 @PermitAll
 public class CalendarView extends VerticalLayout {
 
-    public CalendarView() {
+    public CalendarView(MeetingRoomService meetingRoomService) {
         setSizeFull();
         setPadding(true);
         setSpacing(true);
 
         CalendarControlsBar controls = new CalendarControlsBar();
-        CalendarRoomsSection rooms = new CalendarRoomsSection();
+        CalendarRoomsSection rooms = new CalendarRoomsSection(meetingRoomService);
 
         rooms.addClassName("calendar-rooms-scroll");
 

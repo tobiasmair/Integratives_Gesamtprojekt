@@ -99,11 +99,17 @@ public class RoomForm extends FormLayout {
         stagedImageOriginalName = r.getImageOriginalName();
 
         if (stagedImagePath != null && !stagedImagePath.isBlank()) {
+            String fileName = stagedImagePath;
+            fileName = fileName.replace("\\", "/");
+            if (fileName.contains("/")) {
+                fileName = fileName.substring(fileName.lastIndexOf('/') + 1);
+            }
+            imagePreview.setSrc("/room-images/" + fileName);
+            imagePreview.setVisible(true);
+        } else {
             imagePreview.setVisible(false);
         }
     }
-
-
 
     public void apply(MeetingRoom r) {
         r.setName(name.getValue());
@@ -116,7 +122,7 @@ public class RoomForm extends FormLayout {
         r.setImageMime(stagedImageMime);
         r.setImageOriginalName(stagedImageOriginalName);
 
-        }
+    }
 
     public boolean isValid() {
         return !name.isEmpty() && capacity.getValue() != null && !building.isEmpty();
@@ -269,7 +275,7 @@ public class RoomForm extends FormLayout {
         stagedImageOriginalName = stored.originalName();
         stagedImageDataUrl = dataUrl;
 
-        imagePreview.setSrc(stagedImageDataUrl);
+        imagePreview.setSrc("/room-images/" + stagedImagePath);
         imagePreview.setVisible(true);
     }
 

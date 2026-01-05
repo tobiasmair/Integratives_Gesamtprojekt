@@ -16,18 +16,28 @@ public class RoomImageStorageService {
         createDir();
     }
 
+    /**
+     * Speichert das Bild am Server im Ordner uploads/rooms
+     * und gibt als "path" nur den Dateinamen zurück (z.B. 8f3a... .jpg).
+     */
     public StoredImage save(InputStream in, String originalName, String mime) {
         String fileName = UUID.randomUUID() + ext(originalName);
         Path target = baseDir.resolve(fileName);
         copy(in, target);
-        return new StoredImage(target.toString(), mime, originalName);
+        return new StoredImage(fileName, normalizeMime(mime, fileName), originalName);
     }
 
-    public InputStream open(String path) {
+    /**
+     * Öffnet ein gespeichertes Bild anhand des Dateinamens (nicht voller Pfad!).
+     */
+    public OpenedImage openByFileName(String fileName) {
         try {
-            return Files.newInputStream(Paths.get(path));
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot open image: " + path, e);
+            Path p = baseDir.resolve(fileName);
+            InputStream in = Files.newInputStream(p, StandardOpenOption.READ);
+            String mime = guessMime(fileName);
+            return new OpenedImage(in, mime);
+        } catch (Exception e) {
+            throw new IllegalStateException("Cannot open image: " + fileName, e);
         }
     }
 
@@ -53,5 +63,19 @@ public class RoomImageStorageService {
         return i >= 0 ? name.substring(i) : "";
     }
 
+    private String guessMime(String fileName) {
+        String lower = fileName == null ? "" : fileName.toLowerCase();
+        if (lower.endsWith(".png")) return "image/png";
+        if (lower.endsWith(".webp")) return "image/webp";
+        if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
+        return "application/octet-stream";
+    }
+
+    private String normalizeMime(String mime, String fileName) {
+        if (mime != null && !mime.isBlank()) return mime;
+        return guessMime(fileName);
+    }
+
+    public record OpenedImage(InputStream stream, String mime) {}
     public record StoredImage(String path, String mime, String originalName) {}
 }

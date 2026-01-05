@@ -11,14 +11,14 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 public class CalendarRoomCard extends Div {
 
-    public CalendarRoomCard(CalendarDummyRooms.Room room) {
+    public CalendarRoomCard(CalendarRoomCardModel room) {
         addClassName("calendar-room-card");
         add(buildCard(room));
     }
 
-    private VerticalLayout buildCard(CalendarDummyRooms.Room r) {
-        Image img = buildImage(r.imageUrl());
-        Span title = buildTitle(r.name());
+    private VerticalLayout buildCard(CalendarRoomCardModel r) {
+        Image img = buildImage(r.imagePath());
+        Span title = buildTitle(n(r.name()));
 
         VerticalLayout info = buildInfo(r);
         HorizontalLayout tags = buildTags(r);
@@ -31,8 +31,12 @@ public class CalendarRoomCard extends Div {
         return box;
     }
 
-    private Image buildImage(String url) {
-        Image img = new Image(url, "Room");
+    private Image buildImage(String imagePath) {
+        String src = (imagePath == null || imagePath.isBlank())
+                ? "https://picsum.photos/600/350"
+                : "/room-images?path=" + imagePath;
+
+        Image img = new Image(src, "Room");
         img.setWidthFull();
         img.setHeight("160px");
         img.getStyle().set("object-fit", "cover");
@@ -48,15 +52,15 @@ public class CalendarRoomCard extends Div {
         return title;
     }
 
-    private VerticalLayout buildInfo(CalendarDummyRooms.Room r) {
+    private VerticalLayout buildInfo(CalendarRoomCardModel r) {
         VerticalLayout info = new VerticalLayout();
         info.setPadding(false);
         info.setSpacing(false);
         info.getStyle().set("padding", "0 12px 10px 12px");
 
-        info.add(infoRow(VaadinIcon.BUILDING, r.building()));
-        info.add(infoRow(VaadinIcon.USERS, "Capacity: " + r.capacity() + " people"));
-        info.add(infoRow(VaadinIcon.LINES, "Floor " + r.floor()));
+        info.add(infoRow(VaadinIcon.BUILDING, n(r.building())));
+        info.add(infoRow(VaadinIcon.USERS, "Capacity: " + nz(r.capacity()) + " people"));
+        info.add(infoRow(VaadinIcon.LINES, "Floor " + nz(r.floor())));
         return info;
     }
 
@@ -75,7 +79,7 @@ public class CalendarRoomCard extends Div {
         return row;
     }
 
-    private HorizontalLayout buildTags(CalendarDummyRooms.Room r) {
+    private HorizontalLayout buildTags(CalendarRoomCardModel r) {
         HorizontalLayout tags = new HorizontalLayout();
         tags.setSpacing(true);
         tags.setPadding(false);
@@ -90,7 +94,7 @@ public class CalendarRoomCard extends Div {
     private Div tagChip(String text) {
         Div chip = new Div(new Span(text));
         chip.getStyle().set("font-size", "12px");
-        chip.getStyle().set("padding", "4px 4px");
+        chip.getStyle().set("padding", "4px 6px");
         chip.getStyle().set("border-radius", "4px");
         chip.getStyle().set("background", "var(--lumo-primary-color-10pct)");
         chip.getStyle().set("color", "var(--lumo-primary-text-color)");
@@ -102,5 +106,13 @@ public class CalendarRoomCard extends Div {
         b.getStyle().set("margin", "0 12px 12px 12px");
         b.getStyle().set("width", "calc(100% - 24px)");
         return b;
+    }
+
+    private String n(String v) {
+        return v == null ? "" : v;
+    }
+
+    private int nz(Integer v) {
+        return v == null ? 0 : v;
     }
 }
