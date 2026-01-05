@@ -24,6 +24,20 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("endTime") LocalDateTime endTime
     );
 
+    // Zeitraum prüfen ohne bestimmte Buchung
+    @Query("SELECT COUNT(b) > 0 FROM Booking b " +
+            "WHERE b.isActive = true " +
+            "AND b.meetingRoom.roomId = :roomId " +
+            "AND b.startTime < :endTime " +
+            "AND b.endTime > :startTime " +
+            "AND b.bookingId <> :excludeBookingId")
+    boolean existsOverlappingBookingExcludingId(
+            @Param("roomId") Long roomId,
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime,
+            @Param("excludeBookingId") Long excludeBookingId
+    );
+
     // Buchungen eines Clients finden
     @Query("SELECT b FROM Booking b WHERE b.isActive = true AND b.client.userId = :clientId")
     List<Booking> findBookingByClientId (@Param("clientId") Long clientId);

@@ -5,6 +5,7 @@ import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.security.SecurityService;
 import com.gesamtprojekt.application.service.implementation.BookingService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
@@ -23,6 +24,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.shared.Registration;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -48,6 +50,11 @@ public class QuickBookingContainer extends Div {
     private final ComboBox<String> reminderField = new ComboBox<String>("Reminder");
     private final ComboBox<Integer> attendeesField = new ComboBox<Integer>("Nr. of Attendees");
 
+    private H3 title;
+    private Button bookButton;
+
+    private Long currentEditingBookingId = null;
+
     public QuickBookingContainer(BookingService bookingService, MeetingRoomService meetingRoomService, SecurityService securityService) {
         this.bookingService = bookingService;
         this.meetingRoomService = meetingRoomService;
@@ -66,12 +73,17 @@ public class QuickBookingContainer extends Div {
         content.setSpacing(false);
         content.setWidthFull();
 
-        content.add(createHeader());
+        this.title = createHeader();
+        this.bookButton = createBookButton();
+
+        //content.add(createHeader());
+        content.add(title);
         content.add(createDateTimeRow());
         content.add(createRoomsSection());
         content.add(createMeetingPurposeField());
         content.add(createReminderRow());
-        content.add(createBookButton());
+        //content.add(createBookButton());
+        content.add(bookButton);
 
         // Initialwerte setzen
         datePicker.setValue(java.time.LocalDate.now());
@@ -292,6 +304,9 @@ public class QuickBookingContainer extends Div {
             Notification.show("Room booked successfully!", 3000, Notification.Position.TOP_CENTER)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
+            // Event feuern
+            fireEvent(new BookingChangedEvent(this));
+
             // Formular zurücksetzen
             startTime.clear();
             endTime.clear();
@@ -304,6 +319,64 @@ public class QuickBookingContainer extends Div {
             Notification.show(ex.getMessage(), 5000, Notification.Position.TOP_CENTER)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
+    }
+
+    // View registrieren
+    public Registration addBookingChangedListener(ComponentEventListener<BookingChangedEvent> listener) {
+        return addListener(BookingChangedEvent.class, listener);
+    }
+
+
+    /*
+    Edit-Modus Abschnitt
+     */
+    public void setEditMode(boolean isEditMode) {
+        if (bookButton != null) {
+            bookButton.setVisible(!isEditMode);
+            title.setVisible(!isEditMode);
+        }
+    }
+
+    // Felder befüllen mit Buchungsdaten
+    public void setBooking(Booking booking) {
+        this.currentEditingBookingId = booking.getBookingId();
+
+        // Felder befüllen
+        datePicker.setValue(booking.getStartTime().toLocalDate());
+        startTime.setValue(booking.getStartTime().toLocalTime());
+        endTime.setValue(booking.getEndTime().toLocalTime());
+        purposeField.setValue(booking.getPurpose() != null ? booking.getPurpose() : "");
+
+        // Räume laden (aktuellen Raum berücksichtigen)
+        List<MeetingRoom> availableRooms = loadAvailableRooms();
+
+        // Aktuellen Raum auswählen
+        if (booking.getMeetingRoom() != null) {
+            availableRooms.stream()
+                    .filter(room -> room.getRoomId().equals(booking.getMeetingRoom().getRoomId()))
+                    .findFirst()
+                    .ifPresent(roomGroup::setValue);
+        }
+    }
+
+    // Räume laden mit findAvailableRoomsExcludingBooking
+    private List<MeetingRoom> loadAvailableRooms() {
+        LocalDateTime start = datePicker.getValue().atTime(startTime.getValue());
+        LocalDateTime end = datePicker.getValue().atTime(endTime.getValue());
+
+        List<MeetingRoom> rooms = meetingRoomService.findAvailableRoomsExcludingBooking(
+                start, end, currentEditingBookingId);
+
+        roomGroup.setItems(rooms);
+        return rooms;
+    }
+
+    // Buchungsobjekt mit Werten aus Formular updaten
+    public void updateBookingObject(Booking b) {
+        b.setPurpose(purposeField.getValue());
+        b.setStartTime(datePicker.getValue().atTime(startTime.getValue()));
+        b.setEndTime(datePicker.getValue().atTime(endTime.getValue()));
+        b.setMeetingRoom(roomGroup.getValue());
     }
 
 }

@@ -20,4 +20,16 @@ public interface MeetingRoomRepository extends JpaRepository<MeetingRoom, Long> 
             @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime);
 
+    @Query("SELECT r FROM MeetingRoom r WHERE r.isActive = true AND r.roomId NOT IN (" +
+            "SELECT b.meetingRoom.roomId FROM Booking b " +
+            "WHERE b.isActive = true " +
+            "AND b.startTime < :endTime " +
+            "AND b.endTime > :startTime " +
+            "AND (:excludeBookingId IS NULL OR b.bookingId <> :excludeBookingId))")
+    List<MeetingRoom> findAvailableRoomsExcludingBooking(
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime,
+            @Param("excludeBookingId") Long excludeBookingId
+    );
+
 }

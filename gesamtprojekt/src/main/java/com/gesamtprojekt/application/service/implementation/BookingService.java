@@ -46,6 +46,15 @@ public class BookingService implements BookingServiceInterface {
 
     // Booking updaten
     public void updateBooking(Booking booking) {
+        boolean conflict = bookingRepository.existsOverlappingBookingExcludingId(
+                booking.getMeetingRoom().getRoomId(),
+                booking.getStartTime(), booking.getEndTime(),
+                booking.getBookingId()
+        );
+        if (conflict) {
+            throw new RuntimeException("Booking conflict detected for the selected room and time.");
+        }
+
         bookingRepository.save(booking);
     }
 

@@ -3,7 +3,9 @@ package com.gesamtprojekt.application.ui.components.dashboard;
 import com.gesamtprojekt.application.model.Booking;
 import com.gesamtprojekt.application.security.SecurityService;
 import com.gesamtprojekt.application.service.implementation.BookingService;
+import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
@@ -16,6 +18,7 @@ import com.vaadin.flow.component.tabs.Tabs;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.shared.Registration;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -27,6 +30,7 @@ import java.util.Locale;
 public class MyBookingsContainer extends Div {
 
     private final BookingService bookingService;
+    private final MeetingRoomService meetingRoomService;
     private final SecurityService securityService;
 
     private final Tab todayTab = new Tab("Today");
@@ -39,8 +43,9 @@ public class MyBookingsContainer extends Div {
     private final Div bookingsList = new Div();
     private final Scroller bookingsScroller = new Scroller();
 
-    public MyBookingsContainer(BookingService bookingService, SecurityService securityService) {
+    public MyBookingsContainer(BookingService bookingService, MeetingRoomService meetingRoomService, SecurityService securityService) {
         this.bookingService = bookingService;
+        this.meetingRoomService = meetingRoomService;
         this.securityService = securityService;
 
         addClassName("my-bookings-container");
@@ -112,6 +117,10 @@ public class MyBookingsContainer extends Div {
             return;
         }
         showThisMonth();
+    }
+
+    public void refresh() {
+        onTabChanged();
     }
 
     private void onCustomDatePicked(LocalDate date) {
@@ -205,15 +214,19 @@ public class MyBookingsContainer extends Div {
                 + " - " +
                 booking.getEndTime().format(DateTimeFormatter.ofPattern("HH:mm"));
 
-        return new BookingItem(
+        BookingItem item = new BookingItem(
                 booking,
                 bookingService,
+                meetingRoomService,
+                this::refresh,  // Runnable event: Liste aktualisieren
                 booking.getPurpose(),
                 meetingRoomName,
                 dateString,
                 timeString,
                 booking.getBookingStatus()
         );
+
+        return item;
     }
 
 }

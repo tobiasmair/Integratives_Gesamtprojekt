@@ -29,4 +29,14 @@ public class MeetingRoomService {
         return meetingRoomRepository.findAvailableRoomsInTimeframe(startTime, endTime);
     }
 
+    public List<MeetingRoom> findAvailableRoomsExcludingBooking(
+            LocalDateTime startTime,
+            LocalDateTime endTime,
+            Long excludeBookingId) {
+        if (startTime == null || endTime == null) {
+            return findAvailableRooms();
+        }
+        return meetingRoomRepository.findAvailableRoomsExcludingBooking(startTime, endTime, excludeBookingId);
+    }
+
 }

@@ -1,25 +1,42 @@
 package com.gesamtprojekt.application.ui.components.dashboard;
 
 import com.gesamtprojekt.application.model.Booking;
+import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.service.implementation.BookingService;
+import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.timepicker.TimePicker;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.List;
 
 public class BookingItem extends Div {
 
-    public final Booking booking;
-    public final BookingService bookingService;
+    private final Booking booking;
+    private final BookingService bookingService;
+    private final MeetingRoomService meetingRoomService;
+    private final Runnable runnable;
 
-    public BookingItem(Booking booking, BookingService bookingService, String title, String room, String dateText, String timeRange, String status) {
+    public BookingItem(Booking booking, BookingService bookingService, MeetingRoomService meetingRoomService, Runnable runnable, String title, String room, String dateText, String timeRange, String status) {
         this.booking = booking;
         this.bookingService = bookingService;
+        this.meetingRoomService = meetingRoomService;
+        this.runnable = runnable;
 
         addClassName("booking-item");
         add(createRow(title, room, dateText, timeRange, status));
@@ -91,20 +108,106 @@ public class BookingItem extends Div {
     // Dialog Fenster für Edit
     private void openEditDialog(Booking booking) {
         Dialog dialog = new Dialog();
-
-        // Hier component für edit Dialog
-
         dialog.setHeaderTitle("Edit Booking: " + booking.getPurpose());
+        dialog.setWidth("800px");
 
-        VerticalLayout dialogLayout = new VerticalLayout();
+        QuickBookingContainer editForm = new QuickBookingContainer(bookingService, meetingRoomService, null);
+        // Daten laden
+        editForm.setBooking(booking);
+        // Button + Titel verstecken
+        editForm.setEditMode(true);
+
+        //editForm.getStyle().set("box-shadow", "none");
+        //editForm.getStyle().set("padding", "0");
+
+        /*
+        // Eingabefelder
+        TextField purposeField = new TextField("Purpose");
+        purposeField.setValue(booking.getPurpose() != null ? booking.getPurpose() : "");
+        purposeField.setWidthFull();
+
+        DatePicker datePicker = new DatePicker("Date");
+        datePicker.setValue(booking.getStartTime().toLocalDate());
+
+        TimePicker startTime = new TimePicker("Start Time");
+        startTime.setValue(booking.getStartTime().toLocalTime());
+        startTime.setStep(Duration.ofMinutes(30));
+
+        TimePicker endTime = new TimePicker("End Time");
+        endTime.setValue(booking.getEndTime().toLocalTime());
+        endTime.setStep(Duration.ofMinutes(30));
+
+        RadioButtonGroup<MeetingRoom> roomGroup = new RadioButtonGroup<>("Select Meeting Room");
+        roomGroup.setRenderer(new ComponentRenderer<>(room -> new Span(room.getName() + " (Cap: " + room.getCapacity() + ")")));
+        roomGroup.setWidthFull();
+
+        // Laden freier Räume
+        Runnable refreshRooms = () -> {
+            if (datePicker.getValue() != null && startTime.getValue() != null && endTime.getValue() != null) {
+                LocalDateTime start = datePicker.getValue().atTime(startTime.getValue());
+                LocalDateTime end = datePicker.getValue().atTime(endTime.getValue());
+
+                if (end.isBefore(start) || end.isEqual(start)) {
+                    Notification.show("End time must be after start time.", 3000, Notification.Position.TOP_CENTER)
+                            .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                    roomGroup.setItems(List.of());
+                    return;
+                }
+
+                List<MeetingRoom> availableRooms = meetingRoomService.findAvailableRoomsExcludingBooking(start, end, booking.getBookingId());
+                roomGroup.setItems(availableRooms);
+                if (availableRooms.isEmpty()) {
+                    roomGroup.setLabel("No rooms available for the selected time.");
+                } else {
+                    roomGroup.setLabel("Select Meeting Room");
+                }
+
+                // Aktuellen Raum auswählen
+                if (booking.getMeetingRoom() != null) {
+                    availableRooms.stream()
+                            .filter(room -> room.getRoomId().equals(booking.getMeetingRoom().getRoomId()))
+                            .findFirst()
+                            .ifPresent(roomGroup::setValue);
+                }
+            }
+        };
+        // Change Listener bei Änderungen
+        datePicker.addValueChangeListener(e -> refreshRooms.run());
+        startTime.addValueChangeListener(e -> refreshRooms.run());
+        endTime.addValueChangeListener(e -> refreshRooms.run());
+
+        refreshRooms.run(); // Initial laden
+
+        VerticalLayout dialogLayout = new VerticalLayout(purposeField, datePicker, new HorizontalLayout(startTime, endTime), roomGroup);
         dialog.add(dialogLayout);
 
+         */
+        dialog.add(editForm);
+
         Button saveButton = new Button("Save", event -> {
+            try {
+                editForm.updateBookingObject(booking);
 
-            // Hier Logik für update Booking
+                /*
+                booking.setPurpose(purposeField.getValue());
+                booking.setStartTime(datePicker.getValue().atTime(startTime.getValue()));
+                booking.setEndTime(datePicker.getValue().atTime(endTime.getValue()));
+                booking.setMeetingRoom(roomGroup.getValue());
 
-            dialog.close();
-            Notification.show("Booking updated");
+                 */
+
+                bookingService.updateBooking(booking);
+
+                // Container benachrichtigen
+                if (runnable != null) {
+                    runnable.run();
+                }
+
+                dialog.close();
+                Notification.show("Booking updated");
+            } catch (Exception e) {
+                Notification.show("Error updating booking: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
+            }
         });
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
@@ -126,6 +229,10 @@ public class BookingItem extends Div {
             //updateList();
             dialog.close();
             Notification.show("Booking deleted");
+            // Container benachrichtigen
+            if (runnable != null) {
+                runnable.run();
+            }
         });
         deleteButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_ERROR);
 
