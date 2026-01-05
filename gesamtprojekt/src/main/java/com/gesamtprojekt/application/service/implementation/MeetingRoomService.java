@@ -17,7 +17,12 @@ public class MeetingRoomService implements MeetingRoomServiceInterface {
         this.meetingRoomRepository = meetingRoomRepository;
     }
 
-    // Filter wie ClientService: entweder Default ACTIVE, oder searchByFilters
+    public MeetingRoom findRoomForEdit(Long roomId) {
+        return meetingRoomRepository.findWithEquipmentByRoomId(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("Room not found: " + roomId));
+    }
+
+    // Filter: entweder Default ACTIVE, oder searchByFilters
     @Override
     public List<MeetingRoom> findAllRooms(String search, String building, String status) {
         String b = (building != null && !building.equals("All Buildings")) ? building : "";
@@ -47,7 +52,7 @@ public class MeetingRoomService implements MeetingRoomServiceInterface {
         meetingRoomRepository.save(room);
     }
 
-    // Soft delete analog zu ClientService.deleteClient
+    // Soft delete
     @Override
     public void deleteRoom(MeetingRoom room) {
         room.setStatus("INACTIVE");

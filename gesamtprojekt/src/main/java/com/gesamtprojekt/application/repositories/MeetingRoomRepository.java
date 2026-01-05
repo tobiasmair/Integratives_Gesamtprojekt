@@ -4,8 +4,10 @@ import com.gesamtprojekt.application.model.MeetingRoom;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.EntityGraph;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface MeetingRoomRepository extends JpaRepository<MeetingRoom, Long> {
 
@@ -27,5 +29,16 @@ public interface MeetingRoomRepository extends JpaRepository<MeetingRoom, Long> 
             @Param("searchTerm") String searchTerm,
             @Param("building") String building,
             @Param("status") String status
+
+
+
     );
+
+    @EntityGraph(attributePaths = "equipment")
+    Optional<MeetingRoom> findWithEquipmentByRoomId(Long roomId);
+
+    @Override
+    @EntityGraph(attributePaths = "equipment")
+    List<MeetingRoom> findAll();
+    
 }

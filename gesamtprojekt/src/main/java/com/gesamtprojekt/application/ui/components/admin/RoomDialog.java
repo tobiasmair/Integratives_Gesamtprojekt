@@ -1,40 +1,79 @@
 package com.gesamtprojekt.application.ui.components.admin;
 
 import com.gesamtprojekt.application.model.MeetingRoom;
+import com.gesamtprojekt.application.service.implementation.EquipmentService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 public class RoomDialog extends Dialog {
 
-    public RoomDialog(String title, MeetingRoomService service, MeetingRoom room, Runnable onSaved) {
+    private final MeetingRoomService roomService;
+    private final Runnable onSaved;
+    private final MeetingRoom existingRoom;
+
+    private final RoomForm form;
+
+    public RoomDialog(String title,
+                      MeetingRoomService roomService,
+                      EquipmentService equipmentService,
+                      MeetingRoom room,
+                      Runnable onSaved) {
+        this.roomService = roomService;
+        this.onSaved = onSaved;
+        this.existingRoom = room;
+
+        this.form = new RoomForm(equipmentService);
+
         setHeaderTitle(title);
+        add(new VerticalLayout(form));
 
-        var form = new RoomForm();
         form.setRoom(room);
-
-        add(form);
-        getFooter().add(cancelBtn(), saveBtn(form, service, room, onSaved));
+        getFooter().add(cancelBtn(), saveBtn());
     }
 
     private Button cancelBtn() {
         return new Button("Cancel", e -> close());
     }
 
-    private Button saveBtn(RoomForm form, MeetingRoomService service, MeetingRoom room, Runnable onSaved) {
-        var save = new Button("Save");
+    private Button saveBtn() {
+        Button save = new Button("Save", e -> save());
         save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        save.addClickListener(e -> doSave(form, service, room, onSaved));
         return save;
     }
 
-    private void doSave(RoomForm form, MeetingRoomService service, MeetingRoom room, Runnable onSaved) {
+    private void save() {
         if (!form.isValid()) return;
-        var target = room == null ? new MeetingRoom() : room;
+
+        MeetingRoom target = existingRoom == null ? new MeetingRoom() : existingRoom;
         form.apply(target);
-        service.updateRoom(target);
-        onSaved.run();
-        close();
+
+        try {
+            persist(target);
+            onSaved.run();
+            notifyOk(existingRoom == null ? "Room created." : "Room updated.");
+            close();
+        } catch (Exception ex) {
+            notifyErr("Error: " + ex.getMessage());
+        }
+    }
+
+    private void persist(MeetingRoom room) {
+        if (existingRoom == null) roomService.createRoom(room);
+        else roomService.updateRoom(room);
+    }
+
+    private void notifyOk(String msg) {
+        Notification.show(msg, 3000, Notification.Position.TOP_CENTER)
+                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+    }
+
+    private void notifyErr(String msg) {
+        Notification.show(msg, 5000, Notification.Position.TOP_CENTER)
+                .addThemeVariants(NotificationVariant.LUMO_ERROR);
     }
 }

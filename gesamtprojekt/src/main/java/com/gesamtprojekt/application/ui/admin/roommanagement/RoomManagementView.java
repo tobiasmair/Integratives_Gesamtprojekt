@@ -1,5 +1,6 @@
 package com.gesamtprojekt.application.ui.admin.roommanagement;
 
+import com.gesamtprojekt.application.service.implementation.EquipmentService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.gesamtprojekt.application.ui.client.MainLayout;
 import com.gesamtprojekt.application.ui.components.admin.RoomManagementStatsBar;
@@ -14,16 +15,14 @@ import jakarta.annotation.security.RolesAllowed;
 @RolesAllowed("ADMIN")
 public class RoomManagementView extends VerticalLayout {
 
-    public RoomManagementView(MeetingRoomService meetingRoomService) {
+    public RoomManagementView(MeetingRoomService meetingRoomService, EquipmentService equipmentService) {
         setSizeFull();
         setPadding(true);
         setSpacing(true);
 
-        // Komponente hinzufügen
         var stats = new RoomManagementStatsBar(meetingRoomService);
-        var table = new RoomTableSection(meetingRoomService);
+        var table = new RoomTableSection(meetingRoomService, equipmentService);
 
-        // Aufbau View
         add(stats, table);
         setFlexGrow(1, table);
     }

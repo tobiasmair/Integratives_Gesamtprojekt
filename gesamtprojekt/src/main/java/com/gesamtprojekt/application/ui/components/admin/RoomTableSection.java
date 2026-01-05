@@ -1,6 +1,7 @@
 package com.gesamtprojekt.application.ui.components.admin;
 
 import com.gesamtprojekt.application.model.MeetingRoom;
+import com.gesamtprojekt.application.service.implementation.EquipmentService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -22,6 +23,7 @@ import java.util.List;
 public class RoomTableSection extends VerticalLayout {
 
     private final MeetingRoomService meetingRoomService;
+    private final EquipmentService equipmentService;
 
     private final Grid<MeetingRoom> grid = new Grid<>(MeetingRoom.class, false);
     private final TextField searchField = new TextField();
@@ -31,18 +33,17 @@ public class RoomTableSection extends VerticalLayout {
             new ComboBox<>("", List.of("All Status", "ACTIVE", "INACTIVE"));
     private final Button addRoomBtn = new Button("Add Room");
 
-    public RoomTableSection(MeetingRoomService meetingRoomService) {
+    public RoomTableSection(MeetingRoomService meetingRoomService, EquipmentService equipmentService) {
         this.meetingRoomService = meetingRoomService;
+        this.equipmentService = equipmentService;
+
         setSizeFull();
         setPadding(false);
 
-        // Toolbar und Grid hinzufügen
         add(buildToolbar(), buildGrid());
-        // Initiale Liste laden
         updateList();
     }
 
-    // Toolbar aufbauen (Suche, Filter, Buttons)
     private HorizontalLayout buildToolbar() {
         searchField.setPlaceholder("Search rooms by name...");
         searchField.setPrefixComponent(VaadinIcon.SEARCH.create());
@@ -66,18 +67,15 @@ public class RoomTableSection extends VerticalLayout {
         return toolbar;
     }
 
-    // Grid aufbauen (Spalten, Aktionen)
     private Grid<MeetingRoom> buildGrid() {
         grid.setSizeFull();
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_ROW_STRIPES);
 
-        // Spalten
         grid.addColumn(MeetingRoom::getName).setHeader("Room").setSortable(true);
         grid.addColumn(MeetingRoom::getLocation).setHeader("Building");
         grid.addColumn(MeetingRoom::getCapacity).setHeader("Capacity");
         grid.addColumn(MeetingRoom::getStatus).setHeader("Status");
 
-        // Action Buttons in Spalte
         grid.addComponentColumn(room -> {
             Button edit = new Button(VaadinIcon.EDIT.create());
             edit.addClickListener(e -> openEditDialog(room));
@@ -92,7 +90,6 @@ public class RoomTableSection extends VerticalLayout {
         return grid;
     }
 
-    // Liste nach Filter aktualisieren
     private void updateList() {
         grid.setItems(meetingRoomService.findAllRooms(
                 searchField.getValue(),
@@ -101,26 +98,17 @@ public class RoomTableSection extends VerticalLayout {
         ));
     }
 
-    // Dialog Fenster für Edit
     private void openEditDialog(MeetingRoom room) {
-        Dialog dialog = new Dialog();
-        RoomForm form = new RoomForm();
-        form.setRoom(room);
+        MeetingRoom roomForEdit = meetingRoomService.findRoomForEdit(room.getRoomId());
 
-        dialog.setHeaderTitle("Edit Room: " + room.getName());
+        Dialog dialog = new Dialog();
+        RoomForm form = new RoomForm(equipmentService);
+        form.setRoom(roomForEdit);
+
+        dialog.setHeaderTitle("Edit Room: " + roomForEdit.getName());
         dialog.add(new VerticalLayout(form));
 
-        Button saveButton = new Button("Save", event -> {
-            if (form.isValid()) {
-                form.apply(room);
-                meetingRoomService.updateRoom(room);
-                updateList();
-                dialog.close();
-
-                Notification.show("Room updated.", 3000, Notification.Position.TOP_CENTER)
-                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            }
-        });
+        Button saveButton = new Button("Save", event -> saveEdit(roomForEdit, form, dialog));
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         Button cancelButton = new Button("Cancel", event -> dialog.close());
@@ -128,7 +116,19 @@ public class RoomTableSection extends VerticalLayout {
         dialog.open();
     }
 
-    // Dialog Fenster für Delete
+
+    private void saveEdit(MeetingRoom room, RoomForm form, Dialog dialog) {
+        if (!form.isValid()) return;
+
+        form.apply(room);
+        meetingRoomService.updateRoom(room);
+        updateList();
+        dialog.close();
+
+        Notification.show("Room updated.", 3000, Notification.Position.TOP_CENTER)
+                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+    }
+
     private void openDeleteDialog(MeetingRoom room) {
         Dialog dialog = new Dialog();
         dialog.setHeaderTitle("Delete Room: " + room.getName());
@@ -136,14 +136,7 @@ public class RoomTableSection extends VerticalLayout {
         Span text = new Span("Are you sure you want to delete Room " + room.getName() + " ?");
         dialog.add(text);
 
-        Button deleteButton = new Button("Delete", event -> {
-            meetingRoomService.deleteRoom(room);
-            updateList();
-            dialog.close();
-
-            Notification.show("Room deleted.", 3000, Notification.Position.TOP_CENTER)
-                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-        });
+        Button deleteButton = new Button("Delete", event -> deleteRoom(room, dialog));
         deleteButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_ERROR);
 
         Button cancelButton = new Button("Cancel", event -> dialog.close());
@@ -152,36 +145,46 @@ public class RoomTableSection extends VerticalLayout {
         dialog.open();
     }
 
-    // Dialog Fenster für neuen Raum
+    private void deleteRoom(MeetingRoom room, Dialog dialog) {
+        meetingRoomService.deleteRoom(room);
+        updateList();
+        dialog.close();
+
+        Notification.show("Room deleted.", 3000, Notification.Position.TOP_CENTER)
+                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+    }
+
     private void addRoomDialog() {
         Dialog dialog = new Dialog();
-        RoomForm form = new RoomForm();
+        RoomForm form = new RoomForm(equipmentService);
 
         dialog.setHeaderTitle("Create new Room");
         dialog.add(new VerticalLayout(form));
 
-        Button saveButton = new Button("Save", event -> {
-            if (form.isValid()) {
-                MeetingRoom room = new MeetingRoom();
-                form.apply(room);
-
-                try {
-                    meetingRoomService.createRoom(room);
-                    updateList();
-                    dialog.close();
-
-                    Notification.show("Room created.", 3000, Notification.Position.TOP_CENTER)
-                            .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                } catch (Exception ex) {
-                    Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_CENTER)
-                            .addThemeVariants(NotificationVariant.LUMO_ERROR);
-                }
-            }
-        });
+        Button saveButton = new Button("Save", event -> createRoom(form, dialog));
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         Button cancelButton = new Button("Cancel", event -> dialog.close());
         dialog.getFooter().add(cancelButton, saveButton);
         dialog.open();
+    }
+
+    private void createRoom(RoomForm form, Dialog dialog) {
+        if (!form.isValid()) return;
+
+        MeetingRoom room = new MeetingRoom();
+        form.apply(room);
+
+        try {
+            meetingRoomService.createRoom(room);
+            updateList();
+            dialog.close();
+
+            Notification.show("Room created.", 3000, Notification.Position.TOP_CENTER)
+                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        } catch (Exception ex) {
+            Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_CENTER)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        }
     }
 }

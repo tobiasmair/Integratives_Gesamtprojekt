@@ -11,12 +11,12 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 public class RoomManagementStatsBar extends HorizontalLayout {
 
     public RoomManagementStatsBar(MeetingRoomService service) {
-        // Layout Grundkonfiguration
+
         setWidthFull();
         setSpacing(true);
         addClassName("room-stats-bar");
 
-        // Stat-Karten hinzufügen
+
         add(
                 card("Total Rooms", String.valueOf(service.countRooms()), VaadinIcon.HOME),
                 card("Total Capacity", String.valueOf(service.sumCapacity()), VaadinIcon.GROUP),
@@ -33,13 +33,13 @@ public class RoomManagementStatsBar extends HorizontalLayout {
                 LumoUtility.Padding.MEDIUM
         );
 
-        // Karten-Header
+
         var header = new HorizontalLayout(new Span(title), icon.create());
         header.setJustifyContentMode(JustifyContentMode.BETWEEN);
         header.setWidthFull();
         header.addClassName(LumoUtility.TextColor.SECONDARY);
 
-        // Wert-Label
+
         var val = new Span(value);
         val.addClassNames(LumoUtility.FontSize.XXLARGE, LumoUtility.FontWeight.BOLD);
 
