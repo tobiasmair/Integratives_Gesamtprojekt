@@ -52,6 +52,10 @@ public class MeetingRoom {
     @Column(name = "hasVentilationControl")
     private Boolean hasVentilationControl;
 
+    @Column(name = "isActive")
+    private Boolean isActive = true;
+
+    // Relation to Booking
     @Column(name = "image_path")
     private String imagePath;
 

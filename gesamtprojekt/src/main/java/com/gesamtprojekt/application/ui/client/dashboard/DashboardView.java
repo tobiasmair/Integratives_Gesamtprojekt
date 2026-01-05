@@ -1,6 +1,10 @@
 package com.gesamtprojekt.application.ui.client.dashboard;
 
+import com.gesamtprojekt.application.security.SecurityService;
+import com.gesamtprojekt.application.service.implementation.BookingService;
+import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.gesamtprojekt.application.ui.client.MainLayout;
+import com.gesamtprojekt.application.ui.components.dashboard.BookingChangedEvent;
 import com.gesamtprojekt.application.ui.components.dashboard.MyBookingsContainer;
 import com.gesamtprojekt.application.ui.components.dashboard.QuickBookingContainer;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -14,18 +18,27 @@ import jakarta.annotation.security.PermitAll;
 @PermitAll
 public class DashboardView extends VerticalLayout {
 
-    public DashboardView() {
+    private final BookingService bookingService;
+    private final MeetingRoomService meetingRoomService;
+    private final SecurityService securityService;
+
+    public DashboardView(BookingService bookingService, MeetingRoomService meetingRoomService, SecurityService securityService) {
+        this.bookingService = bookingService;
+        this.meetingRoomService = meetingRoomService;
+        this.securityService = securityService;
+
         addClassName("dashboard-view");
         setSizeFull();
 
-        //add(new H1("Dashboard!!!"));
         add(createTwoColumnLayout());
     }
 
     private HorizontalLayout createTwoColumnLayout() {
-        var quick = new QuickBookingContainer();
-        var bookings = new MyBookingsContainer();
+        var quick = new QuickBookingContainer(bookingService, meetingRoomService, securityService);
+        var bookings = new MyBookingsContainer(bookingService, meetingRoomService, securityService);
 
+        // Listener registrieren
+        quick.addBookingChangedListener(event -> bookings.refresh());
 
         quick.setWidthFull();
         bookings.setWidthFull();
