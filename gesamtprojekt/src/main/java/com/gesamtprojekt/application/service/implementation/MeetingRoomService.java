@@ -32,6 +32,7 @@ public class MeetingRoomService implements MeetingRoomServiceInterface {
         return meetingRoomRepository.findAvailableRoomsInTimeframe(startTime, endTime);
     }
 
+    // Aktive Räume in Zeitabschnitt, aktuelle Buchung ausschließen
     public List<MeetingRoom> findAvailableRoomsExcludingBooking(
             LocalDateTime startTime,
             LocalDateTime endTime,
@@ -56,7 +57,7 @@ public class MeetingRoomService implements MeetingRoomServiceInterface {
 
         if (q.isEmpty() && b.isEmpty() && s.isEmpty()) {
             // Default: nur ACTIVE Räume
-            return meetingRoomRepository.findByStatus("ACTIVE");
+            return meetingRoomRepository.findByIsActiveTrueAndStatus("ACTIVE");
         }
         // Angepasste Suche mit Query
         return meetingRoomRepository.searchByFilters(q, b, s);
@@ -77,23 +78,23 @@ public class MeetingRoomService implements MeetingRoomServiceInterface {
         meetingRoomRepository.save(room);
     }
 
-    // Soft delete
+    // Soft delete (isActive false)
     @Override
     public void deleteRoom(MeetingRoom room) {
-        room.setStatus("INACTIVE");
+        room.setIsActive(false);
         meetingRoomRepository.save(room);
     }
 
     // Statistik: Anzahl Räume
     @Override
     public long countRooms() {
-        return meetingRoomRepository.countByStatus("ACTIVE");
+        return meetingRoomRepository.countByIsActiveTrueAndStatus("ACTIVE");
     }
 
     // Statistik: Gesamtkapazität
     @Override
     public int sumCapacity() {
-        return meetingRoomRepository.findByStatus("ACTIVE").stream()
+        return meetingRoomRepository.findByIsActiveTrueAndStatus("ACTIVE").stream()
                 .map(MeetingRoom::getCapacity)
                 .filter(Objects::nonNull)
                 .mapToInt(i -> i)
@@ -103,7 +104,7 @@ public class MeetingRoomService implements MeetingRoomServiceInterface {
     // Statistik: Anzahl unterschiedlicher Gebäude
     @Override
     public long countBuildings() {
-        return meetingRoomRepository.findByStatus("ACTIVE").stream()
+        return meetingRoomRepository.findByIsActiveTrueAndStatus("ACTIVE").stream()
                 .map(MeetingRoom::getLocation)
                 .filter(Objects::nonNull)
                 .distinct()
@@ -113,7 +114,7 @@ public class MeetingRoomService implements MeetingRoomServiceInterface {
     @Transactional(readOnly = true)
     public List<MeetingRoom> findRoomsForCalendar() {
         // z.B. nur ACTIVE, inkl. equipment (weil findByStatus jetzt @EntityGraph hat)
-        return meetingRoomRepository.findByStatus("ACTIVE");
+        return meetingRoomRepository.findByIsActiveTrueAndStatus("ACTIVE");
     }
 
 }

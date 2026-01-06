@@ -36,10 +36,10 @@ public interface MeetingRoomRepository extends JpaRepository<MeetingRoom, Long> 
 
     // Standard-Filter: Räume nach Status (z. B. ACTIVE)
     @EntityGraph(attributePaths = "equipment")
-    List<MeetingRoom> findByStatus(String status);
+    List<MeetingRoom> findByIsActiveTrueAndStatus(String status);
 
     // Zähler nach Status
-    long countByStatus(String status);
+    long countByIsActiveTrueAndStatus(String status);
 
     // Suche mit mehreren Filtern: Suche, Gebäude, Status
     @EntityGraph(attributePaths = "equipment")
@@ -49,7 +49,8 @@ public interface MeetingRoomRepository extends JpaRepository<MeetingRoom, Long> 
             "   or (:status <> '' and r.status = :status)" +
             ") " +
             "and (:building = '' or r.location = :building) " +
-            "and (:searchTerm = '' or lower(r.name) like lower(concat('%', :searchTerm, '%')))")
+            "and (:searchTerm = '' or lower(r.name) like lower(concat('%', :searchTerm, '%'))) " +
+            "and r.isActive = true")
     List<MeetingRoom> searchByFilters(
             @Param("searchTerm") String searchTerm,
             @Param("building") String building,
