@@ -1,5 +1,6 @@
 package com.gesamtprojekt.application.ui.admin.usermanagement;
 
+import com.gesamtprojekt.application.service.implementation.BookingService;
 import com.gesamtprojekt.application.service.implementation.ClientService;
 import com.gesamtprojekt.application.ui.client.MainLayout;
 import com.gesamtprojekt.application.ui.components.admin.UserManagementStatsBar;
@@ -14,14 +15,17 @@ import jakarta.annotation.security.RolesAllowed;
 @RolesAllowed("ADMIN")
 public class UserManagementView extends VerticalLayout {
 
-    public UserManagementView(ClientService clientService) {
+    public UserManagementView(ClientService clientService, BookingService bookingService) {
         setSizeFull();
         setPadding(true);
         setSpacing(true);
 
         // Komponente hinzufügen
-        UserManagementStatsBar statsBar = new UserManagementStatsBar(clientService);
-        UserTableSection tableSection = new UserTableSection(clientService);
+        UserManagementStatsBar statsBar = new UserManagementStatsBar(clientService, bookingService);
+        UserTableSection tableSection = new UserTableSection(clientService, bookingService);
+
+        // Listener registrieren
+        tableSection.addStatsChangedListener(event -> statsBar.refresh());
 
         // Aufbau View
         add(statsBar, tableSection);

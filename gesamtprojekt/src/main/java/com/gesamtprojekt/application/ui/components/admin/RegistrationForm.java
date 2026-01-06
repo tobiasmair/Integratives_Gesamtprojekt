@@ -69,7 +69,6 @@ public class RegistrationForm extends FormLayout {
             return false;
         }
 
-
         // Prüft Passwort-Match
         if (!password.getValue().equals(confirmPassword.getValue())) {
             Notification.show("Passwords do not match!", 3000, Notification.Position.TOP_CENTER)

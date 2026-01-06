@@ -4,7 +4,6 @@ import com.gesamtprojekt.application.security.SecurityService;
 import com.gesamtprojekt.application.service.implementation.BookingService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.gesamtprojekt.application.ui.client.MainLayout;
-import com.gesamtprojekt.application.ui.components.dashboard.BookingChangedEvent;
 import com.gesamtprojekt.application.ui.components.dashboard.MyBookingsContainer;
 import com.gesamtprojekt.application.ui.components.dashboard.QuickBookingContainer;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
