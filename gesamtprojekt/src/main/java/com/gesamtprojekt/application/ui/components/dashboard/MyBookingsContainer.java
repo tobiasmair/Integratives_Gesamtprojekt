@@ -18,7 +18,6 @@ import com.vaadin.flow.component.tabs.Tabs;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import com.vaadin.flow.component.orderedlayout.Scroller;
-import com.vaadin.flow.shared.Registration;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;

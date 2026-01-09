@@ -22,6 +22,25 @@ public class CalendarView extends VerticalLayout {
         CalendarControlsBar controls = new CalendarControlsBar();
         CalendarRoomsSection rooms = new CalendarRoomsSection(meetingRoomService);
 
+        // Initiales laden der Daten
+        rooms.reload(
+                controls.getStartDateTime(),
+                controls.getEndDateTime(),
+                controls.getBuilding(),
+                controls.getFloor(),
+                controls.getCapacity()
+        );
+
+        controls.addFilterChangedListener(e -> {
+            rooms.reload(
+                    controls.getStartDateTime(),
+                    controls.getEndDateTime(),
+                    controls.getBuilding(),
+                    controls.getFloor(),
+                    controls.getCapacity()
+            );
+        });
+
         rooms.addClassName("calendar-rooms-scroll");
 
         add(controls, rooms);

@@ -3,9 +3,13 @@ package com.gesamtprojekt.application.ui.components.calendar;
 import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.vaadin.flow.component.html.H4;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class CalendarRoomsSection extends VerticalLayout {
@@ -23,7 +27,7 @@ public class CalendarRoomsSection extends VerticalLayout {
         add(new H4("available Meeting Rooms"));
         add(buildGrid());
 
-        reload();
+        //reload();
     }
 
     private FlexLayout buildGrid() {
@@ -33,9 +37,31 @@ public class CalendarRoomsSection extends VerticalLayout {
         return grid;
     }
 
+    /*
     public void reload() {
         grid.removeAll();
         loadRooms().forEach(r -> grid.add(buildCard(mapToCardModel(r))));
+    }
+     */
+
+    public void reload(LocalDateTime start, LocalDateTime end, String b, String f, String cap) {
+        grid.removeAll();
+
+        if (end.isBefore(start) || end.isEqual(start)) {
+            Notification.show("End time must be after start time.", 3000, Notification.Position.TOP_CENTER)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            grid.removeAll();
+            return;
+        }
+
+        // Abfrage DB
+        List<MeetingRoom> rooms = meetingRoomService.findCalendarRooms(start, end, b, f, cap);
+
+        if (rooms.isEmpty()) {
+            grid.add(new Span("No rooms available for the selected filters."));
+        } else {
+            rooms.forEach(r -> grid.add(buildCard(mapToCardModel(r))));
+        }
     }
 
     private List<MeetingRoom> loadRooms() {

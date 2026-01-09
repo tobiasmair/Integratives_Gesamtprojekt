@@ -117,4 +117,35 @@ public class MeetingRoomService implements MeetingRoomServiceInterface {
         return meetingRoomRepository.findByIsActiveTrueAndStatus("ACTIVE");
     }
 
+    public List<MeetingRoom> findCalendarRooms(
+            LocalDateTime startTime,
+            LocalDateTime endTime,
+            String building,
+            String floorStr,
+            String minCapStr) {
+
+        // Floor-String zu Integer konvertieren
+        Integer floor = null;
+        if (floorStr != null && !floorStr.equals("Any Floor")) {
+            try {
+                floor = Integer.valueOf(floorStr);
+            } catch (NumberFormatException e) {
+                floor = null;
+            }
+        }
+
+        // Min capacity Logik
+        int minCap = 0;
+        if (minCapStr != null && minCapStr.endsWith("+")) {
+            minCap = Integer.parseInt(minCapStr.replace("+", ""));
+        }
+
+        return meetingRoomRepository.findFilteredAvailableRooms(
+                startTime,
+                endTime,
+                building,
+                floor,
+                minCap);
+    }
+
 }

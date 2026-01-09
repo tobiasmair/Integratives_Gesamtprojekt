@@ -28,6 +28,7 @@ import com.vaadin.flow.shared.Registration;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 public class QuickBookingContainer extends Div {
@@ -86,9 +87,15 @@ public class QuickBookingContainer extends Div {
         content.add(bookButton);
 
         // Initialwerte setzen
+        LocalTime nowRounded = roundToNextHalfHour(LocalTime.now());
         datePicker.setValue(java.time.LocalDate.now());
+
         startTime.setStep(Duration.ofMinutes(30));
         endTime.setStep(Duration.ofMinutes(30));
+
+        // Nächste gerundete Stunde als Startzeit
+        startTime.setValue(nowRounded);
+        endTime.setValue(nowRounded.plusHours(1));
 
         return content;
     }
@@ -320,6 +327,18 @@ public class QuickBookingContainer extends Div {
         } catch (Exception ex) {
             Notification.show(ex.getMessage(), 5000, Notification.Position.TOP_CENTER)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        }
+    }
+
+    // Zeit auf nächste halbe Stunde aufrunden
+    private LocalTime roundToNextHalfHour(LocalTime time) {
+        int minutes = time.getMinute();
+        if (minutes == 0) {
+            return time.withSecond(0).withNano(0);
+        } else if (minutes <= 30) {
+            return time.withMinute(30).withSecond(0).withNano(0);
+        } else {
+            return time.plusHours(1).withMinute(0).withSecond(0).withNano(0);
         }
     }
 

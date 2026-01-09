@@ -34,6 +34,23 @@ public interface MeetingRoomRepository extends JpaRepository<MeetingRoom, Long> 
             @Param("excludeBookingId") Long excludeBookingId
     );
 
+    // Query für calendar view: verfügbare Räume mit bestimmten Eigenschaften
+    @EntityGraph(attributePaths = "equipment")
+    @Query("SELECT r FROM MeetingRoom r WHERE r.isActive = true AND r.status = 'ACTIVE' " +
+            "AND (:building = 'All Buildings' OR r.location = :building) " +
+            "AND (:floor IS NULL OR r.floor = :floor) " +
+            "AND (:minCap = 0 OR r.capacity >= :minCap) " +
+            "AND r.roomId NOT IN (" +
+            "    SELECT b.meetingRoom.roomId FROM Booking b " +
+            "    WHERE b.isActive = true AND b.startTime < :endTime AND b.endTime > :startTime" +
+            ")")
+    List<MeetingRoom> findFilteredAvailableRooms(
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime,
+            @Param("building") String building,
+            @Param("floor") Integer floor,
+            @Param("minCap") int minCap);
+
     // Standard-Filter: Räume nach Status (z. B. ACTIVE)
     @EntityGraph(attributePaths = "equipment")
     List<MeetingRoom> findByIsActiveTrueAndStatus(String status);
@@ -63,4 +80,5 @@ public interface MeetingRoomRepository extends JpaRepository<MeetingRoom, Long> 
     @Override
     @EntityGraph(attributePaths = "equipment")
     List<MeetingRoom> findAll();
+
 }
