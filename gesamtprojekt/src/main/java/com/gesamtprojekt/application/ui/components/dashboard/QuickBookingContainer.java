@@ -297,6 +297,8 @@ public class QuickBookingContainer extends Div {
 
             booking.setPurpose(purposeField.getValue());  // purpose
 
+            booking.setAttendees(attendeesField.getValue());
+
             booking.setBookingStatus("CONFIRMED");  // status
 
             bookingService.createBooking(booking);
@@ -346,6 +348,7 @@ public class QuickBookingContainer extends Div {
         startTime.setValue(booking.getStartTime().toLocalTime());
         endTime.setValue(booking.getEndTime().toLocalTime());
         purposeField.setValue(booking.getPurpose() != null ? booking.getPurpose() : "");
+        attendeesField.setValue(booking.getAttendees() != null ? booking.getAttendees() : 1);
 
         // Räume laden (aktuellen Raum berücksichtigen)
         List<MeetingRoom> availableRooms = loadAvailableRooms();
@@ -376,6 +379,7 @@ public class QuickBookingContainer extends Div {
         b.setPurpose(purposeField.getValue());
         b.setStartTime(datePicker.getValue().atTime(startTime.getValue()));
         b.setEndTime(datePicker.getValue().atTime(endTime.getValue()));
+        b.setAttendees(attendeesField.getValue());
         b.setMeetingRoom(roomGroup.getValue());
     }
 
