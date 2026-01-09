@@ -38,6 +38,7 @@ public class DashboardView extends VerticalLayout {
 
         // Listener registrieren
         quick.addBookingChangedListener(event -> bookings.refresh());
+        bookings.addBookingChangedListener(event -> quick.loadRooms());
 
         quick.setWidthFull();
         bookings.setWidthFull();

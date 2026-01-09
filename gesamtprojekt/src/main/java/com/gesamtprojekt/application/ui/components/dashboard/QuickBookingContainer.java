@@ -88,14 +88,15 @@ public class QuickBookingContainer extends Div {
 
         // Initialwerte setzen
         LocalTime nowRounded = roundToNextHalfHour(LocalTime.now());
-        datePicker.setValue(java.time.LocalDate.now());
 
-        startTime.setStep(Duration.ofMinutes(30));
-        endTime.setStep(Duration.ofMinutes(30));
+        datePicker.setValue(java.time.LocalDate.now());
 
         // Nächste gerundete Stunde als Startzeit
         startTime.setValue(nowRounded);
         endTime.setValue(nowRounded.plusHours(1));
+
+        startTime.setStep(Duration.ofMinutes(30));
+        endTime.setStep(Duration.ofMinutes(30));
 
         return content;
     }
@@ -143,7 +144,7 @@ public class QuickBookingContainer extends Div {
     }
 
     // Nur freie Räume laden
-    private void loadRooms() {
+    public void loadRooms() {
         if (datePicker.getValue() == null || startTime.getValue() == null || endTime.getValue() == null) {
             return;
         }
@@ -317,8 +318,9 @@ public class QuickBookingContainer extends Div {
             fireEvent(new BookingChangedEvent(this));
 
             // Formular zurücksetzen
-            startTime.clear();
-            endTime.clear();
+            LocalTime nowRounded = roundToNextHalfHour(LocalTime.now());
+            startTime.setValue(nowRounded);
+            endTime.setValue(nowRounded.plusHours(1));
             purposeField.clear();
             reminderField.setValue("15 min before");
             attendeesField.setValue(1);

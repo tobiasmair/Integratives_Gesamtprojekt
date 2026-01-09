@@ -18,6 +18,7 @@ import com.vaadin.flow.component.tabs.Tabs;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.shared.Registration;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -120,6 +121,8 @@ public class MyBookingsContainer extends Div {
 
     public void refresh() {
         onTabChanged();
+        // Event für DashboardView -> trigger QuickBookingContainer
+        fireEvent(new BookingChangedEvent(this));
     }
 
     private void onCustomDatePicked(LocalDate date) {
@@ -226,6 +229,11 @@ public class MyBookingsContainer extends Div {
         );
 
         return item;
+    }
+
+    // View registrieren
+    public Registration addBookingChangedListener(ComponentEventListener<BookingChangedEvent> listener) {
+        return addListener(BookingChangedEvent.class, listener);
     }
 
 }

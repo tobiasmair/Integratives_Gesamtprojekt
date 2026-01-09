@@ -60,12 +60,12 @@ public class CalendarControlsBar extends VerticalLayout {
     private FormLayout buildTopRow() {
         LocalTime nowRounded = roundToNextHalfHour(LocalTime.now());
 
-        start.setStep(Duration.ofMinutes(30));
-        end.setStep(Duration.ofMinutes(30));
-
         // Nächste gerundete Stunde als Startzeit
         start = time("Start Time", nowRounded);
         end = time("End Time", nowRounded.plusHours(1));
+
+        start.setStep(Duration.ofMinutes(30));
+        end.setStep(Duration.ofMinutes(30));
 
         date.setValue(LocalDate.now());
         date.setWidthFull();
