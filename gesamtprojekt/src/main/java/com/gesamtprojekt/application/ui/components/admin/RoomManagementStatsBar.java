@@ -10,7 +10,14 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 
 public class RoomManagementStatsBar extends HorizontalLayout {
 
-    public RoomManagementStatsBar(MeetingRoomService service) {
+    private final MeetingRoomService meetingRoomService;
+
+    private final Span totalRoomsValue = new Span();
+    private final Span totalCapacityValue = new Span();
+    private final Span buildingsValue = new Span();
+
+    public RoomManagementStatsBar(MeetingRoomService meetingRoomService) {
+        this.meetingRoomService = meetingRoomService;
 
         setWidthFull();
         setSpacing(true);
@@ -18,13 +25,23 @@ public class RoomManagementStatsBar extends HorizontalLayout {
 
 
         add(
-                card("Total Rooms", String.valueOf(service.countRooms()), VaadinIcon.HOME),
-                card("Total Capacity", String.valueOf(service.sumCapacity()), VaadinIcon.GROUP),
-                card("Buildings", String.valueOf(service.countBuildings()), VaadinIcon.OFFICE)
+                card("Total Rooms", totalRoomsValue, VaadinIcon.HOME),
+                card("Total Capacity", totalCapacityValue, VaadinIcon.GROUP),
+                card("Buildings", buildingsValue, VaadinIcon.OFFICE)
         );
+
+        // Erstes mal laden
+        refresh();
     }
 
-    private Component card(String title, String value, VaadinIcon icon) {
+    // Cards befüllen
+    public void refresh() {
+        totalRoomsValue.setText(String.valueOf(meetingRoomService.countRooms()));
+        totalCapacityValue.setText(String.valueOf(meetingRoomService.sumCapacity()));
+        buildingsValue.setText(String.valueOf(meetingRoomService.countBuildings()));
+    }
+
+    private Component card(String title, Span value, VaadinIcon icon) {
         var c = new VerticalLayout();
         c.addClassNames(
                 LumoUtility.Background.BASE,

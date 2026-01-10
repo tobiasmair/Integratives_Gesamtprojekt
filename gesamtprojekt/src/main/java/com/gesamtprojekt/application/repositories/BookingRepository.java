@@ -42,4 +42,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("SELECT b FROM Booking b WHERE b.isActive = true AND b.client.userId = :clientId")
     List<Booking> findBookingByClientId (@Param("clientId") Long clientId);
 
+    // Anzahl der aktiven Buchungen zählen
+    long countByIsActiveTrueAndBookingStatusAndEndTimeAfter(String status, LocalDateTime currentTime);
+
+    // Zählt aktive Buchungen für einen bestimmten Client
+    long countByClient_UserIdAndIsActiveTrueAndBookingStatusAndEndTimeAfter(Long clientId, String status, LocalDateTime currentTime);
+
 }

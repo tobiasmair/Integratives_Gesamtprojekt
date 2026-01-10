@@ -24,6 +24,9 @@ public class RoomManagementView extends VerticalLayout {
         var stats = new RoomManagementStatsBar(meetingRoomService);
         var table = new RoomTableSection(meetingRoomService, equipmentService, imageStorage);
 
+        // Listener registrieren
+        table.addStatsChangedListener(event -> stats.refresh());
+
         add(stats, table);
         setFlexGrow(1, table);
     }
