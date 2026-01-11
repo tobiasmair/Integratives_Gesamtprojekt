@@ -1,6 +1,8 @@
 package com.gesamtprojekt.application.ui.components.calendar;
 
 import com.gesamtprojekt.application.model.MeetingRoom;
+import com.gesamtprojekt.application.security.SecurityService;
+import com.gesamtprojekt.application.service.implementation.BookingService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Span;
@@ -15,10 +17,15 @@ import java.util.List;
 public class CalendarRoomsSection extends VerticalLayout {
 
     private final MeetingRoomService meetingRoomService;
+    private final BookingService bookingService;
+    private final SecurityService securityService;
     private final FlexLayout grid = new FlexLayout();
 
-    public CalendarRoomsSection(MeetingRoomService meetingRoomService) {
+    public CalendarRoomsSection(MeetingRoomService meetingRoomService, BookingService bookingService,
+                                SecurityService securityService) {
         this.meetingRoomService = meetingRoomService;
+        this.bookingService = bookingService;
+        this.securityService = securityService;
 
         setWidthFull();
         setPadding(false);
@@ -69,7 +76,7 @@ public class CalendarRoomsSection extends VerticalLayout {
     }
 
     private CalendarRoomCard buildCard(CalendarRoomCardModel r) {
-        CalendarRoomCard card = new CalendarRoomCard(r);
+        CalendarRoomCard card = new CalendarRoomCard(r, bookingService, meetingRoomService, securityService);
         card.getStyle().set("width", "260px");
         return card;
     }
@@ -93,7 +100,6 @@ public class CalendarRoomsSection extends VerticalLayout {
                 .map(e -> e.getDescription() == null ? "" : e.getDescription().trim())
                 .filter(s -> !s.isBlank())
                 .sorted(String.CASE_INSENSITIVE_ORDER)
-                .limit(5)
                 .toList();
     }
 }

@@ -117,7 +117,11 @@ public class RoomForm extends FormLayout {
         r.setLocation(building.getValue());
         r.setFloor(floor.getValue());
         r.setStatus(status.getValue());
-        r.setEquipment(new java.util.LinkedHashSet<>(equipmentGroup.getValue()));
+
+
+        r.getEquipment().clear();
+        r.getEquipment().addAll(equipmentGroup.getValue());
+
         r.setImagePath(stagedImagePath);
         r.setImageMime(stagedImageMime);
         r.setImageOriginalName(stagedImageOriginalName);
@@ -201,16 +205,34 @@ public class RoomForm extends FormLayout {
         String val = field.getValue() == null ? "" : field.getValue().trim();
         if (val.isEmpty()) return;
 
+
+        var currentSelectedIds = equipmentGroup.getValue().stream()
+                .map(Equipment::getEquipmentId)
+                .filter(id -> id != null)
+                .collect(java.util.stream.Collectors.toSet());
+
         Equipment eq = new Equipment();
         eq.setDescription(val);
 
         Equipment created = equipmentService.create(eq);
 
         field.clear();
-        reloadEquipmentSorted();
 
-        var selected = new LinkedHashSet<>(equipmentGroup.getValue());
-        selected.add(created);
+
+        currentSelectedIds.add(created.getEquipmentId());
+
+
+        List<Equipment> allItems = equipmentService.findAll();
+        allItems.sort(Comparator.comparing(e -> n(e.getDescription()).toLowerCase()));
+
+
+        equipmentGroup.setItems(allItems);
+
+
+        var selected = allItems.stream()
+                .filter(e -> e.getEquipmentId() != null && currentSelectedIds.contains(e.getEquipmentId()))
+                .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
+
         equipmentGroup.setValue(selected);
     }
 

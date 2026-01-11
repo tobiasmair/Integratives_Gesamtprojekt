@@ -1,12 +1,18 @@
 package com.gesamtprojekt.application.ui.client.calendar;
 
+import com.gesamtprojekt.application.events.RoomChangedBroadcaster;
+import com.gesamtprojekt.application.security.SecurityService;
+import com.gesamtprojekt.application.service.implementation.BookingService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.gesamtprojekt.application.ui.client.MainLayout;
 import com.gesamtprojekt.application.ui.components.calendar.CalendarControlsBar;
 import com.gesamtprojekt.application.ui.components.calendar.CalendarRoomsSection;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.shared.Registration;
 import jakarta.annotation.security.PermitAll;
 
 @Route(value = "calendar", layout = MainLayout.class)
@@ -14,13 +20,18 @@ import jakarta.annotation.security.PermitAll;
 @PermitAll
 public class CalendarView extends VerticalLayout {
 
-    public CalendarView(MeetingRoomService meetingRoomService) {
+    private Registration broadcasterRegistration;
+    private CalendarControlsBar controls;
+    private CalendarRoomsSection rooms;
+
+    public CalendarView(MeetingRoomService meetingRoomService, BookingService bookingService,
+                        SecurityService securityService) {
         setSizeFull();
         setPadding(true);
         setSpacing(true);
 
-        CalendarControlsBar controls = new CalendarControlsBar();
-        CalendarRoomsSection rooms = new CalendarRoomsSection(meetingRoomService);
+        controls = new CalendarControlsBar();
+        rooms = new CalendarRoomsSection(meetingRoomService, bookingService, securityService);
 
         // Initiales laden der Daten
         rooms.reload(
@@ -45,5 +56,30 @@ public class CalendarView extends VerticalLayout {
 
         add(controls, rooms);
         setFlexGrow(1, rooms);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+
+        broadcasterRegistration = RoomChangedBroadcaster.register(event -> {
+            attachEvent.getUI().access(() -> {
+                rooms.reload(
+                        controls.getStartDateTime(),
+                        controls.getEndDateTime(),
+                        controls.getBuilding(),
+                        controls.getFloor(),
+                        controls.getCapacity()
+                );
+            });
+        });
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        super.onDetach(detachEvent);
+        if (broadcasterRegistration != null) {
+            broadcasterRegistration.remove();
+        }
     }
 }
