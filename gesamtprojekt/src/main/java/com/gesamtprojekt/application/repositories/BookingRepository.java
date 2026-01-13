@@ -42,4 +42,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("SELECT b FROM Booking b WHERE b.isActive = true AND b.client.userId = :clientId")
     List<Booking> findBookingByClientId (@Param("clientId") Long clientId);
 
+    long countByIsActiveTrue();
+
+    @Query("SELECT COUNT(DISTINCT b.meetingRoom.roomId) " +
+            "FROM Booking b " +
+            "WHERE b.isActive = true " +
+            "AND b.startTime >= :from " +
+            "AND b.startTime < :to")
+    long countDistinctRoomsBookedBetween(@Param("from") LocalDateTime from,
+                                         @Param("to") LocalDateTime to);
 }
