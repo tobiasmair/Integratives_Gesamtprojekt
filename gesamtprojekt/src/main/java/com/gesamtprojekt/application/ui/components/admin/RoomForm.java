@@ -1,5 +1,6 @@
 package com.gesamtprojekt.application.ui.components.admin;
 
+import com.gesamtprojekt.application.model.Client;
 import com.gesamtprojekt.application.model.Equipment;
 import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.service.implementation.EquipmentService;
@@ -52,6 +53,9 @@ public class RoomForm extends FormLayout {
 
     public final ComboBox<String> status = new ComboBox<>("Status");
 
+    public final TextField roomUsername = new TextField("Display Username");
+    public final TextField roomPassword = new TextField("Display Password");
+
     private final CheckboxGroup<Equipment> equipmentGroup = new CheckboxGroup<>();
 
     public RoomForm(EquipmentService equipmentService, RoomImageStorageService imageStorage) {
@@ -70,6 +74,11 @@ public class RoomForm extends FormLayout {
         setColspan(status, 1);
 
         add(name, capacity, building, floor, status);
+
+        setColspan(roomUsername, 3);
+        setColspan(roomPassword, 3);
+        add(roomUsername, roomPassword);
+
         Hr divider = new Hr();
         setColspan(divider, 6);
 
@@ -109,6 +118,18 @@ public class RoomForm extends FormLayout {
         } else {
             imagePreview.setVisible(false);
         }
+
+        // Prüfen ob neuer Raum -> Raumnamen nicht änderbar
+        boolean isNew = (r.getRoomId() == null);
+        name.setReadOnly(!isNew);
+
+        // Raum-User Daten laden
+        if (r.getRoomUser() != null) {
+            roomUsername.setValue(n(r.getRoomUser().getUsername()));
+            //roomPassword.setValue(n(r.getRoomUser().getPassword()));
+            roomPassword.setValue("********");
+            roomPassword.setReadOnly(false);    // Passwort änderbar
+        }
     }
 
     public void apply(MeetingRoom r) {
@@ -122,10 +143,25 @@ public class RoomForm extends FormLayout {
         r.setImageMime(stagedImageMime);
         r.setImageOriginalName(stagedImageOriginalName);
 
+        // AUTO-LOGIN LOGIK
+        if (r.getRoomUser() == null) {
+            Client newClient = new Client();
+            newClient.setRole("ROOM");
+            newClient.setUserType("ROOM_SCREEN");
+            r.setRoomUser(newClient);
+        }
+
+        // Raum-User Daten setzen
+        r.getRoomUser().setUsername(roomUsername.getValue());
+        r.getRoomUser().setPassword(roomPassword.getValue());
+
+        // Wenn Raum deaktiviert, auch User deaktiviert
+        r.getRoomUser().setIsActive(r.getIsActive());
+
     }
 
     public boolean isValid() {
-        return !name.isEmpty() && capacity.getValue() != null && !building.isEmpty();
+        return !name.isEmpty() && capacity.getValue() != null && !building.isEmpty() && floor.getValue() != null;
     }
 
     private Component equipmentSection() {
@@ -188,6 +224,19 @@ public class RoomForm extends FormLayout {
         floor.setMax(50);
         floor.setHelperText(null);
         floor.setWidthFull();
+
+        roomUsername.setLabel("Username *");
+        roomUsername.setReadOnly(true);
+        roomPassword.setLabel("Password *");
+        roomPassword.setReadOnly(true);
+
+        name.addValueChangeListener(e -> {
+            if (e.getValue() != null && !e.getValue().trim().isEmpty()) {
+                String generatedUser = "room_" + e.getValue().toLowerCase().replaceAll("\\s+", "_");
+                roomUsername.setValue(generatedUser);
+                roomPassword.setValue(generatedUser); // Passwort initial gleich Name
+            }
+        });
 
     }
 
@@ -292,8 +341,8 @@ public class RoomForm extends FormLayout {
         imagePreview.getStyle().set("border-radius", "10px");
     }
 
-
     private String n(String v) {
         return v == null ? "" : v;
     }
+
 }
