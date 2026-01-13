@@ -66,6 +66,11 @@ public class MeetingRoom {
     @Column(name = "image_original_name")
     private String imageOriginalName;
 
+    // Relation zu Client (1:1)
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "clientId", referencedColumnName = "userId")
+    private Client roomUser;
+
     // Relation zu Buchungen (1:n)
     @OneToMany(mappedBy = "meetingRoom")
     private List<Booking> bookings  = new ArrayList<>();
@@ -77,5 +82,6 @@ public class MeetingRoom {
             joinColumns = @JoinColumn(name = "room_id", referencedColumnName = "roomId"),
             inverseJoinColumns = @JoinColumn(name = "equipment_id", referencedColumnName = "equipmentId")
     )
+
     private Set<Equipment> equipment = new LinkedHashSet<>();
 }

@@ -29,7 +29,7 @@ public class UserTableSection extends VerticalLayout {
 
     private final Grid<Client> grid = new Grid<>(Client.class, false);
     private final TextField searchField = new TextField();
-    private final ComboBox<String> roleFilter = new ComboBox<>("", List.of("All Roles", "ADMIN", "USER"));
+    private final ComboBox<String> roleFilter = new ComboBox<>("", List.of("All Roles", "ADMIN", "USER", "ROOM"));
     private final Button addClientBtn = new Button("Add User");
 
     public UserTableSection(ClientService clientService, BookingService bookingService) {
@@ -75,22 +75,36 @@ public class UserTableSection extends VerticalLayout {
         grid.addColumn(Client::getEmail).setHeader("Contact"); // Dummy-Email
         grid.addColumn(Client::getRole).setHeader("Role");
         grid.addColumn(Client::getDepartment).setHeader("Department");
-        grid.addColumn(client ->
-                bookingService.countByClient_UserIdAndIsActiveTrueAndBookingStatusAndEndTimeAfter(client.getUserId())
-        ).setHeader("Bookings");
+        grid.addColumn(client -> {
+            // Für Rooms nicht befüllen
+            if ("ROOM_SCREEN".equals(client.getUserType())) {
+                return "-";
+            }
+            return bookingService.countByClient_UserIdAndIsActiveTrueAndBookingStatusAndEndTimeAfter(client.getUserId());
+        }).setHeader("Bookings");
 
         // Action Buttons
         grid.addComponentColumn(client -> {
             // Edit Button
             Button edit = new Button(VaadinIcon.EDIT.create());
-            edit.addClickListener(e -> {
-                openEditDialog(client);
-            });
+            // Edit für Rooms deaktivieren
+            if ("ROOM_SCREEN".equals(client.getUserType())) {
+                edit.setEnabled(false);
+                edit.setTooltipText("Technical room users cannot be deleted");
+            } else {
+                edit.addClickListener(e -> openEditDialog(client));
+            }
 
             // Delete Button
             Button delete = new Button(VaadinIcon.TRASH.create());
             delete.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_TERTIARY);
-            delete.addClickListener(e -> openDeleteDialog(client));
+            // Delete für Rooms deaktivieren
+            if ("ROOM_SCREEN".equals(client.getUserType())) {
+                delete.setEnabled(false);
+                delete.setTooltipText("Technical room users cannot be deleted");
+            } else {
+                delete.addClickListener(e -> openDeleteDialog(client));
+            }
 
             HorizontalLayout actions = new HorizontalLayout(edit, delete);
 

@@ -47,4 +47,16 @@ public class SecurityService {
                 .orElse(false);
     }
 
+    public boolean isClient() {
+        return getAuthenticatedClient()
+                .map(client -> "CLIENT".equalsIgnoreCase(client.getRole()))
+                .orElse(false);
+    }
+
+    public boolean isRoomUser() {
+        return getAuthenticatedClient()
+                .map(client -> "ROOM".equalsIgnoreCase(client.getRole()))
+                .orElse(false);
+    }
+
 }

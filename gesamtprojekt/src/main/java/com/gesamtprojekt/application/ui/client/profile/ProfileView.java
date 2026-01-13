@@ -55,6 +55,12 @@ public class ProfileView extends VerticalLayout {
         registrationForm.username.setReadOnly(true);
         registrationForm.role.setReadOnly(true);
 
+        if ("ROOM".equals(currentClient.getRole())) {
+            registrationForm.email.setReadOnly(true);
+            registrationForm.department.setReadOnly(true);
+            registrationForm.userType.setReadOnly(true);
+        }
+
         registrationForm.password.setPlaceholder("Simply fill in to modify");
         registrationForm.confirmPassword.setPlaceholder("Confirm password");
     }
@@ -64,16 +70,26 @@ public class ProfileView extends VerticalLayout {
 
         String pass = registrationForm.password.getValue();
 
-        if (registrationForm.isValid()) {
+        boolean isRoom = "ROOM".equals(currentClient.getRole());
+
+        if (isRoom || registrationForm.isValid()) {
             try {
-                currentClient.setEmail(registrationForm.email.getValue());
-                currentClient.setDepartment(registrationForm.department.getValue());
-                currentClient.setUserType(registrationForm.userType.getValue());
+                if (!isRoom) {
+                    currentClient.setEmail(registrationForm.email.getValue());
+                    currentClient.setDepartment(registrationForm.department.getValue());
+                    currentClient.setUserType(registrationForm.userType.getValue());
+                }
 
                 // Speichern
                 if (pass.isEmpty()) {
                     clientService.updateClient(currentClient);
                 } else {
+                    // Bei Room findet Passwort überprüfung hier statt. Ansonsten direkt in isValid()
+                    if (isRoom && !registrationForm.password.getValue().equals(registrationForm.confirmPassword.getValue())) {
+                        Notification.show("Passwords do not match!", 3000, Notification.Position.TOP_CENTER)
+                                .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                        return;
+                    }
                     clientService.updateClientWithPassword(currentClient, pass);
                 }
 

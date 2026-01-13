@@ -123,20 +123,34 @@ public class SideNavbar extends FlexLayout {
         SideNav nav = new SideNav();
         nav.addClassName("sidenav");
 
-        addDefaultItems(nav);
+        if (isClientUser() || isAdminUser()) {
+            addClientSection(nav);
+        }
 
         if (isAdminUser()) {
             addAdminSection(nav);
         }
 
+        if (isRoomUser()) {
+            addRoomUserSection(nav);
+        }
+
         return nav;
+    }
+
+    private boolean isClientUser() {
+        return securityService.isClient();
     }
 
     private boolean isAdminUser() {
         return securityService.isAdmin();
     }
 
-    private void addDefaultItems(SideNav nav) {
+    private boolean isRoomUser() {
+        return securityService.isRoomUser();
+    }
+
+    private void addClientSection(SideNav nav) {
         nav.addItem(new SideNavItem("My Dashboard", "", VaadinIcon.DASHBOARD.create()));
         nav.addItem(new SideNavItem("Calendar", "calendar", VaadinIcon.CALENDAR.create()));
         nav.addItem(new SideNavItem("Browse Rooms", "browserooms", VaadinIcon.SEARCH.create()));
@@ -147,6 +161,10 @@ public class SideNavbar extends FlexLayout {
         nav.addItem(new SideNavItem("Room Management", "roommanagement", VaadinIcon.BUILDING.create()));
         nav.addItem(new SideNavItem("User Management", "usermanagement", VaadinIcon.USERS.create()));
         nav.addItem(new SideNavItem("System Settings", "systemsettings", VaadinIcon.TOOLS.create()));
+    }
+
+    private void addRoomUserSection(SideNav nav) {
+        nav.addItem(new SideNavItem("Room Service Dashboard", "roomservice", VaadinIcon.COGS.create()));
     }
 
     private Footer buildFooter() {
