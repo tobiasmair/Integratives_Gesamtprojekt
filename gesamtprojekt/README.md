@@ -1,51 +1,102 @@
-# Gesamtprojekt
+# 📦 Integratives Gesamtprojekt
 
-This project can be used as a starting point to create your own Vaadin application with Spring Boot.
-It contains all the necessary configuration and some placeholder files to get you started.
+This repository contains the **Integratives Gesamtprojekt** of **Group 1.3** for the program  
+**MCI – Digital Business & Software Engineering**.
 
-## Running the application
+---
 
-Open the project in an IDE. You can download the [IntelliJ community edition](https://www.jetbrains.com/idea/download) if you do not have a suitable IDE already.
-Once opened in the IDE, locate the `Application` class and run the main method using "Debug".
+## 🚀 Project Setup
 
-For more information on installing in various IDEs, see [how to import Vaadin projects to different IDEs](https://vaadin.com/docs/latest/getting-started/import).
+### 1️. Clone the Repository
 
-If you install the Vaadin plugin for IntelliJ, you should instead launch the `Application` class using "Debug using HotswapAgent" to see updates in the Java code immediately reflected in the browser.
-
-## Deploying to Production
-
-The project is a standard Maven project. To create a production build, call 
-
-```
-./mvnw clean package -Pproduction
+```bash 
+git clone https://github.com/tobiasmair/Integratives_Gesamtprojekt.git
+cd gesamtprojekt
 ```
 
-If you have Maven globally installed, you can replace `./mvnw` with `mvn`.
+### 2️. Prerequisites
+Ensure that Docker and Docker Compose are installed and running.
 
-This will build a JAR file with all the dependencies and front-end resources,ready to be run. The file can be found in the `target` folder after the build completes.
-You then launch the application using 
+The project was developed and tested with:
+
+- Docker: 29.1.3
+- Docker Compose: v5.0.0
+
+Check your versions using:
+```bash 
+docker --version
+docker compose version
 ```
-java -jar target/gesamtprojekt-1.0-SNAPSHOT.jar
+
+### 3. Start the Docker Containers
+Run the following command to start the containers:
+```bash 
+docker compose up -d
+```
+Note:
+During the first build, the database image will be created automatically.
+
+(Optional) Check Container Status:
+```bash 
+docker compose ps
+```
+Expected status:
+```Up <n> seconds (healthy)```
+
+
+(Optional) Verify Database Access:
+```bash 
+docker exec -it gesamtprojekt_db psql -U postgres -d postgres_database
+```
+If successful, you should see:
+```postgres_database=#```
+Exit the SQL shell with:
+```bash 
+\q
 ```
 
-## Project structure
+## ▶️ Running the Application
+in the  project folder ```gesamtprojekt```, start the application using:
+  ```bash
+  ./mvnw spring-boot:run
+  ```
 
-- `MainLayout.java` in `src/main/java` contains the navigation setup (i.e., the
-  side/top bar and the main menu). This setup uses
-  [App Layout](https://vaadin.com/docs/components/app-layout).
-- `views` package in `src/main/java` contains the server-side Java views of your application.
-- `views` folder in `src/main/frontend` contains the client-side JavaScript views of your application.
-- `themes` folder in `src/main/frontend` contains the custom CSS styles.
+### Running the application
+in the  project folder ```gesamtprojekt```, run
+  ```bash
+  ./mvnw spring-boot:run
+  ```
 
-## Useful links
+⚠️ Permission Issue:
 
-- Read the documentation at [vaadin.com/docs](https://vaadin.com/docs).
-- Follow the tutorial at [vaadin.com/docs/latest/tutorial/overview](https://vaadin.com/docs/latest/tutorial/overview).
-- Create new projects at [start.vaadin.com](https://start.vaadin.com/).
-- Search UI components and their usage examples at [vaadin.com/docs/latest/components](https://vaadin.com/docs/latest/components).
-- View use case applications that demonstrate Vaadin capabilities at [vaadin.com/examples-and-demos](https://vaadin.com/examples-and-demos).
-- Build any UI without custom CSS by discovering Vaadin's set of [CSS utility classes](https://vaadin.com/docs/styling/lumo/utility-classes). 
-- Find a collection of solutions to common use cases at [cookbook.vaadin.com](https://cookbook.vaadin.com/).
-- Find add-ons at [vaadin.com/directory](https://vaadin.com/directory).
-- Ask questions on [Stack Overflow](https://stackoverflow.com/questions/tagged/vaadin) or join our [Forum](https://vaadin.com/forum).
-- Report issues, create pull requests in [GitHub](https://github.com/vaadin).
+If you encounter:```Permission denied```
+
+Fix it by making the wrapper executable:
+```bash
+chmod u+x mvnw
+```
+
+
+## 🛑 Stopping Containers & Resetting the Database
+
+### Stop the Database Container
+```bash
+docker stop gesamtprojekt_db
+```
+- Or stop it manually via Docker Desktop.
+
+### Stop and Remove Containers
+```bash
+docker compose down
+```
+
+### Optional Cleanup Flags
+- Remove volumes
+```bash
+docker compose down -v
+```
+
+- Remove database images:
+```bash
+docker compose down --rmi all
+```
