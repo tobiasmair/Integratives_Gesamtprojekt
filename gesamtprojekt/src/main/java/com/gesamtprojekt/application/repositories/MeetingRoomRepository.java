@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface MeetingRoomRepository extends JpaRepository<MeetingRoom, Long> {
 
@@ -36,10 +37,13 @@ public interface MeetingRoomRepository extends JpaRepository<MeetingRoom, Long> 
 
     // Query für calendar view: verfügbare Räume mit bestimmten Eigenschaften
     @EntityGraph(attributePaths = "equipment")
-    @Query("SELECT r FROM MeetingRoom r WHERE r.isActive = true AND r.status = 'ACTIVE' " +
+    @Query("SELECT DISTINCT r FROM MeetingRoom r " +
+            "WHERE r.isActive = true AND r.status = 'ACTIVE' " +
             "AND (:building = 'All Buildings' OR r.location = :building) " +
             "AND (:floor IS NULL OR r.floor = :floor) " +
             "AND (:minCap = 0 OR r.capacity >= :minCap) " +
+            "AND (:equipmentCount = 0 OR " +
+            "    (SELECT COUNT(e) FROM r.equipment e WHERE e.description IN :equipmentSet) = :equipmentCount) " +
             "AND r.roomId NOT IN (" +
             "    SELECT b.meetingRoom.roomId FROM Booking b " +
             "    WHERE b.isActive = true AND b.startTime < :endTime AND b.endTime > :startTime" +
@@ -49,7 +53,9 @@ public interface MeetingRoomRepository extends JpaRepository<MeetingRoom, Long> 
             @Param("endTime") LocalDateTime endTime,
             @Param("building") String building,
             @Param("floor") Integer floor,
-            @Param("minCap") int minCap);
+            @Param("minCap") int minCap,
+            @Param("equipmentSet") Set<String> equipmentSet,
+            @Param("equipmentCount") long equipmentCount);
 
     // Standard-Filter: Räume nach Status (z. B. ACTIVE)
     @EntityGraph(attributePaths = "equipment")

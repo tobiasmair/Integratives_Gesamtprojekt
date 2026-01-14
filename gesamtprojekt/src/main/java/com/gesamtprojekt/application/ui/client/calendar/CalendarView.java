@@ -3,6 +3,7 @@ package com.gesamtprojekt.application.ui.client.calendar;
 import com.gesamtprojekt.application.events.RoomChangedBroadcaster;
 import com.gesamtprojekt.application.security.SecurityService;
 import com.gesamtprojekt.application.service.implementation.BookingService;
+import com.gesamtprojekt.application.service.implementation.EquipmentService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.gesamtprojekt.application.ui.client.MainLayout;
 import com.gesamtprojekt.application.ui.components.calendar.CalendarControlsBar;
@@ -15,6 +16,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
 import jakarta.annotation.security.PermitAll;
 
+import java.util.Set;
+
 @Route(value = "calendar", layout = MainLayout.class)
 @PageTitle("Calendar")
 @PermitAll
@@ -25,12 +28,12 @@ public class CalendarView extends VerticalLayout {
     private CalendarRoomsSection rooms;
 
     public CalendarView(MeetingRoomService meetingRoomService, BookingService bookingService,
-                        SecurityService securityService) {
+                        SecurityService securityService, EquipmentService equipmentService) {
         setSizeFull();
         setPadding(true);
         setSpacing(true);
 
-        controls = new CalendarControlsBar();
+        controls = new CalendarControlsBar(equipmentService);
         rooms = new CalendarRoomsSection(meetingRoomService, bookingService, securityService);
 
         // Initiales laden der Daten
@@ -39,7 +42,8 @@ public class CalendarView extends VerticalLayout {
                 controls.getEndDateTime(),
                 controls.getBuilding(),
                 controls.getFloor(),
-                controls.getCapacity()
+                controls.getCapacity(),
+                controls.getEquipment()
         );
 
         controls.addFilterChangedListener(e -> {
@@ -48,7 +52,8 @@ public class CalendarView extends VerticalLayout {
                     controls.getEndDateTime(),
                     controls.getBuilding(),
                     controls.getFloor(),
-                    controls.getCapacity()
+                    controls.getCapacity(),
+                    controls.getEquipment()
             );
         });
 
@@ -69,7 +74,8 @@ public class CalendarView extends VerticalLayout {
                         controls.getEndDateTime(),
                         controls.getBuilding(),
                         controls.getFloor(),
-                        controls.getCapacity()
+                        controls.getCapacity(),
+                        controls.getEquipment()
                 );
             });
         });

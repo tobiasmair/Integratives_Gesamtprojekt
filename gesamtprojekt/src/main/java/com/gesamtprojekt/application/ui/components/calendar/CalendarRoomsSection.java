@@ -13,6 +13,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 public class CalendarRoomsSection extends VerticalLayout {
 
@@ -51,7 +52,7 @@ public class CalendarRoomsSection extends VerticalLayout {
     }
      */
 
-    public void reload(LocalDateTime start, LocalDateTime end, String b, String f, String cap) {
+    public void reload(LocalDateTime start, LocalDateTime end, String b, String f, String cap, Set<String> equip) {
         grid.removeAll();
 
         if (end.isBefore(start) || end.isEqual(start)) {
@@ -62,7 +63,7 @@ public class CalendarRoomsSection extends VerticalLayout {
         }
 
         // Abfrage DB
-        List<MeetingRoom> rooms = meetingRoomService.findCalendarRooms(start, end, b, f, cap);
+        List<MeetingRoom> rooms = meetingRoomService.findCalendarRooms(start, end, b, f, cap, equip);
 
         if (rooms.isEmpty()) {
             grid.add(new Span("No rooms available for the selected filters."));
