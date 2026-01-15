@@ -36,7 +36,7 @@ public class RoomTableSection extends VerticalLayout {
     private final Grid<MeetingRoom> grid = new Grid<>(MeetingRoom.class, false);
     private final TextField searchField = new TextField();
     private final ComboBox<String> buildingFilter =
-            new ComboBox<>("", List.of("All Buildings", "MCI I", "MCI II", "MCI III"));
+            new ComboBox<>("", List.of("All Buildings", "MCI I", "MCI II", "MCI III", "MCI IV", "MCI V"));
     private final ComboBox<String> statusFilter =
             new ComboBox<>("", List.of("All Status", "ACTIVE", "INACTIVE"));
     private final Button addRoomBtn = new Button("Add Room");

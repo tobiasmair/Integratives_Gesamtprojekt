@@ -89,7 +89,7 @@ public class CalendarControlsBar extends VerticalLayout {
     }
 
     private FormLayout buildFiltersRow() {
-        building = combo("Building", List.of("All Buildings", "MCI I", "MCI II", "MCI III"));
+        building = combo("Building", List.of("All Buildings", "MCI I", "MCI II", "MCI III", "MCI IV", "MCI V"));
         floor = combo("Floor", List.of("Any Floor", "1", "2", "3"));
         capacity = combo("Min Capacity", List.of("Any", "5+", "10+", "20+", "50+"));
 
