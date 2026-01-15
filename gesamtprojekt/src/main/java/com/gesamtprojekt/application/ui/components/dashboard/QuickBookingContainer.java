@@ -22,9 +22,9 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.component.orderedlayout.Scroller;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -48,8 +48,6 @@ public class QuickBookingContainer extends Div {
     private final TimePicker startTime = new TimePicker("Start");
     private final TimePicker endTime = new TimePicker("End");
     private final TextArea purposeField = new TextArea("Meeting purpose");
-    private final ComboBox<String> reminderField = new ComboBox<String>("Reminder");
-    private final ComboBox<Integer> attendeesField = new ComboBox<Integer>("Nr. of Attendees");
 
     private H3 title;
     private Button bookButton;
@@ -73,18 +71,28 @@ public class QuickBookingContainer extends Div {
         content.setPadding(false);
         content.setSpacing(false);
         content.setWidthFull();
+        content.setHeightFull();
 
         this.title = createHeader();
         this.bookButton = createBookButton();
 
+        var dateTimeRow = createDateTimeRow();
+        var roomsSection = createRoomsSection();
+        var purposeField = createMeetingPurposeField();
+
         //content.add(createHeader());
         content.add(title);
-        content.add(createDateTimeRow());
-        content.add(createRoomsSection());
-        content.add(createMeetingPurposeField());
-        content.add(createReminderRow());
+        content.add(dateTimeRow);
+        content.add(roomsSection);
+        content.add(purposeField);
         //content.add(createBookButton());
         content.add(bookButton);
+
+        content.setFlexGrow(0, title);
+        content.setFlexGrow(0, dateTimeRow);
+        content.setFlexGrow(1, roomsSection);
+        content.setFlexGrow(0, purposeField);
+        content.setFlexGrow(0, bookButton);
 
         // Initialwerte setzen
         LocalTime nowRounded = roundToNextHalfHour(LocalTime.now());
@@ -116,13 +124,23 @@ public class QuickBookingContainer extends Div {
     private Div createRoomsSection() {
         var box = new Div();
         box.addClassName("quick-rooms-box");
+        box.getStyle()
+            .set("display", "flex")
+            .set("flex-direction", "column")
+            .set("flex-grow", "1")
+            .set("overflow", "hidden");
 
         //tabs.addSelectedChangeListener(e -> onTabChanged());
         tabs.addSelectedChangeListener(e -> loadRooms());
         roomGroup.setLabel("Select a room");
         roomGroup.setWidthFull();
 
-        box.add(tabs, roomGroup);
+        Scroller scroller = new Scroller(roomGroup);
+        scroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
+        scroller.setWidthFull();
+        scroller.getStyle().set("flex-grow", "1");
+
+        box.add(tabs, scroller);
         return box;
     }
 
@@ -241,41 +259,6 @@ public class QuickBookingContainer extends Div {
         return purposeField;
     }
 
-    private ComboBox<String> createReminderField() {
-        reminderField.setItems(
-                "No reminder",
-                "15 min before",
-                "30 min before",
-                "60 min before",
-                "2 hours before",
-                "1 day before"
-        );
-        reminderField.setValue("15 min before");
-        reminderField.setWidthFull();
-        reminderField.setClearButtonVisible(true);
-        return reminderField;
-    }
-
-    private ComboBox<Integer> createAttendeesField() {
-        attendeesField.setItems(1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20);
-        attendeesField.setValue(1);
-        attendeesField.setWidthFull();
-        return attendeesField;
-    }
-
-    private HorizontalLayout createReminderRow() {
-        var reminder = createReminderField();
-        var attendees = createAttendeesField();
-
-        var row = new HorizontalLayout(reminder, attendees);
-        row.setWidthFull();
-        row.setSpacing(true);
-        row.setFlexGrow(1, reminder);
-        row.setFlexGrow(1, attendees);
-
-        return row;
-    }
-
     private Button createBookButton() {
         var btn = new Button("Book the room");
         btn.setWidthFull();
@@ -305,8 +288,6 @@ public class QuickBookingContainer extends Div {
 
             booking.setPurpose(purposeField.getValue());  // purpose
 
-            booking.setAttendees(attendeesField.getValue());
-
             booking.setBookingStatus("CONFIRMED");  // status
 
             bookingService.createBooking(booking);
@@ -322,8 +303,6 @@ public class QuickBookingContainer extends Div {
             startTime.setValue(nowRounded);
             endTime.setValue(nowRounded.plusHours(1));
             purposeField.clear();
-            reminderField.setValue("15 min before");
-            attendeesField.setValue(1);
             loadRooms();
 
         } catch (Exception ex) {
@@ -369,7 +348,6 @@ public class QuickBookingContainer extends Div {
         startTime.setValue(booking.getStartTime().toLocalTime());
         endTime.setValue(booking.getEndTime().toLocalTime());
         purposeField.setValue(booking.getPurpose() != null ? booking.getPurpose() : "");
-        attendeesField.setValue(booking.getAttendees() != null ? booking.getAttendees() : 1);
 
         // Räume laden (aktuellen Raum berücksichtigen)
         List<MeetingRoom> availableRooms = loadAvailableRooms();
@@ -400,7 +378,6 @@ public class QuickBookingContainer extends Div {
         b.setPurpose(purposeField.getValue());
         b.setStartTime(datePicker.getValue().atTime(startTime.getValue()));
         b.setEndTime(datePicker.getValue().atTime(endTime.getValue()));
-        b.setAttendees(attendeesField.getValue());
         b.setMeetingRoom(roomGroup.getValue());
     }
 

@@ -15,6 +15,8 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -37,8 +39,6 @@ public class RoomBookingDialog extends Dialog {
     private final TimePicker startTime = new TimePicker("Start");
     private final TimePicker endTime = new TimePicker("End");
     private final TextArea purposeField = new TextArea("Meeting purpose");
-    private final ComboBox<String> reminderField = new ComboBox<>("Reminder");
-    private final ComboBox<Integer> attendeesField = new ComboBox<>("Nr. of Attendees");
 
     public RoomBookingDialog(Long roomId, String roomName, BookingService bookingService,
                              MeetingRoomService meetingRoomService, SecurityService securityService) {
@@ -47,9 +47,11 @@ public class RoomBookingDialog extends Dialog {
         this.meetingRoomService = meetingRoomService;
         this.securityService = securityService;
 
-        setWidth("600px");
         setCloseOnEsc(true);
         setCloseOnOutsideClick(false);
+        getElement().getStyle()
+            .set("overflow", "visible")
+            .set("max-height", "none");
 
         add(createContent(roomName));
         initializeFields();
@@ -57,54 +59,34 @@ public class RoomBookingDialog extends Dialog {
 
     private VerticalLayout createContent(String roomName) {
         VerticalLayout content = new VerticalLayout();
-        content.setPadding(false);
+        content.setPadding(true);
         content.setSpacing(true);
 
         H2 header = new H2("Book Room: " + (roomName != null ? roomName : ""));
-        header.getStyle().set("margin", "0 0 20px 0");
+        header.getStyle().set("margin", "0 0 10px 0");
 
-        HorizontalLayout dateTimeRow = new HorizontalLayout(datePicker, startTime, endTime);
-        dateTimeRow.setWidthFull();
+        datePicker.setWidthFull();
+
+        HorizontalLayout timeRow = new HorizontalLayout(startTime, endTime);
+        timeRow.setWidthFull();
+        timeRow.setDefaultVerticalComponentAlignment(Alignment.BASELINE);
 
         purposeField.setPlaceholder("Brief description of the meeting");
         purposeField.setWidthFull();
-        purposeField.setMinHeight("80px");
+        purposeField.setHeight("60px");
+        purposeField.getStyle().set("resize", "none");
 
-        reminderField.setItems(
-                "No reminder",
-                "15 min before",
-                "30 min before",
-                "60 min before",
-                "2 hours before",
-                "1 day before"
-        );
-        reminderField.setValue("15 min before");
-        reminderField.setWidthFull();
-        reminderField.setClearButtonVisible(true);
-
-        attendeesField.setItems(1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20);
-        attendeesField.setValue(1);
-        attendeesField.setWidthFull();
-
-        HorizontalLayout reminderRow = new HorizontalLayout(reminderField, attendeesField);
-        reminderRow.setWidthFull();
-        reminderRow.setSpacing(true);
-        reminderRow.setFlexGrow(1, reminderField);
-        reminderRow.setFlexGrow(1, attendeesField);
-
-        Button bookButton = new Button("Book the room", e -> saveBooking());
+        Button bookButton = new Button("Book", e -> saveBooking());
         bookButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        bookButton.setWidthFull();
 
         Button cancelButton = new Button("Cancel", e -> close());
-        cancelButton.setWidthFull();
 
         HorizontalLayout buttonRow = new HorizontalLayout(cancelButton, bookButton);
         buttonRow.setWidthFull();
-        buttonRow.setFlexGrow(1, cancelButton);
-        buttonRow.setFlexGrow(1, bookButton);
+        buttonRow.setJustifyContentMode(JustifyContentMode.END);
 
-        content.add(header, dateTimeRow, purposeField, reminderRow, buttonRow);
+        content.add(header, datePicker, timeRow, purposeField, buttonRow);
+        content.setWidth("450px");
         return content;
     }
 
@@ -149,7 +131,6 @@ public class RoomBookingDialog extends Dialog {
             booking.setStartTime(start);
             booking.setEndTime(end);
             booking.setPurpose(purposeField.getValue());
-            booking.setAttendees(attendeesField.getValue());
             booking.setBookingStatus("CONFIRMED");
 
             bookingService.createBooking(booking);
