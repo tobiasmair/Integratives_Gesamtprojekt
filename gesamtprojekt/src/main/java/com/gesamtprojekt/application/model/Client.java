@@ -29,13 +29,13 @@ public class Client {
     @Column(name = "email", unique = true)
     private String email;
 
-    @Column(name = "role")  // ADMIN, USER
+    @Column(name = "role")  // ADMIN, USER, ROOM
     private String role;
 
     @Column(name = "department")    // DIBSE, MCI 1, MCI 2, MCI 3
     private String department;
 
-    @Column(name = "userType")  // LECTURER, STUDENT, EXTERNAL
+    @Column(name = "userType")  // LECTURER, STUDENT, EXTERNAL, ROOM_SCREEN
     private String userType;
 
     @Column(name = "isActive")

@@ -1,5 +1,6 @@
 package com.gesamtprojekt.application.service.implementation;
 
+import com.gesamtprojekt.application.model.Client;
 import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.repositories.MeetingRoomRepository;
 import com.gesamtprojekt.application.service.MeetingRoomServiceInterface;
@@ -17,6 +18,7 @@ import java.util.Set;
 public class MeetingRoomService implements MeetingRoomServiceInterface {
 
     private final MeetingRoomRepository meetingRoomRepository;
+    private final ClientService clientService;
 
     // Aktive Räume finden
     public List<MeetingRoom> findAvailableRooms() {
@@ -57,8 +59,7 @@ public class MeetingRoomService implements MeetingRoomServiceInterface {
         String q = (search != null) ? search : "";
 
         if (q.isEmpty() && b.isEmpty() && s.isEmpty()) {
-            // Default: nur ACTIVE Räume
-            return meetingRoomRepository.findByIsActiveTrueAndStatus("ACTIVE");
+            return meetingRoomRepository.findByIsActiveTrue();
         }
         // Angepasste Suche mit Query
         return meetingRoomRepository.searchByFilters(q, b, s);
@@ -67,6 +68,21 @@ public class MeetingRoomService implements MeetingRoomServiceInterface {
     // Raum erstellen (Default-Status setzen wenn leer)
     @Override
     public MeetingRoom createRoom(MeetingRoom room) {
+        if (room.getRoomUser() != null && room.getRoomUser().getUserId() == null) {
+            Client tempUser = room.getRoomUser();
+
+            Client persistedUser = clientService.createClient(
+                    tempUser.getUsername(),
+                    tempUser.getPassword(),
+                    tempUser.getUsername() + "@system.local", // Dummy Email
+                    tempUser.getDepartment(),
+                    tempUser.getUserType(),
+                    tempUser.getRole()
+            );
+
+            room.setRoomUser(persistedUser);
+        }
+
         if (room.getStatus() == null || room.getStatus().isBlank()) {
             room.setStatus("ACTIVE");
         }
@@ -75,15 +91,37 @@ public class MeetingRoomService implements MeetingRoomServiceInterface {
 
     // Raum aktualisieren (save)
     @Override
+    @Transactional
     public void updateRoom(MeetingRoom room) {
+        if (room.getRoomUser() != null) {
+            Client user = room.getRoomUser();
+            String currentInput = user.getPassword();
+
+            // Passwort nur bei Änderung effektiv aktualisieren
+            if (currentInput != null && !currentInput.equals("********") && !currentInput.isEmpty()) {
+                clientService.updateClientWithPassword(user, currentInput);
+            }
+        }
         meetingRoomRepository.save(room);
     }
 
     // Soft delete (isActive false)
     @Override
+    @Transactional
     public void deleteRoom(MeetingRoom room) {
-        room.setIsActive(false);
-        meetingRoomRepository.save(room);
+        // Raum mit User aus DB aktuell laden
+        MeetingRoom persistentRoom = meetingRoomRepository.findById(room.getRoomId())
+                .orElseThrow(() -> new RuntimeException("Room not found: " + room.getRoomId()));
+
+        // Raum deaktivieren
+        persistentRoom.setIsActive(false);
+
+        // Verknüpften User deaktivieren
+        if (persistentRoom.getRoomUser() != null) {
+            clientService.deleteClient(persistentRoom.getRoomUser());
+        }
+
+        meetingRoomRepository.save(persistentRoom);
     }
 
     // Statistik: Anzahl Räume

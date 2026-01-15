@@ -80,7 +80,7 @@ public interface MeetingRoomRepository extends JpaRepository<MeetingRoom, Long> 
             @Param("status") String status
     );
 
-    @EntityGraph(attributePaths = "equipment")
+    @EntityGraph(attributePaths = {"equipment", "roomUser"})
     Optional<MeetingRoom> findWithEquipmentByRoomId(Long roomId);
 
     @Override

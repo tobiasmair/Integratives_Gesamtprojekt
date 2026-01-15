@@ -63,7 +63,7 @@ public class RoomTableSection extends VerticalLayout {
         buildingFilter.setValue("All Buildings");
         buildingFilter.addValueChangeListener(e -> updateList());
 
-        statusFilter.setValue("All Status");
+        statusFilter.setValue("ACTIVE");
         statusFilter.addValueChangeListener(e -> updateList());
 
         addRoomBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
