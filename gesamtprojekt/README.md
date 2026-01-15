@@ -15,6 +15,18 @@ cd gesamtprojekt
 ```
 
 ### 2️. Prerequisites
+**Java**
+
+The project is running with Java 21.
+
+Check your version using:
+```bash 
+java --version
+```
+
+
+**Docker**
+
 Ensure that Docker and Docker Compose are installed and running.
 
 The project was developed and tested with:
