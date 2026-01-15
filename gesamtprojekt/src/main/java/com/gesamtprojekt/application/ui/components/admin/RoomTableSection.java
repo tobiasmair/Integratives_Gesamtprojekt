@@ -1,5 +1,6 @@
 package com.gesamtprojekt.application.ui.components.admin;
 
+import com.gesamtprojekt.application.events.RoomChangedBroadcaster;
 import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.service.implementation.EquipmentService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
@@ -133,6 +134,7 @@ public class RoomTableSection extends VerticalLayout {
         meetingRoomService.updateRoom(room);
         updateList();
         fireEvent(new StatsChangedEvent(this)); // Container benachrichtigen
+        RoomChangedBroadcaster.broadcast(new RoomChangedBroadcaster.RoomChangedEvent("Room updated"));
         dialog.close();
 
         Notification.show("Room updated.", 3000, Notification.Position.TOP_CENTER)
@@ -161,6 +163,7 @@ public class RoomTableSection extends VerticalLayout {
 
         // Container benachrichtigen
         fireEvent(new StatsChangedEvent(this));
+        RoomChangedBroadcaster.broadcast(new RoomChangedBroadcaster.RoomChangedEvent("Room deleted"));
 
         dialog.close();
 
@@ -193,6 +196,7 @@ public class RoomTableSection extends VerticalLayout {
             meetingRoomService.createRoom(room);
             updateList();
             fireEvent(new StatsChangedEvent(this)); // Container benachrichtigen
+            RoomChangedBroadcaster.broadcast(new RoomChangedBroadcaster.RoomChangedEvent("Room created"));
             dialog.close();
 
             Notification.show("Room created.", 3000, Notification.Position.TOP_CENTER)

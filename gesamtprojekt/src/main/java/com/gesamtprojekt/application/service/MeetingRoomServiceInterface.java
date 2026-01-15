@@ -15,7 +15,7 @@ public interface MeetingRoomServiceInterface {
     // Raum aktualisieren
     void updateRoom(MeetingRoom room);
 
-    // Raum löschen (häufig Soft-Delete)
+    // Raum löschen
     void deleteRoom(MeetingRoom room);
 
     // Statistiken
