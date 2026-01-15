@@ -61,12 +61,6 @@ in the  project folder ```gesamtprojekt```, start the application using:
   ./mvnw spring-boot:run
   ```
 
-### Running the application
-in the  project folder ```gesamtprojekt```, run
-  ```bash
-  ./mvnw spring-boot:run
-  ```
-
 ⚠️ Permission Issue:
 
 If you encounter:```Permission denied```
