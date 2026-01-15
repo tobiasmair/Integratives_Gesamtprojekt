@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict m7k88nbBUPsQLxHmH3KdQe7qTmEhwFtdJry7rl9udgxHcpCL3wWuuWWYYguZLnc
+\restrict Njd0tnGbx1IR4D6q22OHqEvtsSvX4vvkfIxC8BOA3cLDz9ct89KZDEuviYQcvpc
 
 -- Dumped from database version 16.11 (Debian 16.11-1.pgdg13+1)
 -- Dumped by pg_dump version 16.11 (Debian 16.11-1.pgdg13+1)
@@ -196,8 +196,35 @@ COPY public.booking (booking_id, attendees, booking_status, check_in_time, end_t
 
 COPY public.client (user_id, department, email, is_active, password, role, user_type, username) FROM stdin;
 1	DiBSE	tobi@mail.com	t	$2a$10$L6Ns1J1sBYLwUGc2DHGbUOjcm5RyZ4J7XbnhvBXer/n7IfAzs8tZu	USER	STUDENT	tobi
-2	IT-Services	tobiadmin@mail.com	t	$2a$10$sAgSAZVm9dUwb9W2gdrcD.F2/ZROw6NbWaOxpEJcErEehT6J/Eu5y	USER	STAFF	tobiadmin
 3	MCI 1	tobi2@mail.com	t	$2a$10$bM5CFj76wSCOjOlHexzEButyJeoVTyri8mSIJxuQq55H.FVizxRKO	USER	EXTERNAL	tobi2
+2	IT-Services	tobiadmin@mail.com	t	$2a$10$sAgSAZVm9dUwb9W2gdrcD.F2/ZROw6NbWaOxpEJcErEehT6J/Eu5y	ADMIN	STAFF	tobiadmin
+4	IT-Services	nico@mail.com	t	$2a$10$2/DEkdQUJ52eEjk/t775b.Jb.0lJEVw49C609n.jMOdueamIqM5NC	ADMIN	STAFF	nico
+5	\N	room_234@system.local	t	$2a$10$/X6hvDMnymJgipzdYkgxfej96bjMthk1SZa78MNu86Pp93NMl/Wye	ROOM	ROOM_SCREEN	room_234
+6	\N	room_301/302@system.local	t	$2a$10$aAmXW4i8MxbjZiMXq9tMXOiLnF9esl7E9/TZkcy.dC0r0FYkRgtgK	ROOM	ROOM_SCREEN	room_301/302
+7	\N	room_303@system.local	t	$2a$10$M4uD7agD2oTbRoj/XO7Tte0.4skRGptL2HlUZjUAoPKUNUfAg98w2	ROOM	ROOM_SCREEN	room_303
+8	\N	room_304@system.local	t	$2a$10$pPpXetiq1aeH5tfeSGpd.e8ylawfLCg/HcPWCuLe38c0c520XZVRi	ROOM	ROOM_SCREEN	room_304
+9	\N	room_305@system.local	t	$2a$10$7cL7kTqXc0sqAayGUVlx2.Ny9Sl3y8nqh5MDRZSVMuvnYvka1/nva	ROOM	ROOM_SCREEN	room_305
+10	\N	room_306@system.local	t	$2a$10$8N6KoEVpw1FovPnjE5FixexMimjvJ6B4A/h8iR.IXNxBC5Q857Tni	ROOM	ROOM_SCREEN	room_306
+11	\N	room_307@system.local	t	$2a$10$d/mJjGNnLMa/4r5nquHu0OS6crugB6Aji0ShJyiN2MV1Hcfh9QdWG	ROOM	ROOM_SCREEN	room_307
+12	\N	room_308@system.local	t	$2a$10$ISxmCkGP7CvdWmntR5S/IeVfN.7Cs8k9Q2FvKuOiP/g2.x0YRvmWy	ROOM	ROOM_SCREEN	room_308
+13	\N	room_309@system.local	t	$2a$10$Vao.Uy1IpHyZ/VYWO8hM9eJpvd6xvdv5KTTHT1jYXWRmX2H4UC49u	ROOM	ROOM_SCREEN	room_309
+14	\N	room_310@system.local	t	$2a$10$C/4SiulxZsCoNl7paEnOzOM/9Vey.T9gJTKCY0gHFVNvHmxNGkNsu	ROOM	ROOM_SCREEN	room_310
+15	\N	room_401/402@system.local	t	$2a$10$r1M8PFgMWRCtZK0xAC1JYuQOOTZ8CLSx0GbaKFaLQhzs5sVAN/ava	ROOM	ROOM_SCREEN	room_401/402
+16	\N	room_403@system.local	t	$2a$10$83Gv1XCyF6qZFM5rYAxQReGrW/6rAFnu47lLDxJWqrtMEVdRpvzcC	ROOM	ROOM_SCREEN	room_403
+17	\N	room_404@system.local	t	$2a$10$sM8dQ3dNghj/4QcckfHF3Ol6KjKavxLFHplL.odL0f3pY2scSTU5C	ROOM	ROOM_SCREEN	room_404
+18	\N	room_405@system.local	t	$2a$10$buR3.JTtKVrUlmqEd6lLmuJVoe6fkvs5j1ZoPv4MyqIBTRjYGa6Ly	ROOM	ROOM_SCREEN	room_405
+19	\N	room_406@system.local	t	$2a$10$BW81QUdTvo73MJSvuJPOUuY9rDQeBLqhZNYrh/eSqSgPe1OjNaNLK	ROOM	ROOM_SCREEN	room_406
+20	\N	room_051/052/053@system.local	t	$2a$10$hhjpyByZKOoPFhQRUSfl4.CB9jX0ktPa.zev0gnjpiWdlrgkr.MQW	ROOM	ROOM_SCREEN	room_051/052/053
+21	\N	room_162@system.local	t	$2a$10$vTUH43ZXMRQjJ9nHGyHYdedu7591nMo.fgitNqXyE/PRvYsV1w72u	ROOM	ROOM_SCREEN	room_162
+22	\N	room_163@system.local	t	$2a$10$vN1DdtqXK29aO0Wwbmil8uau9cO0Y2ed/i2JKFPUUjPHgwoQgK46q	ROOM	ROOM_SCREEN	room_163
+23	\N	room_164@system.local	t	$2a$10$Jk56SzebWHtg26pLclYH8uw83HzKWZ0l06aPhDEHjWZot7caOaFEa	ROOM	ROOM_SCREEN	room_164
+24	\N	room_551/552@system.local	t	$2a$10$rgl6mw3rxWxNwKrK9JhN4.JmDtnCkM5gXnmTUZvAsvNP.LpO.tP7W	ROOM	ROOM_SCREEN	room_551/552
+25	\N	room_011@system.local	t	$2a$10$UIMMlJCSyGsgg9UX/UsviO5MY0EPVHlA218YOmDHVFzyXfh5QkhCa	ROOM	ROOM_SCREEN	room_011
+26	\N	room_012@system.local	t	$2a$10$7m.O0amaSejJw/5OmFdjQOLe71y5lTAw6SpVTncrWbdfsOOrvbq9y	ROOM	ROOM_SCREEN	room_012
+27	\N	room_013@system.local	t	$2a$10$kTd0iTpMMMs84zlzx6Z3M.ab7w68g8K8T2d7R8CBiXMkRtHS7IIn6	ROOM	ROOM_SCREEN	room_013
+28	\N	room_014@system.local	t	$2a$10$HqoyqTi0e.QShMY0PfRuE.tBbHVGG1V9R1AMJwwbJqeqPbUA5s29O	ROOM	ROOM_SCREEN	room_014
+29	\N	room_111@system.local	t	$2a$10$tMGa9HCEOo7bvYY5atA9Y.77URoyQDpvI7OS9qiU8liGGhFVU6usC	ROOM	ROOM_SCREEN	room_111
+30	\N	room_112/113@system.local	t	$2a$10$bBzXiK10BRobXXCJ6upP7.d7/on6GoAmc.v4gnfcDymWQ7/V3jHsW	ROOM	ROOM_SCREEN	room_112/113
 \.
 
 
@@ -214,6 +241,32 @@ COPY public.equipment (equipment_id, description) FROM stdin;
 --
 
 COPY public.meeting_room (room_id, capacity, floor, has_door_control, has_light_control, has_ventilation_control, image_mime, image_original_name, image_path, is_active, location, name, status, client_id) FROM stdin;
+1	26	2	\N	\N	\N	\N	\N	\N	t	MCI I	234	ACTIVE	5
+2	132	3	\N	\N	\N	\N	\N	\N	t	MCI I	301/302	ACTIVE	6
+3	54	3	\N	\N	\N	\N	\N	\N	t	MCI I	303	ACTIVE	7
+4	54	3	\N	\N	\N	\N	\N	\N	t	MCI I	304	ACTIVE	8
+5	60	3	\N	\N	\N	\N	\N	\N	t	MCI I	305	ACTIVE	9
+6	56	3	\N	\N	\N	\N	\N	\N	t	MCI I	306	ACTIVE	10
+7	32	3	\N	\N	\N	\N	\N	\N	t	MCI I	307	ACTIVE	11
+8	18	3	\N	\N	\N	\N	\N	\N	t	MCI I	308	ACTIVE	12
+9	45	3	\N	\N	\N	\N	\N	\N	t	MCI I	309	ACTIVE	13
+10	32	3	\N	\N	\N	\N	\N	\N	t	MCI I	310	ACTIVE	14
+11	20	4	\N	\N	\N	\N	\N	\N	t	MCI I	401/402	ACTIVE	15
+12	28	4	\N	\N	\N	\N	\N	\N	t	MCI I	403	ACTIVE	16
+13	28	4	\N	\N	\N	\N	\N	\N	t	MCI I	404	ACTIVE	17
+14	28	4	\N	\N	\N	\N	\N	\N	t	MCI I	405	ACTIVE	18
+15	32	4	\N	\N	\N	\N	\N	\N	t	MCI I	406	ACTIVE	19
+16	100	0	\N	\N	\N	\N	\N	\N	t	MCI II	051/052/053	ACTIVE	20
+17	8	1	\N	\N	\N	\N	\N	\N	t	MCI II	162	ACTIVE	21
+18	8	1	\N	\N	\N	\N	\N	\N	t	MCI II	163	ACTIVE	22
+19	12	1	\N	\N	\N	\N	\N	\N	t	MCI II	164	ACTIVE	23
+20	94	5	\N	\N	\N	\N	\N	\N	t	MCI II	551/552	ACTIVE	24
+21	54	0	\N	\N	\N	\N	\N	\N	t	MCI III	011	ACTIVE	25
+22	54	0	\N	\N	\N	\N	\N	\N	t	MCI III	012	ACTIVE	26
+23	54	0	\N	\N	\N	\N	\N	\N	t	MCI III	013	ACTIVE	27
+24	30	0	\N	\N	\N	\N	\N	\N	t	MCI III	014	ACTIVE	28
+25	54	1	\N	\N	\N	\N	\N	\N	t	MCI III	111	ACTIVE	29
+26	90	1	\N	\N	\N	\N	\N	\N	t	MCI III	112/113	ACTIVE	30
 \.
 
 
@@ -236,7 +289,7 @@ SELECT pg_catalog.setval('public.booking_booking_id_seq', 1, false);
 -- Name: client_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.client_user_id_seq', 3, true);
+SELECT pg_catalog.setval('public.client_user_id_seq', 30, true);
 
 
 --
@@ -250,7 +303,7 @@ SELECT pg_catalog.setval('public.equipment_equipment_id_seq', 1, false);
 -- Name: meeting_room_room_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.meeting_room_room_id_seq', 1, false);
+SELECT pg_catalog.setval('public.meeting_room_room_id_seq', 26, true);
 
 
 --
@@ -361,5 +414,5 @@ ALTER TABLE ONLY public.booking
 -- PostgreSQL database dump complete
 --
 
-\unrestrict m7k88nbBUPsQLxHmH3KdQe7qTmEhwFtdJry7rl9udgxHcpCL3wWuuWWYYguZLnc
+\unrestrict Njd0tnGbx1IR4D6q22OHqEvtsSvX4vvkfIxC8BOA3cLDz9ct89KZDEuviYQcvpc
 
