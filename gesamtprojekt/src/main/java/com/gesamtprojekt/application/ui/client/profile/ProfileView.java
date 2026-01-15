@@ -13,11 +13,11 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 
 @Route(value = "profile", layout = MainLayout.class)
 @PageTitle("Profile")
-@PermitAll
+@RolesAllowed({"USER", "ADMIN", "ROOM"})
 public class ProfileView extends VerticalLayout {
 
     private final ClientService clientService;

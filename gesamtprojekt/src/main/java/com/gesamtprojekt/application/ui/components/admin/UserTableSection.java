@@ -202,7 +202,7 @@ public class UserTableSection extends VerticalLayout {
         registerButton.addClickListener(e -> {
             if (form.isValid()) {
                 try {
-                    clientService.createClient(form.username.getValue(), form.password.getValue(), form.email.getValue(), form.department.getValue(), form.userType.getValue(),"USER");
+                    clientService.createClient(form.username.getValue(), form.password.getValue(), form.email.getValue(), form.department.getValue(), form.userType.getValue(),form.role.getValue());
 
                     updateList();
                     fireEvent(new StatsChangedEvent(this)); // Container benachrichtigen

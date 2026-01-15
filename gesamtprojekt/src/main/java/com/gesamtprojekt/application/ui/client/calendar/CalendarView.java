@@ -21,7 +21,7 @@ import java.util.Set;
 
 @Route(value = "calendar", layout = MainLayout.class)
 @PageTitle("Calendar")
-@RolesAllowed({"CLIENT", "ADMIN"})
+@RolesAllowed({"USER", "ADMIN"})
 public class CalendarView extends VerticalLayout {
 
     private Registration broadcasterRegistration;
