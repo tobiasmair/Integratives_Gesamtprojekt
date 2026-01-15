@@ -1,22 +1,25 @@
 package com.gesamtprojekt.application.ui.client.dashboard;
 
+import com.gesamtprojekt.application.model.Client;
 import com.gesamtprojekt.application.security.SecurityService;
 import com.gesamtprojekt.application.service.implementation.BookingService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.gesamtprojekt.application.ui.client.MainLayout;
-import com.gesamtprojekt.application.ui.components.dashboard.BookingChangedEvent;
 import com.gesamtprojekt.application.ui.components.dashboard.MyBookingsContainer;
 import com.gesamtprojekt.application.ui.components.dashboard.QuickBookingContainer;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 
 @Route(value = "", layout = MainLayout.class)
 @PageTitle("Dashboard")
+//@RolesAllowed({"USER", "ADMIN"})
 @PermitAll
-public class DashboardView extends VerticalLayout {
+public class DashboardView extends VerticalLayout implements BeforeEnterObserver {
 
     private final BookingService bookingService;
     private final MeetingRoomService meetingRoomService;
@@ -33,12 +36,22 @@ public class DashboardView extends VerticalLayout {
         add(createTwoColumnLayout());
     }
 
+    // Weiterleitung für ROOM Nutzer
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        Client client = securityService.getAuthenticatedClient().orElseThrow();
+        if ("ROOM".equals(client.getRole())) {
+            event.forwardTo("roomservice");
+        }
+    }
+
     private HorizontalLayout createTwoColumnLayout() {
         var quick = new QuickBookingContainer(bookingService, meetingRoomService, securityService);
         var bookings = new MyBookingsContainer(bookingService, meetingRoomService, securityService);
 
         // Listener registrieren
         quick.addBookingChangedListener(event -> bookings.refresh());
+        bookings.addBookingChangedListener(event -> quick.loadRooms());
 
         quick.setWidthFull();
         bookings.setWidthFull();

@@ -1,9 +1,9 @@
 package com.gesamtprojekt.application.ui.components.admin;
 
 import com.gesamtprojekt.application.model.Client;
+import com.gesamtprojekt.application.service.implementation.BookingService;
 import com.gesamtprojekt.application.service.implementation.ClientService;
-import com.gesamtprojekt.application.ui.login.LoginView;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -18,19 +18,24 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.shared.Registration;
 
 import java.util.List;
 
 public class UserTableSection extends VerticalLayout {
 
     private final ClientService clientService;
+    private final BookingService bookingService;
+
     private final Grid<Client> grid = new Grid<>(Client.class, false);
     private final TextField searchField = new TextField();
-    private final ComboBox<String> roleFilter = new ComboBox<>("", List.of("All Roles", "ADMIN", "USER"));
+    private final ComboBox<String> roleFilter = new ComboBox<>("", List.of("All Roles", "ADMIN", "USER", "ROOM"));
     private final Button addClientBtn = new Button("Add User");
 
-    public UserTableSection(ClientService clientService) {
+    public UserTableSection(ClientService clientService, BookingService bookingService) {
         this.clientService = clientService;
+        this.bookingService = bookingService;
+
         setSizeFull();
         setPadding(false);
 
@@ -70,20 +75,36 @@ public class UserTableSection extends VerticalLayout {
         grid.addColumn(Client::getEmail).setHeader("Contact"); // Dummy-Email
         grid.addColumn(Client::getRole).setHeader("Role");
         grid.addColumn(Client::getDepartment).setHeader("Department");
-        grid.addColumn(c -> "DUMMY").setHeader("Bookings");
+        grid.addColumn(client -> {
+            // Für Rooms nicht befüllen
+            if ("ROOM_SCREEN".equals(client.getUserType())) {
+                return "-";
+            }
+            return bookingService.countByClient_UserIdAndIsActiveTrueAndBookingStatusAndEndTimeAfter(client.getUserId());
+        }).setHeader("Bookings");
 
         // Action Buttons
         grid.addComponentColumn(client -> {
             // Edit Button
             Button edit = new Button(VaadinIcon.EDIT.create());
-            edit.addClickListener(e -> {
-                openEditDialog(client);
-            });
+            // Edit für Rooms deaktivieren
+            if ("ROOM_SCREEN".equals(client.getUserType())) {
+                edit.setEnabled(false);
+                edit.setTooltipText("Technical room users cannot be deleted");
+            } else {
+                edit.addClickListener(e -> openEditDialog(client));
+            }
 
             // Delete Button
             Button delete = new Button(VaadinIcon.TRASH.create());
             delete.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_TERTIARY);
-            delete.addClickListener(e -> openDeleteDialog(client));
+            // Delete für Rooms deaktivieren
+            if ("ROOM_SCREEN".equals(client.getUserType())) {
+                delete.setEnabled(false);
+                delete.setTooltipText("Technical room users cannot be deleted");
+            } else {
+                delete.addClickListener(e -> openDeleteDialog(client));
+            }
 
             HorizontalLayout actions = new HorizontalLayout(edit, delete);
 
@@ -103,8 +124,11 @@ public class UserTableSection extends VerticalLayout {
         Dialog dialog = new Dialog();
         RegistrationForm form = new RegistrationForm();
 
+        // Password verdecken und Dummy Werte setzen für isValid Prüfung
         form.password.setVisible(false);
+        form.password.setValue("********");
         form.confirmPassword.setVisible(false);
+        form.confirmPassword.setValue("********");
 
         form.setClient(client);
 
@@ -123,6 +147,7 @@ public class UserTableSection extends VerticalLayout {
 
                 clientService.updateClient(client);
                 updateList();
+                fireEvent(new StatsChangedEvent(this)); // Container benachrichtigen
                 dialog.close();
                 Notification.show("User updated.");
             }
@@ -146,6 +171,7 @@ public class UserTableSection extends VerticalLayout {
         Button deleteButton = new Button("Delete", event -> {
             clientService.deleteClient(client);
             updateList();
+            fireEvent(new StatsChangedEvent(this)); // Container benachrichtigen
             dialog.close();
             Notification.show("User deleted.");
         });
@@ -176,10 +202,13 @@ public class UserTableSection extends VerticalLayout {
         registerButton.addClickListener(e -> {
             if (form.isValid()) {
                 try {
-                    clientService.createClient(form.username.getValue(), form.password.getValue(), form.email.getValue(), form.department.getValue(), form.userType.getValue(),"USER");
+                    clientService.createClient(form.username.getValue(), form.password.getValue(), form.email.getValue(), form.department.getValue(), form.userType.getValue(),form.role.getValue());
+
+                    updateList();
+                    fireEvent(new StatsChangedEvent(this)); // Container benachrichtigen
+                    dialog.close();
                     Notification.show("Registration success!", 3000, Notification.Position.TOP_CENTER)
                             .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                    UI.getCurrent().navigate(LoginView.class);
                 } catch (Exception ex) {
                     Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_CENTER)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
@@ -189,5 +218,10 @@ public class UserTableSection extends VerticalLayout {
 
         dialog.getFooter().add(cancelButton, registerButton);
         dialog.open();
+    }
+
+    // View registrieren
+    public Registration addStatsChangedListener(ComponentEventListener<StatsChangedEvent> listener) {
+        return addListener(StatsChangedEvent.class, listener);
     }
 }

@@ -58,4 +58,14 @@ public class BookingService implements BookingServiceInterface {
         bookingRepository.save(booking);
     }
 
+    // Anzahl der aktiven Buchungen zählen
+    public long countActiveBookings() {
+        return bookingRepository.countByIsActiveTrueAndBookingStatusAndEndTimeAfter("CONFIRMED", java.time.LocalDateTime.now());
+    }
+
+    // Zählt aktive Buchungen für einen bestimmten Client
+    public long countByClient_UserIdAndIsActiveTrueAndBookingStatusAndEndTimeAfter(Long clientId) {
+        return bookingRepository.countByClient_UserIdAndIsActiveTrueAndBookingStatusAndEndTimeAfter(clientId, "CONFIRMED", java.time.LocalDateTime.now());
+    }
+
 }

@@ -95,5 +95,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     long countByIsActiveTrueAndStartTimeBetween(LocalDateTime start, LocalDateTime end);
 
 
+    // Anzahl der aktiven Buchungen zählen
+    long countByIsActiveTrueAndBookingStatusAndEndTimeAfter(String status, LocalDateTime currentTime);
+
+    // Zählt aktive Buchungen für einen bestimmten Client
+    long countByClient_UserIdAndIsActiveTrueAndBookingStatusAndEndTimeAfter(Long clientId, String status, LocalDateTime currentTime);
 
 }

@@ -1,10 +1,13 @@
 package com.gesamtprojekt.application.ui.components.admin;
 
+import com.gesamtprojekt.application.events.RoomChangedBroadcaster;
 import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.service.implementation.EquipmentService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.gesamtprojekt.application.service.implementation.RoomImageStorageService;
 
+import com.gesamtprojekt.application.ui.components.dashboard.BookingChangedEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -19,6 +22,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.shared.Registration;
 
 import java.util.List;
 
@@ -59,7 +63,7 @@ public class RoomTableSection extends VerticalLayout {
         buildingFilter.setValue("All Buildings");
         buildingFilter.addValueChangeListener(e -> updateList());
 
-        statusFilter.setValue("All Status");
+        statusFilter.setValue("ACTIVE");
         statusFilter.addValueChangeListener(e -> updateList());
 
         addRoomBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -129,6 +133,8 @@ public class RoomTableSection extends VerticalLayout {
         form.apply(room);
         meetingRoomService.updateRoom(room);
         updateList();
+        fireEvent(new StatsChangedEvent(this)); // Container benachrichtigen
+        RoomChangedBroadcaster.broadcast(new RoomChangedBroadcaster.RoomChangedEvent("Room updated"));
         dialog.close();
 
         Notification.show("Room updated.", 3000, Notification.Position.TOP_CENTER)
@@ -154,6 +160,11 @@ public class RoomTableSection extends VerticalLayout {
     private void deleteRoom(MeetingRoom room, Dialog dialog) {
         meetingRoomService.deleteRoom(room);
         updateList();
+
+        // Container benachrichtigen
+        fireEvent(new StatsChangedEvent(this));
+        RoomChangedBroadcaster.broadcast(new RoomChangedBroadcaster.RoomChangedEvent("Room deleted"));
+
         dialog.close();
 
         Notification.show("Room deleted.", 3000, Notification.Position.TOP_CENTER)
@@ -184,6 +195,8 @@ public class RoomTableSection extends VerticalLayout {
         try {
             meetingRoomService.createRoom(room);
             updateList();
+            fireEvent(new StatsChangedEvent(this)); // Container benachrichtigen
+            RoomChangedBroadcaster.broadcast(new RoomChangedBroadcaster.RoomChangedEvent("Room created"));
             dialog.close();
 
             Notification.show("Room created.", 3000, Notification.Position.TOP_CENTER)
@@ -192,5 +205,10 @@ public class RoomTableSection extends VerticalLayout {
             Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_CENTER)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
+    }
+
+    // View registrieren
+    public Registration addStatsChangedListener(ComponentEventListener<StatsChangedEvent> listener) {
+        return addListener(StatsChangedEvent.class, listener);
     }
 }
