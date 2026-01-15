@@ -100,3 +100,15 @@ docker compose down -v
 ```bash
 docker compose down --rmi all
 ```
+
+## 💡Updating the database
+To add newly added data into the database dump, run
+```bash
+docker exec -t gesamtprojekt_db pg_dump \
+  -U postgres \
+  -d postgres_database \
+  --clean \
+  --if-exists \
+  > docker/postgres/init.sql
+```
+and commit the updated version of docker/postgres/init.sql to git
