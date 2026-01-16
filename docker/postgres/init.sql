@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict MaBGeg4hfjqY9haufnBYeoRs7vSg10MWsGrZC9D0Ab0j7uhQISI49WvLTyx6RgM
+\restrict IjcuWbBMyfZsSb9WSwky4DKTTeVZVPupJGHkLGj3dmatxBhX3T1pCxsqD0l6oSQ
 
 -- Dumped from database version 16.11 (Debian 16.11-1.pgdg13+1)
 -- Dumped by pg_dump version 16.11 (Debian 16.11-1.pgdg13+1)
@@ -231,6 +231,31 @@ COPY public.client (user_id, department, email, is_active, password, role, user_
 36	IT-Services	admin@mail.com	t	$2a$10$B0hryWKFVd13cYBuX/yYl.N6xsztsIH3pztdt.l8/45bu8NQ4Zbkq	ADMIN	STAFF	admin
 35	IT-Services	nicoadmin@mail.com	f	$2a$10$E7r8zAL8QZZ1HWXjkPD3ie9LgUAlnaQ0lZZKvB3lWHD3iMqkBlnWO	ADMIN	STAFF	nicoadmin
 4	DiBSE	nico@mail.com	t	$2a$10$2/DEkdQUJ52eEjk/t775b.Jb.0lJEVw49C609n.jMOdueamIqM5NC	ADMIN	STAFF	nico
+37	\N	room_4b-001@system.local	t	$2a$10$kSesd0caAbdS6w6HtVm/9.Rdu09F.C1qSxyAy98wWbxwYon0KM9ym	ROOM	ROOM_SCREEN	room_4b-001
+38	\N	room_4b-003@system.local	t	$2a$10$45bIJ9lHEdVJHA4jdg3apOf0F3W1axJH5fs2ix8w00JUJQVFc0LTm	ROOM	ROOM_SCREEN	room_4b-003
+39	\N	room_4b-005@system.local	t	$2a$10$00YQwY19Vqo2LAwfFbdAdOdfiJL2P7hQ7a4XGuMwsD6R5DRVY8yHe	ROOM	ROOM_SCREEN	room_4b-005
+40	\N	room_4b-006@system.local	t	$2a$10$40T8b9.YWssiO18qlbSylubWp72yQAmEfauefzdgjXMiady3psTzG	ROOM	ROOM_SCREEN	room_4b-006
+41	\N	room_4b-007@system.local	t	$2a$10$dJHxl7oG9vF2ivpsgdf.FOvSOfKouJTt95wCqXZ1EorcyCGUtbfGe	ROOM	ROOM_SCREEN	room_4b-007
+42	\N	room_4b-008@system.local	t	$2a$10$urjhuxgpMdZ3Gpeg1XiBLO4J679eK32T3Ej6BME5aZqBv5dtOWVb.	ROOM	ROOM_SCREEN	room_4b-008
+43	\N	room_4a-020@system.local	t	$2a$10$yvzv7dwN2clhoQaMKGCvNe6WDc1h278vUB9cw5j2g7G2N.zOZKLYm	ROOM	ROOM_SCREEN	room_4a-020
+44	\N	room_4a-024@system.local	t	$2a$10$rX3UeythlEUB3EtCiepCe.CZkQrGQCiM/KB5AAwl1kGhZHosQ.nYW	ROOM	ROOM_SCREEN	room_4a-024
+45	\N	room_4a-027@system.local	t	$2a$10$36LUnGO.Swvt.psOnx2Biul7l2Q3IpQiRjAYSQ/9HrHXEIQBDrbca	ROOM	ROOM_SCREEN	room_4a-027
+46	\N	room_1a-135@system.local	t	$2a$10$BQky30Ukz68khnQHHNilO.yp/w.ct83WuRKB4PbLs/x1zs7YV3Scm	ROOM	ROOM_SCREEN	room_1a-135
+47	\N	room_4b-115@system.local	t	$2a$10$fqbt643.6Fiu/6CuoRwmq.qUo8jtWsIjJFXtaHnyAhyotpUbhzUnq	ROOM	ROOM_SCREEN	room_4b-115
+48	\N	room_4a-393@system.local	t	$2a$10$beX.jgH2EpjTHKt3rdyHw.Zs52sG4AmM/WWkauvV5QgpzDhMiHzu2	ROOM	ROOM_SCREEN	room_4a-393
+49	\N	room_4a-438@system.local	t	$2a$10$trRs1k.B0LEF4.vNDjJArOmiWw2EXOtoQNmzMY6xg1K9b0Rpyeowe	ROOM	ROOM_SCREEN	room_4a-438
+50	\N	room_4a-439@system.local	t	$2a$10$Gvp.kgEaPXcdQ3qgv.2bdutqo0qq4KJBskkMWAXWqIJHnv9NDYGEu	ROOM	ROOM_SCREEN	room_4a-439
+51	\N	room_4c-501@system.local	t	$2a$10$RhnQTcOYdCZlE0WrIfJoduzPUcKOc/kryYAYBLJIiDXAy5gm.lJ06	ROOM	ROOM_SCREEN	room_4c-501
+52	\N	room_4c-502@system.local	t	$2a$10$vmEDcTMiddodvDUNNI6/uuXWYqAHe.GiknScdTzZTgCl.yPB7loGW	ROOM	ROOM_SCREEN	room_4c-502
+53	\N	room_4c-503@system.local	t	$2a$10$NQsqozT1PTeyLfTBqI744eXErr/0QSZHxKe2hmB0aGQ8EPUxmdNoK	ROOM	ROOM_SCREEN	room_4c-503
+54	\N	room_4c-504@system.local	t	$2a$10$P9Oj9S3G8PhSdqjCdFfs.OpZDS/HBMQgoEGjFk7sC1oK9tn11byYm	ROOM	ROOM_SCREEN	room_4c-504
+55	\N	room_4c-505@system.local	t	$2a$10$EWkhoRGFItwHF90Z7zjxguWRvt.DwCYQXvnaSTp/A16zfiLs3Pi0i	ROOM	ROOM_SCREEN	room_4c-505
+56	\N	room_181@system.local	t	$2a$10$HnqFs9ZvAf8GyWbMpzcmSO5Mls08XQseAPDlq1pfXhl7YWTMFGgxy	ROOM	ROOM_SCREEN	room_181
+57	\N	room_182@system.local	t	$2a$10$9bW45bdGPETRz8rs4Fjkruzc/OSds/t7WwKA6zi3ixD17Bn5enGnS	ROOM	ROOM_SCREEN	room_182
+58	\N	room_183@system.local	t	$2a$10$zfJyMy3KMq16tk4GdqpfdOMW1XN1wTsmnTqNGwLGi8a1saSjsXsA2	ROOM	ROOM_SCREEN	room_183
+59	\N	room_184@system.local	t	$2a$10$3Ph5jcfIUneAQMRVsjr3ZOgpwcnw1kPUJZBRXYDwMi1Svb4NidSwC	ROOM	ROOM_SCREEN	room_184
+60	\N	room_185@system.local	t	$2a$10$U9WTEqVKy.hDr4N8UbMapu0smDkPfS.p6O505eKrG2LAP6aYBHCvK	ROOM	ROOM_SCREEN	room_185
+61	\N	room_283@system.local	t	$2a$10$VwqTjB2Gi1BsRD5mp5nKbOCSK.C0s3IJT3A7lLp.V76bTyR4VEAKq	ROOM	ROOM_SCREEN	room_283
 \.
 
 
@@ -273,6 +298,31 @@ COPY public.meeting_room (room_id, capacity, floor, has_door_control, has_light_
 24	30	0	\N	\N	\N	\N	\N	\N	t	MCI III	014	ACTIVE	28
 25	54	1	\N	\N	\N	\N	\N	\N	t	MCI III	111	ACTIVE	29
 26	90	1	\N	\N	\N	\N	\N	\N	t	MCI III	112/113	ACTIVE	30
+27	29	0	\N	\N	\N	\N	\N	\N	t	MCI IV	4B-001	ACTIVE	37
+28	30	0	\N	\N	\N	\N	\N	\N	t	MCI IV	4B-003	ACTIVE	38
+29	23	0	\N	\N	\N	\N	\N	\N	t	MCI IV	4B-005	ACTIVE	39
+30	33	0	\N	\N	\N	\N	\N	\N	t	MCI IV	4B-006	ACTIVE	40
+31	30	0	\N	\N	\N	\N	\N	\N	t	MCI IV	4B-007	ACTIVE	41
+32	16	0	\N	\N	\N	\N	\N	\N	t	MCI IV	4B-008	ACTIVE	42
+33	58	0	\N	\N	\N	\N	\N	\N	t	MCI IV	4A-020	ACTIVE	43
+34	68	0	\N	\N	\N	\N	\N	\N	t	MCI IV	4A-024	ACTIVE	44
+35	60	0	\N	\N	\N	\N	\N	\N	t	MCI IV	4A-027	ACTIVE	45
+36	45	1	\N	\N	\N	\N	\N	\N	t	MCI IV	1A-135	ACTIVE	46
+38	48	3	\N	\N	\N	\N	\N	\N	t	MCI IV	4A-393	ACTIVE	48
+39	36	4	\N	\N	\N	\N	\N	\N	t	MCI IV	4A-438	ACTIVE	49
+40	68	4	\N	\N	\N	\N	\N	\N	t	MCI IV	4A-439	ACTIVE	50
+37	22	1	\N	\N	\N	\N	\N	\N	t	MCI IV	4B-115	ACTIVE	47
+41	12	5	\N	\N	\N	\N	\N	\N	t	MCI IV	4C-501	ACTIVE	51
+42	25	5	\N	\N	\N	\N	\N	\N	t	MCI IV	4C-502	ACTIVE	52
+43	25	5	\N	\N	\N	\N	\N	\N	t	MCI IV	4C-503	ACTIVE	53
+44	27	5	\N	\N	\N	\N	\N	\N	t	MCI IV	4C-504	ACTIVE	54
+45	45	5	\N	\N	\N	\N	\N	\N	t	MCI IV	4C-505	ACTIVE	55
+46	40	1	\N	\N	\N	\N	\N	\N	t	MCI V	181	ACTIVE	56
+47	40	1	\N	\N	\N	\N	\N	\N	t	MCI V	182	ACTIVE	57
+48	40	1	\N	\N	\N	\N	\N	\N	t	MCI V	183	ACTIVE	58
+49	44	1	\N	\N	\N	\N	\N	\N	t	MCI V	184	ACTIVE	59
+50	52	1	\N	\N	\N	\N	\N	\N	t	MCI V	185	ACTIVE	60
+51	40	2	\N	\N	\N	\N	\N	\N	t	MCI V	283	ACTIVE	61
 \.
 
 
@@ -295,7 +345,7 @@ SELECT pg_catalog.setval('public.booking_booking_id_seq', 1, false);
 -- Name: client_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.client_user_id_seq', 36, true);
+SELECT pg_catalog.setval('public.client_user_id_seq', 61, true);
 
 
 --
@@ -309,7 +359,7 @@ SELECT pg_catalog.setval('public.equipment_equipment_id_seq', 1, false);
 -- Name: meeting_room_room_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.meeting_room_room_id_seq', 26, true);
+SELECT pg_catalog.setval('public.meeting_room_room_id_seq', 51, true);
 
 
 --
@@ -420,5 +470,5 @@ ALTER TABLE ONLY public.booking
 -- PostgreSQL database dump complete
 --
 
-\unrestrict MaBGeg4hfjqY9haufnBYeoRs7vSg10MWsGrZC9D0Ab0j7uhQISI49WvLTyx6RgM
+\unrestrict IjcuWbBMyfZsSb9WSwky4DKTTeVZVPupJGHkLGj3dmatxBhX3T1pCxsqD0l6oSQ
 
