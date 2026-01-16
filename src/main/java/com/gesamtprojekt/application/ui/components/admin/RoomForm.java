@@ -217,7 +217,7 @@ public class RoomForm extends FormLayout {
         capacity.setMin(1);
         capacity.setRequiredIndicatorVisible(true);
         capacity.setWidthFull();
-        building.setItems("MCI I", "MCI II", "MCI III");
+        building.setItems("MCI I", "MCI II", "MCI III", "MCI IV", "MCI V");
         building.setRequiredIndicatorVisible(true);
         building.setWidthFull();
         status.setItems("ACTIVE", "INACTIVE");
