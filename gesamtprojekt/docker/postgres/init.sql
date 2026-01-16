@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict Njd0tnGbx1IR4D6q22OHqEvtsSvX4vvkfIxC8BOA3cLDz9ct89KZDEuviYQcvpc
+\restrict MaBGeg4hfjqY9haufnBYeoRs7vSg10MWsGrZC9D0Ab0j7uhQISI49WvLTyx6RgM
 
 -- Dumped from database version 16.11 (Debian 16.11-1.pgdg13+1)
 -- Dumped by pg_dump version 16.11 (Debian 16.11-1.pgdg13+1)
@@ -198,7 +198,6 @@ COPY public.client (user_id, department, email, is_active, password, role, user_
 1	DiBSE	tobi@mail.com	t	$2a$10$L6Ns1J1sBYLwUGc2DHGbUOjcm5RyZ4J7XbnhvBXer/n7IfAzs8tZu	USER	STUDENT	tobi
 3	MCI 1	tobi2@mail.com	t	$2a$10$bM5CFj76wSCOjOlHexzEButyJeoVTyri8mSIJxuQq55H.FVizxRKO	USER	EXTERNAL	tobi2
 2	IT-Services	tobiadmin@mail.com	t	$2a$10$sAgSAZVm9dUwb9W2gdrcD.F2/ZROw6NbWaOxpEJcErEehT6J/Eu5y	ADMIN	STAFF	tobiadmin
-4	IT-Services	nico@mail.com	t	$2a$10$2/DEkdQUJ52eEjk/t775b.Jb.0lJEVw49C609n.jMOdueamIqM5NC	ADMIN	STAFF	nico
 5	\N	room_234@system.local	t	$2a$10$/X6hvDMnymJgipzdYkgxfej96bjMthk1SZa78MNu86Pp93NMl/Wye	ROOM	ROOM_SCREEN	room_234
 6	\N	room_301/302@system.local	t	$2a$10$aAmXW4i8MxbjZiMXq9tMXOiLnF9esl7E9/TZkcy.dC0r0FYkRgtgK	ROOM	ROOM_SCREEN	room_301/302
 7	\N	room_303@system.local	t	$2a$10$M4uD7agD2oTbRoj/XO7Tte0.4skRGptL2HlUZjUAoPKUNUfAg98w2	ROOM	ROOM_SCREEN	room_303
@@ -225,6 +224,13 @@ COPY public.client (user_id, department, email, is_active, password, role, user_
 28	\N	room_014@system.local	t	$2a$10$HqoyqTi0e.QShMY0PfRuE.tBbHVGG1V9R1AMJwwbJqeqPbUA5s29O	ROOM	ROOM_SCREEN	room_014
 29	\N	room_111@system.local	t	$2a$10$tMGa9HCEOo7bvYY5atA9Y.77URoyQDpvI7OS9qiU8liGGhFVU6usC	ROOM	ROOM_SCREEN	room_111
 30	\N	room_112/113@system.local	t	$2a$10$bBzXiK10BRobXXCJ6upP7.d7/on6GoAmc.v4gnfcDymWQ7/V3jHsW	ROOM	ROOM_SCREEN	room_112/113
+31	DiBSE	peter@mail.com	t	$2a$10$3cH8cs/yY3rK/XFolm1vV.kHbRN152KlWUr61nR5Aswzhgn1.7qnu	USER	STUDENT	peter
+32	DiBSE	matthias@mail.com	t	$2a$10$ixw77LM6v8Ak6pvIZZJe.uK9M4vAbY3aeLFdP5cK8L2dzVxwbUfRm	USER	STUDENT	matthias
+33	DiBSE	alessandro@mail.com	t	$2a$10$shrut4r13COsRucrwMTNGO/.9Xj9GQQGfypdWXQuOGLQNZywC5dui	USER	STUDENT	alessandro
+34	DiBSE	plamena@mail.com	t	$2a$10$2ouvqI83qVxy.bPg4LPFy.QbJBDBc0HA8D2EDyBexL7BZaaogidYK	USER	STUDENT	plamena
+36	IT-Services	admin@mail.com	t	$2a$10$B0hryWKFVd13cYBuX/yYl.N6xsztsIH3pztdt.l8/45bu8NQ4Zbkq	ADMIN	STAFF	admin
+35	IT-Services	nicoadmin@mail.com	f	$2a$10$E7r8zAL8QZZ1HWXjkPD3ie9LgUAlnaQ0lZZKvB3lWHD3iMqkBlnWO	ADMIN	STAFF	nicoadmin
+4	DiBSE	nico@mail.com	t	$2a$10$2/DEkdQUJ52eEjk/t775b.Jb.0lJEVw49C609n.jMOdueamIqM5NC	ADMIN	STAFF	nico
 \.
 
 
@@ -289,7 +295,7 @@ SELECT pg_catalog.setval('public.booking_booking_id_seq', 1, false);
 -- Name: client_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.client_user_id_seq', 30, true);
+SELECT pg_catalog.setval('public.client_user_id_seq', 36, true);
 
 
 --
@@ -414,5 +420,5 @@ ALTER TABLE ONLY public.booking
 -- PostgreSQL database dump complete
 --
 
-\unrestrict Njd0tnGbx1IR4D6q22OHqEvtsSvX4vvkfIxC8BOA3cLDz9ct89KZDEuviYQcvpc
+\unrestrict MaBGeg4hfjqY9haufnBYeoRs7vSg10MWsGrZC9D0Ab0j7uhQISI49WvLTyx6RgM
 
