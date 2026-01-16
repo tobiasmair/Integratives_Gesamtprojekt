@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -160,7 +161,8 @@ public class MeetingRoomService implements MeetingRoomServiceInterface {
             LocalDateTime endTime,
             String building,
             String floorStr,
-            String minCapStr) {
+            String minCapStr,
+            Set<String> equipmentSet) {
 
         // Floor-String zu Integer konvertieren
         Integer floor = null;
@@ -178,12 +180,17 @@ public class MeetingRoomService implements MeetingRoomServiceInterface {
             minCap = Integer.parseInt(minCapStr.replace("+", ""));
         }
 
+        // Equipment Count für Query
+        long equipmentCount = (equipmentSet != null && !equipmentSet.isEmpty()) ? equipmentSet.size() : 0;
+
         return meetingRoomRepository.findFilteredAvailableRooms(
                 startTime,
                 endTime,
                 building,
                 floor,
-                minCap);
+                minCap,
+                equipmentSet,
+                equipmentCount);
     }
 
 }

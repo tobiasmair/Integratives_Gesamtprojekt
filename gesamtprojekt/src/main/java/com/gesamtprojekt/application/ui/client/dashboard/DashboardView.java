@@ -17,7 +17,7 @@ import jakarta.annotation.security.PermitAll;
 
 @Route(value = "", layout = MainLayout.class)
 @PageTitle("Dashboard")
-//@RolesAllowed({"CLIENT", "ADMIN"})
+//@RolesAllowed({"USER", "ADMIN"})
 @PermitAll
 public class DashboardView extends VerticalLayout implements BeforeEnterObserver {
 

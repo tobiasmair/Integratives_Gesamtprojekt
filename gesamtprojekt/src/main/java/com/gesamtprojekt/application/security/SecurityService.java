@@ -49,7 +49,7 @@ public class SecurityService {
 
     public boolean isClient() {
         return getAuthenticatedClient()
-                .map(client -> "CLIENT".equalsIgnoreCase(client.getRole()))
+                .map(client -> "USER".equalsIgnoreCase(client.getRole()))
                 .orElse(false);
     }
 

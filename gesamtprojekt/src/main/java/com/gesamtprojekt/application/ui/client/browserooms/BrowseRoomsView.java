@@ -9,7 +9,7 @@ import jakarta.annotation.security.RolesAllowed;
 
 @Route(value = "browserooms", layout = MainLayout.class)
 @PageTitle("Browse Rooms")
-@RolesAllowed({"CLIENT", "ADMIN"})
+@RolesAllowed({"USER", "ADMIN"})
 public class BrowseRoomsView extends VerticalLayout {
 
     public BrowseRoomsView() {

@@ -1,9 +1,12 @@
 package com.gesamtprojekt.application.ui.components.calendar;
 
+import com.gesamtprojekt.application.model.Equipment;
+import com.gesamtprojekt.application.service.implementation.EquipmentService;
 import com.gesamtprojekt.application.ui.components.dashboard.BookingChangedEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
@@ -17,7 +20,9 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class CalendarControlsBar extends VerticalLayout {
 
@@ -27,9 +32,11 @@ public class CalendarControlsBar extends VerticalLayout {
     private ComboBox<String> building = new ComboBox<>("Building");
     private ComboBox<String> floor = new ComboBox<>("Floor");
     private ComboBox<String> capacity = new ComboBox<>("Min Capacity");
-    private ComboBox<String> equipment = new ComboBox<>("Equipment");
+    private MultiSelectComboBox<String> equipment = new MultiSelectComboBox<>("Equipment");
+    private final EquipmentService equipmentService;
 
-    public CalendarControlsBar() {
+    public CalendarControlsBar(EquipmentService equipmentService) {
+        this.equipmentService = equipmentService;
         setWidthFull();
         setPadding(false);
         setSpacing(true);
@@ -47,6 +54,7 @@ public class CalendarControlsBar extends VerticalLayout {
     public String getBuilding() { return building.getValue(); }
     public String getFloor() { return floor.getValue(); }
     public String getCapacity() { return capacity.getValue(); }
+    public Set<String> getEquipment() { return equipment.getValue(); }
 
     private void addValueChangeListeners() {
         date.addValueChangeListener(e -> fireEvent(new FilterChangedEvent(this)));
@@ -55,6 +63,7 @@ public class CalendarControlsBar extends VerticalLayout {
         building.addValueChangeListener(e -> fireEvent(new FilterChangedEvent(this)));
         floor.addValueChangeListener(e -> fireEvent(new FilterChangedEvent(this)));
         capacity.addValueChangeListener(e -> fireEvent(new FilterChangedEvent(this)));
+        equipment.addValueChangeListener(e -> fireEvent(new FilterChangedEvent(this)));
     }
 
     private FormLayout buildTopRow() {
@@ -80,10 +89,20 @@ public class CalendarControlsBar extends VerticalLayout {
     }
 
     private FormLayout buildFiltersRow() {
-        building = combo("Building", List.of("All Buildings", "MCI I", "MCI II", "MCI III"));
+        building = combo("Building", List.of("All Buildings", "MCI I", "MCI II", "MCI III", "MCI IV", "MCI V"));
         floor = combo("Floor", List.of("Any Floor", "1", "2", "3"));
         capacity = combo("Min Capacity", List.of("Any", "5+", "10+", "20+", "50+"));
-        equipment = combo("Equipment", List.of("Any", "Wifi", "Whiteboard", "Smart TV"));
+
+        // Equipment aus Datenbank laden
+        List<String> equipmentItems = equipmentService.findAll().stream()
+                .map(Equipment::getDescription)
+                .filter(desc -> desc != null && !desc.trim().isEmpty())
+                .sorted(String.CASE_INSENSITIVE_ORDER)
+                .toList();
+
+        equipment.setLabel("Equipment");
+        equipment.setItems(equipmentItems);
+        equipment.setWidthFull();
 
         //ComboBox<String> fav = combo("Favourites", List.of("All rooms", "Only favourites"));
 

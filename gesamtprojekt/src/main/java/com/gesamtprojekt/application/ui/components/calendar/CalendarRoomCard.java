@@ -1,5 +1,10 @@
 package com.gesamtprojekt.application.ui.components.calendar;
 
+import com.gesamtprojekt.application.security.SecurityService;
+import com.gesamtprojekt.application.service.implementation.BookingService;
+import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
@@ -8,21 +13,31 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.shared.Registration;
 
 public class CalendarRoomCard extends Div {
 
-    public CalendarRoomCard(CalendarRoomCardModel room) {
+    private final BookingService bookingService;
+    private final MeetingRoomService meetingRoomService;
+    private final SecurityService securityService;
+
+    public CalendarRoomCard(CalendarRoomCardModel room, BookingService bookingService,
+                            MeetingRoomService meetingRoomService, SecurityService securityService) {
+        this.bookingService = bookingService;
+        this.meetingRoomService = meetingRoomService;
+        this.securityService = securityService;
+
         addClassName("calendar-room-card");
         add(buildCard(room));
     }
 
     private VerticalLayout buildCard(CalendarRoomCardModel r) {
         Image img = buildImage(r.imagePath());
-        Span title = buildTitle(n(r.name()));
+        Span title = buildTitle(n(r.name()), r);
 
         VerticalLayout info = buildInfo(r);
-        HorizontalLayout tags = buildTags(r);
-        Button book = buildButton();
+        Div tags = buildTags(r);
+        Button book = buildButton(r);
 
         VerticalLayout box = new VerticalLayout(img, title, info, tags, book);
         box.setPadding(false);
@@ -44,11 +59,19 @@ public class CalendarRoomCard extends Div {
         return img;
     }
 
-    private Span buildTitle(String text) {
+    private Span buildTitle(String text, CalendarRoomCardModel room) {
         Span title = new Span(text);
         title.getStyle().set("font-size", "18px");
         title.getStyle().set("font-weight", "700");
         title.getStyle().set("padding", "8px 12px 8px 12px");
+        title.getStyle().set("cursor", "pointer");
+        title.getStyle().set("color", "var(--lumo-primary-text-color)");
+
+        title.addClickListener(e -> {
+            RoomDetailsDialog dialog = new RoomDetailsDialog(room);
+            dialog.open();
+        });
+
         return title;
     }
 
@@ -79,16 +102,23 @@ public class CalendarRoomCard extends Div {
         return row;
     }
 
-    private HorizontalLayout buildTags(CalendarRoomCardModel r) {
+    private Div buildTags(CalendarRoomCardModel r) {
+        Div tagsContainer = new Div();
+        tagsContainer.getStyle().set("padding", "0 12px 10px 12px");
+        tagsContainer.getStyle().set("height", "80px");
+        tagsContainer.getStyle().set("overflow-y", "auto");
+        tagsContainer.getStyle().set("overflow-x", "hidden");
+
         HorizontalLayout tags = new HorizontalLayout();
         tags.setSpacing(true);
         tags.setPadding(false);
-        tags.getStyle().set("padding", "0 12px 10px 12px");
         tags.getStyle().set("flex-wrap", "wrap");
         tags.getStyle().set("gap", "8px");
 
         r.tags().forEach(t -> tags.add(tagChip(t)));
-        return tags;
+
+        tagsContainer.add(tags);
+        return tagsContainer;
     }
 
     private Div tagChip(String text) {
@@ -101,11 +131,38 @@ public class CalendarRoomCard extends Div {
         return chip;
     }
 
-    private Button buildButton() {
+    private Button buildButton(CalendarRoomCardModel room) {
         Button b = new Button("Book Room");
         b.getStyle().set("margin", "0 12px 12px 12px");
         b.getStyle().set("width", "calc(100% - 24px)");
+
+        b.addClickListener(e -> {
+            RoomBookingDialog dialog = new RoomBookingDialog(
+                    room.roomId(),
+                    room.name(),
+                    bookingService,
+                    meetingRoomService,
+                    securityService
+            );
+
+            dialog.addBookingCreatedListener(event -> {
+                fireEvent(new BookingCreatedEvent(this));
+            });
+
+            dialog.open();
+        });
+
         return b;
+    }
+
+    public static class BookingCreatedEvent extends ComponentEvent<CalendarRoomCard> {
+        public BookingCreatedEvent(CalendarRoomCard source) {
+            super(source, false);
+        }
+    }
+
+    public Registration addBookingCreatedListener(ComponentEventListener<BookingCreatedEvent> listener) {
+        return addListener(BookingCreatedEvent.class, listener);
     }
 
     private String n(String v) {
