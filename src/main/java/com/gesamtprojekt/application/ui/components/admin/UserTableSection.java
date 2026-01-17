@@ -29,7 +29,7 @@ public class UserTableSection extends VerticalLayout {
 
     private final Grid<Client> grid = new Grid<>(Client.class, false);
     private final TextField searchField = new TextField();
-    private final ComboBox<String> roleFilter = new ComboBox<>("", List.of("All Roles", "ADMIN", "USER", "ROOM"));
+    private final ComboBox<String> roleFilter = new ComboBox<>("", List.of("All Roles", "ADMIN", "USER"));
     private final Button addClientBtn = new Button("Add User");
 
     public UserTableSection(ClientService clientService, BookingService bookingService) {

@@ -35,7 +35,7 @@ public class ClientService implements ClientServiceInterface {
         String role = (roleFilter != null && !roleFilter.equals("All Roles")) ? roleFilter : "";
 
         if (stringFilter == null || stringFilter.isEmpty() && role.isEmpty()) {
-            return clientRepository.findByIsActiveTrue();
+            return clientRepository.findByIsActiveTrueAndUserTypeNot("ROOM_SCREEN");
         } else {
             //return clientRepository.search(stringFilter);
             return clientRepository.searchByFilters(stringFilter, role);
@@ -44,7 +44,7 @@ public class ClientService implements ClientServiceInterface {
 
     // Anzahl Client zurückgeben
     public long countUsers() {
-        return clientRepository.countByisActiveTrue();
+        return clientRepository.countByisActiveTrueAndUserTypeNot("ROOM_SCREEN");
     }
 
     public long countByUserTypeAndIsActiveTrue(String userType) {
