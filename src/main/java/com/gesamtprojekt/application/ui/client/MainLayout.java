@@ -84,8 +84,8 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
                 .orElseThrow(() -> new IllegalStateException("No authenticated user found"));
 
         // Glocken Symbol
-        NotificationBell notificationBell = new NotificationBell(notificationService, user);
-        notificationBell.setUnreadCount(notificationService.countUnread(user));
+        this.notificationBell = new NotificationBell(notificationService, user);
+        this.notificationBell.setUnreadCount(notificationService.countUnread(user));
 
         header.add(notificationBell);
         addToNavbar(header);
@@ -99,7 +99,9 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
 
         // Listener der die Glocke aktualisiert
         attachEvent.getUI().addPollListener(e -> {
-            notificationBell.updateBadge();
+            if (notificationBell != null) {
+                notificationBell.updateBadge();
+            }
         });
     }
 

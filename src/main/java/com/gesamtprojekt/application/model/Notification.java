@@ -30,11 +30,22 @@ public class Notification {
     @Column(name = "isRead")
     private boolean isRead = false;
 
+    // Über Booking zugriff zu Room
     @ManyToOne
-    @JoinColumn(name = "userId")
-    private Client client;
+    @JoinColumn(name = "bookingId")
+    private Booking booking;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "roomId")
-    private MeetingRoom meetingRoom;
+    // Get Methoden für UI
+    public Client getClient() {
+        return booking != null ? booking.getClient() : null;
+    }
+
+    public String getRoomName() {
+        return booking != null && booking.getMeetingRoom() != null
+                ? booking.getMeetingRoom().getName() : "Unknown Room";
+    }
+
+    public String getBookingCode() {
+        return booking != null ? booking.getBookingCode() : "0000-0000";
+    }
 }

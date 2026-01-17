@@ -34,12 +34,15 @@ public class BookingService implements BookingServiceInterface {
         if (conflict) {
             throw new RuntimeException("Booking conflict detected for the selected room and time.");
         }
+
+        // Code setzen
+        booking.setBookingCode(generateRandomBookingCode());
+
         bookingRepository.save(booking);
 
         // Notification
         notificationService.createNotification(
-                booking.getClient(),
-                booking.getMeetingRoom(),
+                booking,
                 NotificationType.CONFIRMATION
         );
 
@@ -49,11 +52,19 @@ public class BookingService implements BookingServiceInterface {
             booking.getStartTime().isAfter(now)) {
 
             notificationService.createNotification(
-                    booking.getClient(),
-                    booking.getMeetingRoom(),
+                    booking,
                     NotificationType.REMINDER_START
             );
         }
+    }
+
+    // Buchungs Code generieren
+    private String generateRandomBookingCode() {
+        java.util.Random random = new java.util.Random();
+        // zwei 4-stellige Zahlen
+        int part1 = 1000 + random.nextInt(9000);
+        int part2 = 1000 + random.nextInt(9000);
+        return part1 + "-" + part2;
     }
 
     // Buchungen eines Clients finden

@@ -84,7 +84,17 @@ public class BookingItem extends Div {
         var s = new Span(status);
         s.addClassName("booking-status");
 
-        var box = new VerticalLayout(t, r, d, s);
+        // Buchungscode
+        Span code = new Span("Code: " + booking.getBookingCode());
+        code.getStyle()
+                .set("font-family", "monospace")
+                .set("font-weight", "bold")
+                .set("background", "var(--lumo-contrast-10pct)")
+                .set("padding", "2px 6px")
+                .set("border-radius", "4px")
+                .set("margin-top", "4px");
+
+        var box = new VerticalLayout(t, r, d, s, code);
         box.setPadding(false);
         box.setSpacing(false);
 

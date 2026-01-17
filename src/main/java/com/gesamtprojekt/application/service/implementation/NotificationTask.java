@@ -30,8 +30,7 @@ public class NotificationTask {
 
         for (Booking booking : upcomingBookings) {
             notificationService.createNotification(
-                    booking.getClient(),
-                    booking.getMeetingRoom(),
+                    booking,
                     NotificationType.REMINDER_START
             );
         }
@@ -50,8 +49,7 @@ public class NotificationTask {
 
         for (Booking booking : endingBookings) {
             notificationService.createNotification(
-                    booking.getClient(),
-                    booking.getMeetingRoom(),
+                    booking,
                     NotificationType.REMINDER_END
             );
         }

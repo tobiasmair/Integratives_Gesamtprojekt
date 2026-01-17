@@ -1,5 +1,6 @@
 package com.gesamtprojekt.application.service.implementation;
 
+import com.gesamtprojekt.application.model.Booking;
 import com.gesamtprojekt.application.model.Client;
 import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.model.Notification;
@@ -19,32 +20,31 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
 
     @Transactional
-    public void createNotification(Client client, MeetingRoom room, NotificationType type) {
+    public void createNotification(Booking booking, NotificationType type) {
         Notification notification = new Notification();
         notification.setType(type);
         notification.setCreatedAt(LocalDateTime.now());
         notification.setRead(false);
-        notification.setClient(client);
-        notification.setMeetingRoom(room);
+        notification.setBooking(booking);
 
         notificationRepository.save(notification);
     }
 
     // Alle Benachrichtigungen für den aktuellen User laden
     public List<Notification> findAllByUser(Client client) {
-        return notificationRepository.findByClientOrderByCreatedAtDesc(client);
+        return notificationRepository.findByBooking_ClientOrderByCreatedAtDesc(client);
     }
 
     // Zählen der ungelesenen Nachrichten
     public long countUnread(Client client) {
         if (client == null) return 0;
-        return notificationRepository.countByClientAndIsReadFalse(client);
+        return notificationRepository.countByBooking_ClientAndIsReadFalse(client);
     }
 
     // Alle Nachrichten eines Users als gelesen markieren
     @Transactional
     public void markAllAsRead(Client client) {
-        List<Notification> unreadNotifications = notificationRepository.findByClientAndIsReadFalse(client);
+        List<Notification> unreadNotifications = notificationRepository.findByBooking_ClientAndIsReadFalse(client);
 
         if (!unreadNotifications.isEmpty()) {
             unreadNotifications.forEach(n -> n.setRead(true));

@@ -1,7 +1,6 @@
 package com.gesamtprojekt.application.ui.components.buttons;
 
 import com.gesamtprojekt.application.model.Client;
-import com.gesamtprojekt.application.model.Notification;
 import com.gesamtprojekt.application.service.implementation.NotificationService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -107,7 +106,7 @@ public class NotificationBell extends Div {
                 header.add(typeLabel, time);
 
                 // Content
-                String formattedText = n.getType().format(n.getMeetingRoom().getName());
+                String formattedText = n.getType().format(n.getRoomName(), n.getBookingCode());
                 Span message = new Span(formattedText);
                 message.getStyle().set("font-size", "var(--lumo-font-size-s)");
 

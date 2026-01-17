@@ -9,12 +9,12 @@ import java.util.List;
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
     // Alle Benachrichtigungen eines Users
-    List<Notification> findByClientOrderByCreatedAtDesc(Client client);
+    List<Notification> findByBooking_ClientOrderByCreatedAtDesc(Client client);
 
     // Anzahl ungelesenen Benachrichtigungen
-    long countByClientAndIsReadFalse(Client client);
+    long countByBooking_ClientAndIsReadFalse(Client client);
 
     // ungelesene Benachrichtigungen für User
-    List<Notification> findByClientAndIsReadFalse(Client client);
+    List<Notification> findByBooking_ClientAndIsReadFalse(Client client);
 
 }
