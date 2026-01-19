@@ -54,7 +54,7 @@ public class SideNavbar extends FlexLayout {
     }
 
     private Header buildHeader(Button collapse) {
-        Span appName = new Span("MCI - meeting room booker");
+        Span appName = new Span("MCI - Meeting Room Booking Service");
         appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.SMALL);
         appName.addClassName("app-name");
 
