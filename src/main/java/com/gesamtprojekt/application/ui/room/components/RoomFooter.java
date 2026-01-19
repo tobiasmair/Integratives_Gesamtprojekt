@@ -13,14 +13,18 @@ public class RoomFooter extends HorizontalLayout {
         setPadding(false);
         getStyle().set("padding", "var(--lumo-space-m)");
 
-        // Logout Button erstellen
+        // logout button
         Button logoutBtn = new Button("", VaadinIcon.SIGN_OUT.create());
         logoutBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
 
-        // Die Logik aus deinem SecurityService nutzen
-        logoutBtn.addClickListener(e -> securityService.logout());
+        logoutBtn.addClickListener(e -> {
+            ConfirmLogout dialog = new ConfirmLogout(
+                    securityService::checkPassword,
+                    securityService::logout
+            );
+            dialog.open();
+        });
 
-        // Layout für die Positionierung links unten
         HorizontalLayout layout = new HorizontalLayout(logoutBtn);
         layout.setWidthFull();
         layout.setJustifyContentMode(HorizontalLayout.JustifyContentMode.START);
