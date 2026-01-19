@@ -3,14 +3,17 @@ package com.gesamtprojekt.application.service.implementation;
 import com.gesamtprojekt.application.model.Booking;
 import com.gesamtprojekt.application.model.Client;
 import com.gesamtprojekt.application.model.MeetingRoom;
+import com.gesamtprojekt.application.model.Notification;
 import com.gesamtprojekt.application.repositories.BookingRepository;
 import com.gesamtprojekt.application.repositories.MeetingRoomRepository;
 import com.gesamtprojekt.application.service.BookingServiceInterface;
+import com.gesamtprojekt.application.service.dto.NotificationType;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.awt.print.Book;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -18,6 +21,7 @@ import java.util.List;
 public class BookingService implements BookingServiceInterface {
 
     private final BookingRepository bookingRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public void createBooking(Booking booking) {
@@ -30,7 +34,37 @@ public class BookingService implements BookingServiceInterface {
         if (conflict) {
             throw new RuntimeException("Booking conflict detected for the selected room and time.");
         }
+
+        // Code setzen
+        booking.setBookingCode(generateRandomBookingCode());
+
         bookingRepository.save(booking);
+
+        // Notification
+        notificationService.createNotification(
+                booking,
+                NotificationType.CONFIRMATION
+        );
+
+        // Notification für kurzfristige Buchunen
+        LocalDateTime now = LocalDateTime.now();
+        if (booking.getStartTime().isBefore(now.plusMinutes(15)) &&
+            booking.getStartTime().isAfter(now)) {
+
+            notificationService.createNotification(
+                    booking,
+                    NotificationType.REMINDER_START
+            );
+        }
+    }
+
+    // Buchungs Code generieren
+    private String generateRandomBookingCode() {
+        java.util.Random random = new java.util.Random();
+        // zwei 4-stellige Zahlen
+        int part1 = 1000 + random.nextInt(9000);
+        int part2 = 1000 + random.nextInt(9000);
+        return part1 + "-" + part2;
     }
 
     // Buchungen eines Clients finden

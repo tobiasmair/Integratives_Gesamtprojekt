@@ -41,6 +41,13 @@ public class BookingItem extends Div {
         this.runnable = runnable;
 
         addClassName("booking-item");
+
+        // Optisches Feedback für vergangene Buchungen
+        if (booking.getEndTime().isBefore(LocalDateTime.now())) {
+            this.getStyle().set("opacity", "0.6");
+            this.getStyle().set("background-color", "var(--lumo-contrast-5pct)");
+        }
+
         add(createRow(title, room, dateText, timeRange, status));
     }
 
@@ -77,7 +84,17 @@ public class BookingItem extends Div {
         var s = new Span(status);
         s.addClassName("booking-status");
 
-        var box = new VerticalLayout(t, r, d, s);
+        // Buchungscode
+        Span code = new Span("Code: " + booking.getBookingCode());
+        code.getStyle()
+                .set("font-family", "monospace")
+                .set("font-weight", "bold")
+                .set("background", "var(--lumo-contrast-10pct)")
+                .set("padding", "2px 6px")
+                .set("border-radius", "4px")
+                .set("margin-top", "4px");
+
+        var box = new VerticalLayout(t, r, d, s, code);
         box.setPadding(false);
         box.setSpacing(false);
 
@@ -86,9 +103,15 @@ public class BookingItem extends Div {
 
     private Button createEditButton() {
         Button edit = new Button(VaadinIcon.EDIT.create());
-        edit.addClickListener(e -> {
-            openEditDialog(booking);
-        });
+        // Prüfen ob Buchung bereits verangen
+        if (booking.getEndTime().isBefore(LocalDateTime.now())) {
+            edit.setEnabled(false);
+            edit.setTooltipText("Past bookings cannot be edited.");
+        } else {
+            edit.addClickListener(e -> {
+                openEditDialog(booking);
+            });
+        }
 
         return edit;
     }
@@ -96,7 +119,16 @@ public class BookingItem extends Div {
     public Button createDeleteButton() {
         Button delete = new Button(VaadinIcon.TRASH.create());
         delete.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_TERTIARY);
-        delete.addClickListener(e -> openDeleteDialog(booking));
+
+        // Prüfen ob Buchung bereits verangen
+        if (booking.getEndTime().isBefore(LocalDateTime.now())) {
+            delete.setEnabled(false);
+            delete.setTooltipText("Past bookings cannot be deleted.");
+        } else {
+            delete.addClickListener(e -> {
+                openDeleteDialog(booking);
+            });
+        }
 
         return delete;
     }

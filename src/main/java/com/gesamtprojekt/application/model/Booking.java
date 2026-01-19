@@ -34,8 +34,8 @@ public class Booking {
     @Column(name = "purpose")
     private String purpose;
 
-    @Column(name = "attendees")
-    private Integer attendees;
+    @Column(name = "bookingCode")
+    private String bookingCode;     // 1234-5678
 
     @Column(name = "isActive")
     private Boolean isActive = true;
