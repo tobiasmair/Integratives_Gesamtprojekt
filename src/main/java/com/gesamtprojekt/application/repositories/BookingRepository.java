@@ -106,4 +106,11 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findByEndTimeAndIsActiveTrue(LocalDateTime startTime);
 
+    /**
+     * Findet alle Buchungen für einen Raum, die aktiv sind.
+     * Wir sortieren sie direkt nach Startzeit, damit die Logik in der View
+     * immer die chronologisch nächsten Buchungen zuerst sieht.
+     */
+    List<Booking> findByMeetingRoom_RoomIdAndIsActiveTrueOrderByStartTimeAsc(Long roomId);
+
 }
