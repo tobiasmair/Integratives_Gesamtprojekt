@@ -8,6 +8,7 @@ import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.gesamtprojekt.application.ui.client.MainLayout;
 import com.gesamtprojekt.application.ui.components.calendar.CalendarControlsBar;
 import com.gesamtprojekt.application.ui.components.calendar.CalendarRoomsSection;
+import com.gesamtprojekt.application.ui.components.calendar.ViewMode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -56,6 +57,14 @@ public class CalendarView extends VerticalLayout {
                     controls.getCapacity(),
                     controls.getEquipment()
             );
+        });
+
+        controls.addModeChangedListener(e -> {
+            if (e.getMode() == ViewMode.CALENDAR) {
+                rooms.setHeading("Available Meeting Rooms");
+            } else {
+                rooms.setHeading("Browse All Rooms");
+            }
         });
 
         rooms.addClassName("calendar-rooms-scroll");

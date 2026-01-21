@@ -21,6 +21,7 @@ public class CalendarRoomsSection extends VerticalLayout {
     private final BookingService bookingService;
     private final SecurityService securityService;
     private final FlexLayout grid = new FlexLayout();
+    private final H4 heading = new H4("Available Meeting Rooms");
 
     public CalendarRoomsSection(MeetingRoomService meetingRoomService, BookingService bookingService,
                                 SecurityService securityService) {
@@ -32,10 +33,14 @@ public class CalendarRoomsSection extends VerticalLayout {
         setPadding(false);
         setSpacing(true);
 
-        add(new H4("available Meeting Rooms"));
+        add(heading);
         add(buildGrid());
 
         //reload();
+    }
+
+    public void setHeading(String text) {
+        heading.setText(text);
     }
 
     private FlexLayout buildGrid() {
@@ -55,6 +60,13 @@ public class CalendarRoomsSection extends VerticalLayout {
     public void reload(LocalDateTime start, LocalDateTime end, String b, String f, String cap, Set<String> equip) {
         grid.removeAll();
 
+        // Browse Mode: Nur Filter, kein Datum
+        if (start == null || end == null) {
+            reloadBrowseMode(b, f, cap, equip);
+            return;
+        }
+
+        // Calendar Mode: Mit Datum und Verfügbarkeit
         if (end.isBefore(start) || end.isEqual(start)) {
             Notification.show("End time must be after start time.", 3000, Notification.Position.TOP_CENTER)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
@@ -71,6 +83,24 @@ public class CalendarRoomsSection extends VerticalLayout {
             rooms.forEach(r -> {
                 CalendarRoomCard card = buildCard(mapToCardModel(r));
                 card.setFilterDateTime(start, end);
+                grid.add(card);
+            });
+        }
+    }
+
+    private void reloadBrowseMode(String b, String f, String cap, Set<String> equip) {
+        grid.removeAll();
+
+        // Abfrage DB: Alle Räume ohne Verfügbarkeitsprüfung
+        List<MeetingRoom> rooms = meetingRoomService.findAllRoomsByFilters(b, f, cap, equip);
+
+        if (rooms.isEmpty()) {
+            grid.add(new Span("No rooms found for the selected filters."));
+        } else {
+            rooms.forEach(r -> {
+                CalendarRoomCard card = buildCard(mapToCardModel(r));
+                // Im Browse Mode keine Datum-Filterung
+                card.setFilterDateTime(null, null);
                 grid.add(card);
             });
         }

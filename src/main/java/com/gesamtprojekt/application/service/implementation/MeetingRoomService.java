@@ -193,4 +193,37 @@ public class MeetingRoomService implements MeetingRoomServiceInterface {
                 equipmentCount);
     }
 
+    public List<MeetingRoom> findAllRoomsByFilters(
+            String building,
+            String floorStr,
+            String minCapStr,
+            Set<String> equipmentSet) {
+
+        // Floor-String zu Integer konvertieren
+        Integer floor = null;
+        if (floorStr != null && !floorStr.equals("Any Floor")) {
+            try {
+                floor = Integer.valueOf(floorStr);
+            } catch (NumberFormatException e) {
+                floor = null;
+            }
+        }
+
+        // Min capacity Logik
+        int minCap = 0;
+        if (minCapStr != null && minCapStr.endsWith("+")) {
+            minCap = Integer.parseInt(minCapStr.replace("+", ""));
+        }
+
+        // Equipment Count für Query
+        long equipmentCount = (equipmentSet != null && !equipmentSet.isEmpty()) ? equipmentSet.size() : 0;
+
+        return meetingRoomRepository.findFilteredRooms(
+                building,
+                floor,
+                minCap,
+                equipmentSet,
+                equipmentCount);
+    }
+
 }
