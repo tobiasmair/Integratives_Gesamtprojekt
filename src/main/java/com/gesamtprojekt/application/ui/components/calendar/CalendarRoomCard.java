@@ -41,7 +41,7 @@ public class CalendarRoomCard extends Div {
     }
 
     private VerticalLayout buildCard(CalendarRoomCardModel r) {
-        Image img = buildImage(r.imagePath());
+        Image img = buildImage(r.name());
         Span title = buildTitle(n(r.name()), r);
 
         VerticalLayout info = buildInfo(r);
@@ -55,10 +55,9 @@ public class CalendarRoomCard extends Div {
         return box;
     }
 
-    private Image buildImage(String imagePath) {
-        String src = (imagePath == null || imagePath.isBlank())
-                ? "https://picsum.photos/600/350"
-                : "/room-images?path=" + imagePath;
+    private Image buildImage(String roomName) {
+
+        String src = "/room-images/by-room?roomName=" + (roomName != null ? roomName : "dummypicture");
 
         Image img = new Image(src, "Room");
         img.setWidthFull();

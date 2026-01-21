@@ -30,7 +30,7 @@ public class RoomDetailsDialog extends Dialog {
         H2 header = new H2(room.name() != null ? room.name() : "");
         header.getStyle().set("margin", "0");
 
-        Image img = buildImage(room.imagePath());
+        Image img = buildImage(room.name());
 
         VerticalLayout infoSection = new VerticalLayout();
         infoSection.setPadding(false);
@@ -60,10 +60,8 @@ public class RoomDetailsDialog extends Dialog {
         return content;
     }
 
-    private Image buildImage(String imagePath) {
-        String src = (imagePath == null || imagePath.isBlank())
-                ? "https://picsum.photos/600/350"
-                : "/room-images?path=" + imagePath;
+    private Image buildImage(String roomName) {
+        String src = "/room-images/by-room?roomName=" + (roomName != null ? roomName : "dummypicture");
 
         Image img = new Image(src, "Room");
         img.setWidthFull();

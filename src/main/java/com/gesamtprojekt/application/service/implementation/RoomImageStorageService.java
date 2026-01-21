@@ -16,10 +16,7 @@ public class RoomImageStorageService {
         createDir();
     }
 
-    /**
-     * Speichert das Bild am Server im Ordner uploads/rooms
-     * und gibt als "path" nur den Dateinamen zurück (z.B. 8f3a... .jpg).
-     */
+
     public StoredImage save(InputStream in, String originalName, String mime) {
         String fileName = UUID.randomUUID() + ext(originalName);
         Path target = baseDir.resolve(fileName);
@@ -27,9 +24,6 @@ public class RoomImageStorageService {
         return new StoredImage(fileName, normalizeMime(mime, fileName), originalName);
     }
 
-    /**
-     * Öffnet ein gespeichertes Bild anhand des Dateinamens (nicht voller Pfad!).
-     */
     public OpenedImage openByFileName(String fileName) {
         try {
             Path p = baseDir.resolve(fileName);
@@ -39,6 +33,30 @@ public class RoomImageStorageService {
         } catch (Exception e) {
             throw new IllegalStateException("Cannot open image: " + fileName, e);
         }
+    }
+
+    public OpenedImage getRoomImage(String roomName) {
+        if (roomName != null && !roomName.isBlank()) {
+
+            String safeName = roomName.replaceAll("[/\\\\:*?\"<>|]", "_");
+
+
+            for (String ext : new String[]{".jpeg", ".jpg", ".png", ".webp"}) {
+                Path roomImagePath = baseDir.resolve(safeName + ext);
+                if (Files.exists(roomImagePath)) {
+                    try {
+                        InputStream in = Files.newInputStream(roomImagePath, StandardOpenOption.READ);
+                        String mime = guessMime(safeName + ext);
+                        return new OpenedImage(in, mime);
+                    } catch (Exception e) {
+
+                    }
+                }
+            }
+        }
+
+
+        return openByFileName("dummypicture1.jpeg");
     }
 
     private void createDir() {
