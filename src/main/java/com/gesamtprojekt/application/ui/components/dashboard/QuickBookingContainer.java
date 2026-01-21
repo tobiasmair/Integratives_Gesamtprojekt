@@ -27,6 +27,7 @@ import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -98,6 +99,7 @@ public class QuickBookingContainer extends Div {
         LocalTime nowRounded = roundToNextHalfHour(LocalTime.now());
 
         datePicker.setValue(java.time.LocalDate.now());
+        datePicker.setMin(LocalDate.now());
 
         // Nächste gerundete Stunde als Startzeit
         startTime.setValue(nowRounded);
@@ -169,9 +171,17 @@ public class QuickBookingContainer extends Div {
 
         LocalDateTime start = datePicker.getValue().atTime(startTime.getValue());
         LocalDateTime end = datePicker.getValue().atTime(endTime.getValue());
+        LocalDateTime now = LocalDateTime.now();
 
         if (end.isBefore(start) || end.isEqual(start)) {
             Notification.show("End time must be after start time.", 3000, Notification.Position.TOP_CENTER)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            roomGroup.setItems(List.of());
+            return;
+        }
+
+        if (start.isBefore(now)) {
+            Notification.show("Start time must be in the future.", 3000, Notification.Position.TOP_CENTER)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             roomGroup.setItems(List.of());
             return;
