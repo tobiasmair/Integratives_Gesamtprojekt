@@ -2,31 +2,24 @@ package com.gesamtprojekt.application.ui.components.calendar;
 
 import com.gesamtprojekt.application.model.Equipment;
 import com.gesamtprojekt.application.service.implementation.EquipmentService;
-import com.gesamtprojekt.application.ui.components.dashboard.BookingChangedEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.shared.Registration;
-import lombok.Getter;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -62,7 +55,6 @@ public class CalendarControlsBar extends VerticalLayout {
     }
 
 
-    public ViewMode getCurrentMode() { return currentMode; }
     public LocalDateTime getStartDateTime() {
         if (currentMode == ViewMode.BROWSE || date.getValue() == null || start.getValue() == null) {
             return null;
@@ -184,7 +176,7 @@ public class CalendarControlsBar extends VerticalLayout {
         toggleBar.setSpacing(true);
         toggleBar.getStyle().set("margin-bottom", "10px");
 
-        calendarModeBtn = new Button("Calendar", new Icon(VaadinIcon.CALENDAR));
+        calendarModeBtn = new Button("Book by Date", new Icon(VaadinIcon.CALENDAR));
         calendarModeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         calendarModeBtn.addClickListener(e -> switchMode(ViewMode.CALENDAR));
 
