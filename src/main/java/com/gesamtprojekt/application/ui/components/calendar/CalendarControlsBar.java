@@ -87,7 +87,14 @@ public class CalendarControlsBar extends VerticalLayout {
 
         // Nächste gerundete Stunde als Startzeit
         start = time("Start Time", nowRounded);
-        end = time("End Time", nowRounded.plusHours(1));
+
+        // End Time: 1 Stunde später, aber maximal 23:30 (um Mitternachts-Problem zu vermeiden)
+        LocalTime endTimeCalculated = nowRounded.plusHours(1);
+        if (endTimeCalculated.isBefore(nowRounded) || endTimeCalculated.equals(LocalTime.MIDNIGHT)) {
+            // Über Mitternacht:    setze auf 23:30 statt 0 Uhr
+            endTimeCalculated = LocalTime.of(23, 30);
+        }
+        end = time("End Time", endTimeCalculated);
 
         start.setStep(Duration.ofMinutes(30));
         end.setStep(Duration.ofMinutes(30));

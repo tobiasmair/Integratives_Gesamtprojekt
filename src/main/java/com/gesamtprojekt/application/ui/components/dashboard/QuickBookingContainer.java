@@ -101,7 +101,14 @@ public class QuickBookingContainer extends Div {
 
         // Nächste gerundete Stunde als Startzeit
         startTime.setValue(nowRounded);
-        endTime.setValue(nowRounded.plusHours(1));
+
+        // End Time: 1 Stunde später, aber maximal 23:30 (um Mitternachts-Problem zu vermeiden)
+        LocalTime endTimeCalculated = nowRounded.plusHours(1);
+        if (endTimeCalculated.isBefore(nowRounded) || endTimeCalculated.equals(LocalTime.MIDNIGHT)) {
+            // Über Mitternacht - setze auf 23:30 statt
+            endTimeCalculated = LocalTime.of(23, 30);
+        }
+        endTime.setValue(endTimeCalculated);
 
         startTime.setStep(Duration.ofMinutes(30));
         endTime.setStep(Duration.ofMinutes(30));
@@ -301,7 +308,14 @@ public class QuickBookingContainer extends Div {
             // Formular zurücksetzen
             LocalTime nowRounded = roundToNextHalfHour(LocalTime.now());
             startTime.setValue(nowRounded);
-            endTime.setValue(nowRounded.plusHours(1));
+
+            // End Time: 1 Stunde später, aber maximal 23:30 (um Mitternachts-Problem zu vermeiden)
+            LocalTime endTimeReset = nowRounded.plusHours(1);
+            if (endTimeReset.isBefore(nowRounded) || endTimeReset.equals(LocalTime.MIDNIGHT)) {
+                endTimeReset = LocalTime.of(23, 30);
+            }
+            endTime.setValue(endTimeReset);
+
             purposeField.clear();
             loadRooms();
 
