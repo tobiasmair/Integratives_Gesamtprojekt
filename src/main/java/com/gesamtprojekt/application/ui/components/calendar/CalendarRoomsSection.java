@@ -4,12 +4,15 @@ import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.security.SecurityService;
 import com.gesamtprojekt.application.service.implementation.BookingService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.shared.Registration;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -113,6 +116,13 @@ public class CalendarRoomsSection extends VerticalLayout {
     private CalendarRoomCard buildCard(CalendarRoomCardModel r) {
         CalendarRoomCard card = new CalendarRoomCard(r, bookingService, meetingRoomService, securityService);
         card.getStyle().set("width", "260px");
+
+        // Event-Listener für Buchungserstellung
+        card.addBookingCreatedListener(event -> {
+            System.out.println("DEBUG: BookingCreatedEvent received in CalendarRoomsSection from card: " + r.name());
+            fireEvent(new BookingCreatedInSectionEvent(this));
+        });
+
         return card;
     }
 
@@ -136,5 +146,15 @@ public class CalendarRoomsSection extends VerticalLayout {
                 .filter(s -> !s.isBlank())
                 .sorted(String.CASE_INSENSITIVE_ORDER)
                 .toList();
+    }
+
+    public static class BookingCreatedInSectionEvent extends ComponentEvent<CalendarRoomsSection> {
+        public BookingCreatedInSectionEvent(CalendarRoomsSection source) {
+            super(source, false);
+        }
+    }
+
+    public Registration addBookingCreatedListener(ComponentEventListener<BookingCreatedInSectionEvent> listener) {
+        return addListener(BookingCreatedInSectionEvent.class, listener);
     }
 }

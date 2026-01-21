@@ -67,6 +67,18 @@ public class CalendarView extends VerticalLayout {
             }
         });
 
+        rooms.addBookingCreatedListener(e -> {
+            System.out.println("DEBUG: BookingCreatedInSectionEvent received in CalendarView, reloading grid");
+            rooms.reload(
+                    controls.getStartDateTime(),
+                    controls.getEndDateTime(),
+                    controls.getBuilding(),
+                    controls.getFloor(),
+                    controls.getCapacity(),
+                    controls.getEquipment()
+            );
+        });
+
         rooms.addClassName("calendar-rooms-scroll");
 
         add(controls, rooms);
