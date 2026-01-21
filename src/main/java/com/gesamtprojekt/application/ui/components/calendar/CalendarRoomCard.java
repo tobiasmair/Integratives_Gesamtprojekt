@@ -15,11 +15,15 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.shared.Registration;
 
+import java.time.LocalDateTime;
+
 public class CalendarRoomCard extends Div {
 
     private final BookingService bookingService;
     private final MeetingRoomService meetingRoomService;
     private final SecurityService securityService;
+    private LocalDateTime startDateTime;
+    private LocalDateTime endDateTime;
 
     public CalendarRoomCard(CalendarRoomCardModel room, BookingService bookingService,
                             MeetingRoomService meetingRoomService, SecurityService securityService) {
@@ -29,6 +33,11 @@ public class CalendarRoomCard extends Div {
 
         addClassName("calendar-room-card");
         add(buildCard(room));
+    }
+
+    public void setFilterDateTime(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        this.startDateTime = startDateTime;
+        this.endDateTime = endDateTime;
     }
 
     private VerticalLayout buildCard(CalendarRoomCardModel r) {
@@ -142,7 +151,9 @@ public class CalendarRoomCard extends Div {
                     room.name(),
                     bookingService,
                     meetingRoomService,
-                    securityService
+                    securityService,
+                    startDateTime,
+                    endDateTime
             );
 
             dialog.addBookingCreatedListener(event -> {

@@ -68,7 +68,11 @@ public class CalendarRoomsSection extends VerticalLayout {
         if (rooms.isEmpty()) {
             grid.add(new Span("No rooms available for the selected filters."));
         } else {
-            rooms.forEach(r -> grid.add(buildCard(mapToCardModel(r))));
+            rooms.forEach(r -> {
+                CalendarRoomCard card = buildCard(mapToCardModel(r));
+                card.setFilterDateTime(start, end);
+                grid.add(card);
+            });
         }
     }
 
