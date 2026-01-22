@@ -9,6 +9,11 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 
+
+/**
+ * A dialog window that prompts the user to enter the rooms password on attempted logout
+ * Safety-feature to ensure only entitled personal logs-out the room tablet
+ */
 public class ConfirmLogout extends Dialog {
 
     public interface ConfirmCallback {
@@ -23,6 +28,7 @@ public class ConfirmLogout extends Dialog {
         VerticalLayout layout = new VerticalLayout(new Span("Please enter the room password to logout."), passwordField);
         add(layout);
 
+        // validates the credentials
         Button confirmButton = new Button("Logout", e -> {
             if (passwordChecker.test(passwordField.getValue())) {
                 callback.onConfirm();

@@ -7,6 +7,9 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
+/**
+ * Is displayed one minute before and 5 minutes past the booking's startTime to prompt the user for the check-in code
+ */
 public class RoomLockScreen extends VerticalLayout {
     public RoomLockScreen(Runnable onCheckInClick) {
         setSizeFull();

@@ -3,6 +3,10 @@ package com.gesamtprojekt.application.ui.room.components;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
+/**
+ * Screen header that shoes the current time
+ * to reduce overhead, the time is updated on client-side
+ */
 public class RoomHeader extends HorizontalLayout {
 
     public RoomHeader() {
@@ -12,7 +16,7 @@ public class RoomHeader extends HorizontalLayout {
         setAlignItems(Alignment.CENTER);
         setJustifyContentMode(JustifyContentMode.CENTER);
 
-        // Styling
+        // styling
         getStyle().set("background-color", "var(--lumo-base-color)");
         getStyle().set("border-bottom", "1px solid var(--lumo-contrast-10pct)");
         getStyle().set("box-shadow", "var(--lumo-box-shadow-xs)");
@@ -25,8 +29,7 @@ public class RoomHeader extends HorizontalLayout {
 
         add(timeSpan);
 
-        // Ein kleiner JavaScript-Schnipsel, der die Uhrzeit im Browser aktualisiert
-        // So läuft die Uhr flüssig ohne Server-Requests
+        // updates the time every second browser-native without request to a server
         getElement().executeJs(
                 "const clock = document.getElementById('live-clock');" +
                         "setInterval(() => {" +

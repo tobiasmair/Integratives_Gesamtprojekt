@@ -6,6 +6,10 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.textfield.TextField;
 import com.gesamtprojekt.application.model.Booking;
 
+/**
+ * A dialog window that prompts the user to enter the Room-Code
+ * Unlocks the room only if the code is correct
+ */
 public class CheckInDialog extends Dialog {
     public CheckInDialog(Booking booking, Runnable onValidCode) {
         setHeaderTitle("Confirm Booking");
@@ -14,11 +18,13 @@ public class CheckInDialog extends Dialog {
         codeField.setPlaceholder("____-____");
         codeField.setWidthFull();
 
+        // checks on click if the entered code matches the code in the Database
         Button confirmBtn = new Button("Unlock", e -> {
             if (codeField.getValue().equals(booking.getBookingCode())) {
-                onValidCode.run();
+                onValidCode.run();  // proceeds check-in
                 close();
             } else {
+                // feedback of wrong entry
                 codeField.setInvalid(true);
                 codeField.setErrorMessage("Invalid Code!");
             }
