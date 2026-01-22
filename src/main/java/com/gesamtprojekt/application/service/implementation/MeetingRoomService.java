@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -212,5 +213,9 @@ public class MeetingRoomService implements MeetingRoomServiceInterface {
         return equipmentSet.stream()
                 .anyMatch(e -> e.getDescription().equalsIgnoreCase(name));
     }
+    public Optional<MeetingRoom> findRoomByClient(Client client) {
+        return meetingRoomRepository.findByRoomUser_UserId(client.getUserId());
+    }
+
 
 }
