@@ -182,10 +182,16 @@ vaadin-app-layout.drawer-collapsed vaadin-side-nav-item::part(label) {
 }
 
 .booking-item {
-  border: 1px solid var(--lumo-contrast-20pct);
-  border-radius: var(--lumo-border-radius-m);
-  padding: var(--lumo-space-s);
-  background: var(--lumo-base-color);
+  border: 1px solid var(--lumo-contrast-10pct);
+  border-radius: var(--lumo-border-radius-l);
+  padding: var(--lumo-space-m);
+  background-color: var(--lumo-base-color);
+  transition: background-color 0.3s;
+}
+
+.booking-item.past-booking {
+  opacity: 0.6;
+  background-color: var(--lumo-contrast-5pct);
 }
 
 .booking-title {
