@@ -50,10 +50,10 @@ public class StatisticsView extends VerticalLayout {
         setPadding(true);
         setSpacing(true);
 
-        add(new H1("Statistics Übersicht"));
+        //add(new H1("Statistics Übersicht"));
 
-        Button refresh = new Button("Aktualisieren", e -> loadAll());
-        add(refresh);
+        //Button refresh = new Button("Aktualisieren", e -> loadAll());
+        //add(refresh);
 
         add(buildKpiRow());
 
