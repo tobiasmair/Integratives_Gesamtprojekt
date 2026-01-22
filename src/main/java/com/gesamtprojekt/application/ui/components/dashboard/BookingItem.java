@@ -4,28 +4,20 @@ import com.gesamtprojekt.application.model.Booking;
 import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.service.implementation.BookingService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.timepicker.TimePicker;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.shared.Registration;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.List;
 
 public class BookingItem extends Div {
 
@@ -44,61 +36,100 @@ public class BookingItem extends Div {
 
         // Optisches Feedback für vergangene Buchungen
         if (booking.getEndTime().isBefore(LocalDateTime.now())) {
-            this.getStyle().set("opacity", "0.6");
-            this.getStyle().set("background-color", "var(--lumo-contrast-5pct)");
+            addClassName("past-booking");
         }
 
-        add(createRow(title, room, dateText, timeRange, status));
+        add(createMainLayout(title, room, dateText, timeRange, status));
     }
 
-    private HorizontalLayout createRow(
-            String title,
-            String room,
-            String dateText,
-            String timeRange,
-            String status
-    ) {
-        var left = createTextBlock(title, room, dateText, status);
-        var edit = createEditButton();
-        var delete = createDeleteButton();
-        var badge = createTimeBadge(timeRange);
+    private HorizontalLayout createMainLayout(String title, String room, String dateText, String timeRange, String status) {
+        // Linke Seite: Alle Infos
+        var infoLayout = createInfoSection(title, room, dateText, status);
 
-        var row = new HorizontalLayout(left, edit, delete, badge);
-        row.setWidthFull();
-        row.setAlignItems(HorizontalLayout.Alignment.CENTER);
-        row.expand(left);
+        // Rechte Seite: Zeit-Badge und Buttons
+        var actionsLayout = new VerticalLayout();
+        actionsLayout.setSpacing(true);
+        actionsLayout.setPadding(false);
+        actionsLayout.setWidth("auto");
+        actionsLayout.setAlignItems(FlexComponent.Alignment.END);
 
-        return row;
+        var timeBadge = createTimeBadge(timeRange);
+        var buttons = new HorizontalLayout(createEditButton(), createDeleteButton());
+
+        actionsLayout.add(timeBadge, buttons);
+
+        var mainRow = new HorizontalLayout(infoLayout, actionsLayout);
+        mainRow.setWidthFull();
+        mainRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        mainRow.expand(infoLayout);
+
+        return mainRow;
     }
 
-    private VerticalLayout createTextBlock(String title, String room, String dateText, String status) {
-        var t = new Span(title);
-        t.addClassName("booking-title");
+    private VerticalLayout createInfoSection(String title, String room, String dateText, String status) {
+        // Titel & Status
+        var titleRow = new HorizontalLayout(new Span(title), new Span(status));
+        titleRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        titleRow.getChildren().findFirst().ifPresent(c -> c.setClassName("booking-title"));
+        titleRow.getChildren().skip(1).findFirst().ifPresent(c -> c.setClassName("booking-status"));
 
-        var r = new Span(room);
-        r.addClassName("booking-subtitle");
+        // Raum & Gebäude Info
+        MeetingRoom roomEntity = booking.getMeetingRoom();
+        String locationInfo = roomEntity != null ?
+                roomEntity.getLocation() + " | Floor " + roomEntity.getFloor() : "No Location";
 
-        var d = new Span(dateText);
-        d.addClassName("booking-date");
+        var locationRow = new HorizontalLayout();
+        locationRow.setSpacing(true);
+        locationRow.setAlignItems(FlexComponent.Alignment.CENTER);
 
-        var s = new Span(status);
-        s.addClassName("booking-status");
+        Icon roomIcon = VaadinIcon.BUILDING.create();
+        roomIcon.setSize("12px");
+        Span roomSpan = new Span(room + " (" + locationInfo + ")");
+        roomSpan.getStyle().set("font-size", "var(--lumo-font-size-s)").set("color", "var(--lumo-secondary-text-color)");
+        locationRow.add(roomIcon, roomSpan);
+
+        // Gehzeit & Lageplan
+        var navigationRow = new HorizontalLayout();
+        navigationRow.setSpacing(true);
+        navigationRow.setAlignItems(FlexComponent.Alignment.CENTER);
+
+        Icon walkIcon = VaadinIcon.MALE.create();
+        walkIcon.setSize("12px");
+        Span walkTime = new Span("approx. 10 min walk");
+        walkTime.getStyle().set("font-size", "var(--lumo-font-size-xs)").set("color", "var(--lumo-tertiary-text-color)");
+
+        // Lageplan Link
+        Anchor mapLink = new Anchor("#", "Show Floor Plan");
+        mapLink.getStyle().set("font-size", "var(--lumo-font-size-xs)");
+        Icon mapIcon = VaadinIcon.MAP_MARKER.create();
+        mapIcon.setSize("12px");
+        HorizontalLayout mapWrapper = new HorizontalLayout(mapIcon, mapLink);
+        mapWrapper.setSpacing(false);
+        mapWrapper.setAlignItems(FlexComponent.Alignment.CENTER);
+        mapWrapper.addClickListener(e -> Notification.show("Opening floor plan for floor " + (roomEntity != null ? roomEntity.getFloor() : "unknown")));
+
+        navigationRow.add(walkIcon, walkTime, new Span(" • "), mapWrapper);
 
         // Buchungscode
-        Span code = new Span("Code: " + booking.getBookingCode());
+        Span code = new Span(booking.getBookingCode());
         code.getStyle()
                 .set("font-family", "monospace")
                 .set("font-weight", "bold")
-                .set("background", "var(--lumo-contrast-10pct)")
-                .set("padding", "2px 6px")
+                .set("background", "var(--lumo-primary-color-10pct)")
+                .set("color", "var(--lumo-primary-text-color)")
+                .set("padding", "2px 8px")
                 .set("border-radius", "4px")
-                .set("margin-top", "4px");
+                .set("font-size", "var(--lumo-font-size-s)");
 
-        var box = new VerticalLayout(t, r, d, s, code);
-        box.setPadding(false);
-        box.setSpacing(false);
+        var codeWrapper = new HorizontalLayout(new Span("Access Code:"), code);
+        codeWrapper.setAlignItems(FlexComponent.Alignment.CENTER);
+        codeWrapper.getStyle().set("margin-top", "4px");
+        codeWrapper.setSpacing(true);
 
-        return box;
+        var section = new VerticalLayout(titleRow, locationRow, navigationRow, codeWrapper);
+        section.setPadding(false);
+        section.setSpacing(false);
+        return section;
     }
 
     private Button createEditButton() {
@@ -151,84 +182,11 @@ public class BookingItem extends Div {
         // Button + Titel verstecken
         editForm.setEditMode(true);
 
-        //editForm.getStyle().set("box-shadow", "none");
-        //editForm.getStyle().set("padding", "0");
-
-        /*
-        // Eingabefelder
-        TextField purposeField = new TextField("Purpose");
-        purposeField.setValue(booking.getPurpose() != null ? booking.getPurpose() : "");
-        purposeField.setWidthFull();
-
-        DatePicker datePicker = new DatePicker("Date");
-        datePicker.setValue(booking.getStartTime().toLocalDate());
-
-        TimePicker startTime = new TimePicker("Start Time");
-        startTime.setValue(booking.getStartTime().toLocalTime());
-        startTime.setStep(Duration.ofMinutes(30));
-
-        TimePicker endTime = new TimePicker("End Time");
-        endTime.setValue(booking.getEndTime().toLocalTime());
-        endTime.setStep(Duration.ofMinutes(30));
-
-        RadioButtonGroup<MeetingRoom> roomGroup = new RadioButtonGroup<>("Select Meeting Room");
-        roomGroup.setRenderer(new ComponentRenderer<>(room -> new Span(room.getName() + " (Cap: " + room.getCapacity() + ")")));
-        roomGroup.setWidthFull();
-
-        // Laden freier Räume
-        Runnable refreshRooms = () -> {
-            if (datePicker.getValue() != null && startTime.getValue() != null && endTime.getValue() != null) {
-                LocalDateTime start = datePicker.getValue().atTime(startTime.getValue());
-                LocalDateTime end = datePicker.getValue().atTime(endTime.getValue());
-
-                if (end.isBefore(start) || end.isEqual(start)) {
-                    Notification.show("End time must be after start time.", 3000, Notification.Position.TOP_CENTER)
-                            .addThemeVariants(NotificationVariant.LUMO_ERROR);
-                    roomGroup.setItems(List.of());
-                    return;
-                }
-
-                List<MeetingRoom> availableRooms = meetingRoomService.findAvailableRoomsExcludingBooking(start, end, booking.getBookingId());
-                roomGroup.setItems(availableRooms);
-                if (availableRooms.isEmpty()) {
-                    roomGroup.setLabel("No rooms available for the selected time.");
-                } else {
-                    roomGroup.setLabel("Select Meeting Room");
-                }
-
-                // Aktuellen Raum auswählen
-                if (booking.getMeetingRoom() != null) {
-                    availableRooms.stream()
-                            .filter(room -> room.getRoomId().equals(booking.getMeetingRoom().getRoomId()))
-                            .findFirst()
-                            .ifPresent(roomGroup::setValue);
-                }
-            }
-        };
-        // Change Listener bei Änderungen
-        datePicker.addValueChangeListener(e -> refreshRooms.run());
-        startTime.addValueChangeListener(e -> refreshRooms.run());
-        endTime.addValueChangeListener(e -> refreshRooms.run());
-
-        refreshRooms.run(); // Initial laden
-
-        VerticalLayout dialogLayout = new VerticalLayout(purposeField, datePicker, new HorizontalLayout(startTime, endTime), roomGroup);
-        dialog.add(dialogLayout);
-
-         */
         dialog.add(editForm);
 
         Button saveButton = new Button("Save", event -> {
             try {
                 editForm.updateBookingObject(booking);
-
-                /*
-                booking.setPurpose(purposeField.getValue());
-                booking.setStartTime(datePicker.getValue().atTime(startTime.getValue()));
-                booking.setEndTime(datePicker.getValue().atTime(endTime.getValue()));
-                booking.setMeetingRoom(roomGroup.getValue());
-
-                 */
 
                 bookingService.updateBooking(booking);
 

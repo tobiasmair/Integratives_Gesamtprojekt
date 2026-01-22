@@ -71,7 +71,7 @@ public class MyBookingsContainer extends Div {
     }
 
     private H3 createHeader() {
-        var title = new H3("My Bookings:");
+        var title = new H3("My Bookings");
         title.getStyle().set("margin", "0");
         return title;
     }
