@@ -8,6 +8,7 @@ import com.gesamtprojekt.application.ui.components.navigation.SideNavbar;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.applayout.AppLayout;
+import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
@@ -76,15 +77,14 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
     }
 
     private void addHeaderContent() {
+        DrawerToggle toggle = new DrawerToggle();
+        toggle.getStyle().set("color", "var(--mci-blue)");
+        toggle.getStyle().set("margin-right", "var(--lumo-space-s)");
+
         HorizontalLayout header = new HorizontalLayout();
         header.setWidthFull();
         header.setPadding(true);
         header.setAlignItems(FlexComponent.Alignment.CENTER);
-        //header.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-
-        // Platzhalter links
-        Div leftPlaceholder = new Div();
-        leftPlaceholder.setWidth("50px");
 
         // Aktuelle Uhrzeit mittig
         Span timeSpan = new Span();
@@ -109,7 +109,7 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
                         "}, 1000);"
         );
 
-        header.add(leftPlaceholder, timeSpan, notificationBell);
+        header.add(toggle, timeSpan, notificationBell);
         header.setFlexGrow(1, timeSpan);
 
         addToNavbar(header);

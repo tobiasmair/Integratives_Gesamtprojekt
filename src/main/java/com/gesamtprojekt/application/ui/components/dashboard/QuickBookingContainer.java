@@ -116,6 +116,14 @@ public class QuickBookingContainer extends Div {
     private HorizontalLayout createDateTimeRow() {
         var row = new HorizontalLayout(datePicker, startTime, endTime);
         row.setWidthFull();
+        // Responsive untereinander
+        row.getStyle().set("flex-wrap", "wrap");
+
+        // volle breite auf mobilen Geräten
+        datePicker.getStyle().set("min-width", "120px").set("flex", "1");
+        startTime.getStyle().set("min-width", "100px").set("flex", "1");
+        endTime.getStyle().set("min-width", "100px").set("flex", "1");
+
         return row;
     }
 
