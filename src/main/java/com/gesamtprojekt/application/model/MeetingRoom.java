@@ -42,21 +42,7 @@ public class MeetingRoom {
     @Column(name = "status")
     private String status;
 
-    // Steuerungs-Flags
-    @Column(name = "hasDoorControl")
-    private Boolean hasDoorControl;
-
-    @Column(name = "hasLightControl")
-    private Boolean hasLightControl;
-
-    @Column(name = "hasVentilationControl")
-    private Boolean hasVentilationControl;
-
-    // wird für Soft-Delete/Filter verwendet
-    @Column(name = "isActive")
-    private Boolean isActive = true;
-
-    // Relation to Booking
+    // Image storage
     @Column(name = "image_path")
     private String imagePath;
 
@@ -65,6 +51,26 @@ public class MeetingRoom {
 
     @Column(name = "image_original_name")
     private String imageOriginalName;
+
+    // Steuerungs-Flags
+    @Column(name = "hasBlindControl")
+    private Boolean hasBlindControl;
+
+    @Column(name = "hasLightControl")
+    private Boolean hasLightControl;
+
+    @Column(name = "hasVentilationControl")
+    private Boolean hasVentilationControl;
+
+    @Column(name = "hasBeamerControl")
+    private Boolean hasBeamerControl;
+
+    @Column(name = "hasVacuumRobot")
+    private Boolean hasVacuumRobot;
+
+    // wird für Soft-Delete/Filter verwendet
+    @Column(name = "isActive")
+    private Boolean isActive = true;
 
     // Relation zu Client (1:1)
     @OneToOne(fetch = FetchType.EAGER)
@@ -82,6 +88,5 @@ public class MeetingRoom {
             joinColumns = @JoinColumn(name = "room_id", referencedColumnName = "roomId"),
             inverseJoinColumns = @JoinColumn(name = "equipment_id", referencedColumnName = "equipmentId")
     )
-
     private Set<Equipment> equipment = new LinkedHashSet<>();
 }

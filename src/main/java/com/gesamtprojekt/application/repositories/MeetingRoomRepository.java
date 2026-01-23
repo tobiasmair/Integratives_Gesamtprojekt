@@ -87,4 +87,14 @@ public interface MeetingRoomRepository extends JpaRepository<MeetingRoom, Long> 
     @EntityGraph(attributePaths = "equipment")
     List<MeetingRoom> findAll();
 
+
+    // Findet den Raum, der einem bestimmten Client-Account zugeordnet ist
+    Optional<MeetingRoom> findByRoomUser_UserId(Long userId);
+
+    @Query("select r from MeetingRoom r where r.isActive = true and r.name = :name")
+    Optional<MeetingRoom> findActiveByExactName(@Param("name") String name);
+
+
+
+
 }

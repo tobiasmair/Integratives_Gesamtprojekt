@@ -28,6 +28,7 @@ public class Booking {
     @Column(name = "checkInTime")
     private LocalDateTime checkInTime;
 
+    // CONFIRMED, CANCELLED, MISSED, COMPLETED
     @Column(name = "bookingStatus")
     private String bookingStatus;
 
