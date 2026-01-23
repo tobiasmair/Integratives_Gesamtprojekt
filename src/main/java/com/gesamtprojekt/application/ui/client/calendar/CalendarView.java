@@ -17,7 +17,7 @@ import com.vaadin.flow.shared.Registration;
 import jakarta.annotation.security.RolesAllowed;
 
 @Route(value = "calendar", layout = MainLayout.class)
-@PageTitle("Calendar")
+@PageTitle("Calendar | MCI Meeting Booker")
 @RolesAllowed({"USER", "ADMIN"})
 public class CalendarView extends VerticalLayout {
 

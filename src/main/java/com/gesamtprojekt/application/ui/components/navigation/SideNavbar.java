@@ -55,7 +55,7 @@ public class SideNavbar extends FlexLayout {
         logo.setHeight("28px");
         logo.addClassName("app-logo");
 
-        Span appName = new Span("MCI - Booking Service");
+        Span appName = new Span("MCI - Meeting Booker");
         appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.SMALL);
         appName.addClassName("app-name");
 

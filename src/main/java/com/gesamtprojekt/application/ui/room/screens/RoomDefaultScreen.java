@@ -5,6 +5,7 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.gesamtprojekt.application.model.Booking;
+import com.vaadin.flow.router.PageTitle;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

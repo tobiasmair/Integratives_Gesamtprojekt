@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Route(value = "statistics", layout = MainLayout.class)
-@PageTitle("Statistics")
+@PageTitle("Statistics | MCI Meeting Booker")
 @RolesAllowed("ADMIN")
 public class StatisticsView extends VerticalLayout {
 

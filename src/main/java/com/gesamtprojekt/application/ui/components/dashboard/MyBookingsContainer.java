@@ -79,6 +79,7 @@ public class MyBookingsContainer extends Div {
     private HorizontalLayout createTopRow() {
         var row = new HorizontalLayout(tabs, customDate);
         row.setWidthFull();
+        row.getStyle().set("flex-wrap", "wrap");    // Zeilenumbruch aktivieren
         row.setAlignItems(HorizontalLayout.Alignment.END);
         row.expand(tabs);
         return row;
