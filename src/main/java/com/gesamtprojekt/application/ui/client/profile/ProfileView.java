@@ -16,7 +16,7 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.RolesAllowed;
 
 @Route(value = "profile", layout = MainLayout.class)
-@PageTitle("Profile")
+@PageTitle("Profile | MCI Meeting Booker")
 @RolesAllowed({"USER", "ADMIN", "ROOM"})
 public class ProfileView extends VerticalLayout {
 

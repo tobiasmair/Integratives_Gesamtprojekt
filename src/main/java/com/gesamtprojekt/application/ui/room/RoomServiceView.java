@@ -29,7 +29,7 @@ import java.util.Optional;
  * This view coordinates the lifecycle of the room regarding the state of a booking: Default-Screen, Lock-Screen and Control-Dashboard.
  */
 @Route(value = "roomservice")
-@PageTitle("Room Service")
+@PageTitle("Room | MCI Meeting Booker")
 @RolesAllowed("ROOM")
 public class RoomServiceView extends VerticalLayout {
 

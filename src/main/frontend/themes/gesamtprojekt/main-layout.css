@@ -408,3 +408,38 @@ vaadin-app-layout.drawer-collapsed vaadin-side-nav-item::part(label) {
   column-gap: 10px;
 }
 
+/* Login & Register Background */
+.login-screen, .register-screen {
+  background: linear-gradient(135deg, var(--mci-blue) 0%, var(--mci-blue-light) 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-card {
+  background-color: white;
+  padding: var(--lumo-space-xl);
+  border-radius: var(--lumo-border-radius-l);
+  box-shadow: var(--lumo-box-shadow-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 420px;
+}
+
+.login-logo {
+  margin-bottom: var(--lumo-space-m);
+  height: 50px;
+}
+
+vaadin-login-form::part(form) {
+  padding: 0;
+}
+
+.login-footer-btns {
+  margin-top: var(--lumo-space-m);
+  border-top: 1px solid var(--lumo-contrast-10pct);
+  padding-top: var(--lumo-space-m);
+  width: 100%;
+}

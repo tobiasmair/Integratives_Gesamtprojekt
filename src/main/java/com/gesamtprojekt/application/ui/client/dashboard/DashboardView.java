@@ -16,7 +16,7 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 
 @Route(value = "", layout = MainLayout.class)
-@PageTitle("Dashboard")
+@PageTitle("Dashboard | MCI Meeting Booker")
 //@RolesAllowed({"USER", "ADMIN"})
 @PermitAll
 public class DashboardView extends VerticalLayout implements BeforeEnterObserver {

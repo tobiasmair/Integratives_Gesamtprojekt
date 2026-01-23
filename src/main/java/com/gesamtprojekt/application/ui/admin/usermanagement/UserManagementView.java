@@ -11,7 +11,7 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.RolesAllowed;
 
 @Route(value = "usermanagement", layout = MainLayout.class)
-@PageTitle("User Management")
+@PageTitle("User Management | MCI Meeting Booker")
 @RolesAllowed("ADMIN")
 public class UserManagementView extends VerticalLayout {
 
