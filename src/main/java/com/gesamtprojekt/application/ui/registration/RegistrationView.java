@@ -6,6 +6,7 @@ import com.gesamtprojekt.application.ui.login.LoginView;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
@@ -15,7 +16,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 @Route("register")
-@PageTitle("Registration")
+@PageTitle("Registration | MCI Meeting Booker")
 @AnonymousAllowed
 public class RegistrationView extends VerticalLayout {
 
@@ -23,23 +24,24 @@ public class RegistrationView extends VerticalLayout {
 
     public RegistrationView(ClientService clientService) {
         this.clientService = clientService;
-
+        addClassName("register-screen");
         setSizeFull();
-        setAlignItems(Alignment.CENTER);
-        setJustifyContentMode(JustifyContentMode.CENTER);
 
-        var title = new H2("Create new account");
+        Div card = new Div();
+        card.addClassName("login-card");
+        card.getStyle().set("max-width", "500px");
+
+        var title = new H2("Sign Up");
+        title.getStyle().set("color", "var(--mci-blue)").set("margin-top", "0");
 
         VerticalLayout customerForm = createCustomerForm();
 
-        customerForm.setMaxWidth("400px");
-        customerForm.setWidthFull();
-        customerForm.setPadding(false);
-
         var loginLink = new Button("Back to Login", e -> UI.getCurrent().navigate(LoginView.class));
         loginLink.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        loginLink.setWidthFull();
 
-        add(title, customerForm, loginLink);
+        card.add(title, customerForm, loginLink);
+        add(card);
     }
 
     private VerticalLayout createCustomerForm() {
