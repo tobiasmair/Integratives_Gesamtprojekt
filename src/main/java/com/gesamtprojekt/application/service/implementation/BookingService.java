@@ -106,4 +106,11 @@ public class BookingService implements BookingServiceInterface {
     public List<Booking> findAllActiveBookingsForRoom(Long roomId) {
         return bookingRepository.findByMeetingRoom_RoomIdAndIsActiveTrueOrderByStartTimeAsc(roomId);
     }
+
+    public List<Booking> getBookingsForDoorDisplayByRoomName(String roomName) {
+        LocalDateTime from = LocalDateTime.now();
+        LocalDateTime to = from.plusHours(24);
+        return bookingRepository.findActiveBookingsForRoomNameBetween(roomName, from, to);
+    }
+
 }
