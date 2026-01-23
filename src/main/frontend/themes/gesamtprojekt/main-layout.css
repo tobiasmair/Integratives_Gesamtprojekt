@@ -15,6 +15,27 @@ vaadin-app-layout.drawer-collapsed {
   --drawer-text-secondary: rgba(255, 255, 255, 0.6);
 }
 
+/* Fix für das seitliche Scrollen im Dashboard */
+@media (max-width: 800px) {
+  .dashboard-view .vaadin-horizontal-layout {
+    flex-direction: column !important;
+    overflow-x: hidden;
+  }
+
+  .quick-booking-container,
+  .my-bookings-container {
+    width: 100% !important;
+    min-width: unset !important;
+  }
+}
+
+/* Sicherstellen, dass der Drawer auf Mobile bedienbar ist */
+@media (max-width: 800px) {
+  vaadin-app-layout::part(drawer) {
+    z-index: 100;
+  }
+}
+
 .drawer {
   background-color: var(--mci-blue);
   color: white;

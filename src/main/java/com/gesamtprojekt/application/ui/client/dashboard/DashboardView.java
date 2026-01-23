@@ -13,6 +13,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.PermitAll;
 
 @Route(value = "", layout = MainLayout.class)
@@ -53,17 +54,21 @@ public class DashboardView extends VerticalLayout implements BeforeEnterObserver
         quick.addBookingChangedListener(event -> bookings.refresh());
         bookings.addBookingChangedListener(event -> quick.loadRooms());
 
-        quick.setWidthFull();
-        bookings.setWidthFull();
-
-        var layout = new HorizontalLayout(quick, bookings);
+        HorizontalLayout layout = new HorizontalLayout(quick, bookings);
         layout.setWidthFull();
-        layout.setHeightFull();
-        layout.setAlignItems(Alignment.STRETCH);
-        layout.setPadding(false);
+
+        // RESPONSIVE
+        layout.addClassNames(
+                LumoUtility.FlexWrap.WRAP,
+                LumoUtility.Display.FLEX
+        );
+
+        // Auf großen Bildschirm nebeneinander, ansonsten untereinander
+        quick.getStyle().set("flex", "1 1 400px");
+        bookings.getStyle().set("flex", "1 1 400px");
+
+        layout.setPadding(true);
         layout.setSpacing(true);
-        layout.setFlexGrow(1, quick);
-        layout.setFlexGrow(1, bookings);
 
         return layout;
     }
