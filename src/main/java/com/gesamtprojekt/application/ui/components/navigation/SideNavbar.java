@@ -50,12 +50,12 @@ public class SideNavbar extends FlexLayout {
 
     private Header buildHeader(Button collapse) {
 
-        // Hotfix von Tobi:
         // import vom MCI Logo
         Image logo = new Image("icons/mci_logo.png", "MCI Logo");
-        logo.setHeight("24px");
+        logo.setHeight("28px");
+        logo.addClassName("app-logo");
 
-        Span appName = new Span("MCI - Meeting Room Booking Service");
+        Span appName = new Span("MCI - Booking Service");
         appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.SMALL);
         appName.addClassName("app-name");
 
