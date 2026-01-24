@@ -1,6 +1,7 @@
 package com.gesamtprojekt.application.service.implementation;
 
 import com.gesamtprojekt.application.model.Client;
+import com.gesamtprojekt.application.model.Equipment;
 import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.repositories.MeetingRoomRepository;
 import com.gesamtprojekt.application.service.MeetingRoomServiceInterface;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -86,6 +88,7 @@ public class MeetingRoomService implements MeetingRoomServiceInterface {
         if (room.getStatus() == null || room.getStatus().isBlank()) {
             room.setStatus("ACTIVE");
         }
+        syncSmartFlags(room);   // Steuerungs-Flags setzen
         return meetingRoomRepository.save(room);
     }
 
@@ -102,6 +105,7 @@ public class MeetingRoomService implements MeetingRoomServiceInterface {
                 clientService.updateClientWithPassword(user, currentInput);
             }
         }
+        syncSmartFlags(room);   // Steuerungs-Flags setzen
         meetingRoomRepository.save(room);
     }
 
@@ -225,5 +229,25 @@ public class MeetingRoomService implements MeetingRoomServiceInterface {
                 equipmentSet,
                 equipmentCount);
     }
+    // Steuerungs Flags syncen
+    private void syncSmartFlags(MeetingRoom room) {
+        Set<Equipment> eq = room.getEquipment();
+
+        // Wird Equipment mit Bezeichnung hinterlegt, wird Flag gesetzt
+        room.setHasBlindControl(hasEquipment(eq, "Blind Control"));
+        room.setHasLightControl(hasEquipment(eq, "Light Control"));
+        room.setHasVentilationControl(hasEquipment(eq, "Ventilation Control"));
+        room.setHasBeamerControl(hasEquipment(eq, "Beamer Control"));
+        room.setHasVacuumRobot(hasEquipment(eq, "Vacuum Robot"));
+    }
+
+    private boolean hasEquipment(Set<Equipment> equipmentSet, String name) {
+        return equipmentSet.stream()
+                .anyMatch(e -> e.getDescription().equalsIgnoreCase(name));
+    }
+    public Optional<MeetingRoom> findRoomByClient(Client client) {
+        return meetingRoomRepository.findByRoomUser_UserId(client.getUserId());
+    }
+
 
 }

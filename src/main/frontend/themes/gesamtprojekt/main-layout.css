@@ -6,43 +6,128 @@ vaadin-app-layout.drawer-collapsed {
   --vaadin-app-layout-drawer-width: 50px;
 }
 
+/* MCI Corporate Identity Farben */
+:root {
+  --mci-blue: #003d7a;
+  --mci-blue-light: #0055a4;
+  --drawer-background: var(--mci-blue);
+  --drawer-text-on-blue: rgba(255, 255, 255, 0.9);
+  --drawer-text-secondary: rgba(255, 255, 255, 0.6);
+}
+
+/* Fix für das seitliche Scrollen im Dashboard */
+@media (max-width: 800px) {
+  .dashboard-view .vaadin-horizontal-layout {
+    flex-direction: column !important;
+    overflow-x: hidden;
+  }
+
+  .quick-booking-container,
+  .my-bookings-container {
+    width: 100% !important;
+    min-width: unset !important;
+  }
+}
+
+/* Sicherstellen, dass der Drawer auf Mobile bedienbar ist */
+@media (max-width: 800px) {
+  vaadin-app-layout::part(drawer) {
+    z-index: 100;
+  }
+}
+
 .drawer {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+  background-color: var(--mci-blue);
+  color: white;
+  border-right: 1px solid rgba(255, 255, 255, 0.1)
 }
 
 .drawer-header {
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: var(--lumo-space-m);
+  color: white;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
+.app-name {
+  color: white;
+  letter-spacing: 0.5px;
+}
+
 .collapse-btn {
-  width: 30px;
-  height: 30px;
-  margin-right: 10px;
-  margin-left: 10px;
+  mind-width: 30px;
+  margin: 0;
+}
+
+/* Navigations-Items */
+.sidenav vaadin-side-nav-item::part(link) {
+  color: var(--drawer-text-on-blue);
+}
+
+.sidenav vaadin-side-nav-item::part(link):hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sidenav vaadin-side-nav-item[active]::part(link) {
+  background: white;
+  color: var(--mci-blue);
+}
+
+.sidenav vaadin-side-nav-item vaadin-icon {
+  color: rgba(255, 255, 255, 0.85) !important;
+  width: var(--lumo-icon-size-m);
+  height: var(--lumo-icon-size-m);
+}
+
+vaadin-app-layout.drawer-collapsed .drawer-header {
+  padding: var(--lumo-space-s) 0;
+  justify-content: center;
+}
+
+vaadin-app-layout.drawer-collapsed .app-logo,
+vaadin-app-layout.drawer-collapsed .app-name {
+  display: none !important;
 }
 
 .profile-box {
   display: flex;
   align-items: center;
-  margin-top: var(--lumo-space-m);
-  margin-bottom: var(--lumo-space-m);
-  padding: var(--lumo-space-s) var(--lumo-space-s);
-  background: var(--lumo-contrast-5pct);
-  min-height: 40px;
+  padding: var(--lumo-space-m);
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 0;
+}
+
+.profile-text {
+  margin-left: var(--lumo-space-s);
 }
 
 .profile-name {
-  font-weight: 600;
+  color: white;
   font-size: var(--lumo-font-size-s);
+  line-height: var(--lumo-line-height-xs);
 }
 
 .profile-role {
-  color: var(--lumo-secondary-text-color);
-  font-size: var(--lumo-font-size-xs);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: var(--lumo-font-size-xxs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.profile-avatar {
+  --vaadin-avatar-background: var(--mci-blue-light);
+  --vaadin-avatar-color: white;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+}
+
+.profile-box:hover .profile-avatar {
+  border-color: white;
+  filter: brightness(1.1);
+  transition: all 0.2s;
 }
 
 vaadin-app-layout.drawer-collapsed .profile-text {
@@ -69,25 +154,56 @@ vaadin-app-layout.drawer-collapsed .sidenav-section-title {
 
 .drawer-footer {
   margin-top: auto;
-  padding: var(--lumo-space-xs);
-  color: var(--lumo-secondary-text-color);
-  font-size: var(--lumo-font-size-s);
+  padding: var(--lumo-space-s);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--lumo-space-xs);
+}
+
+.footer-icon {
+  color: rgba(255, 255, 255, 0.8) !important;
+  margin-right: var(--lumo-space-m);
+  flex-shrink: 0;
 }
 
 .footer-item {
   display: flex;
   align-items: center;
-  gap: var(--lumo-space-s);
-  padding: var(--lumo-space-s) var(--lumo-space-s);
+  padding: var(--lumo-space-s);
+  border-radius: var(--lumo-border-radius-m);
   cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  color: var(--drawer-text-on-blue);
+  text-decoration: none;
 }
 
-.footer-icon {
-  color: var(--lumo-secondary-text-color);
+.footer-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.footer-text {
+  font-size: var(--lumo-font-size-s);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.footer-item:hover .footer-icon[icon*="sign-out"] {
+  color: #ff9d9d !important; /* Rot-Ton für Logout beim Hover */
 }
 
 vaadin-app-layout.drawer-collapsed .footer-text {
   display: none;
+}
+
+vaadin-app-layout.drawer-collapsed .footer-item {
+  justify-content: center;
+  padding: var(--lumo-space-s) 0;
+}
+
+vaadin-app-layout.drawer-collapsed .footer-icon {
+  margin-right: 0;
 }
 
 vaadin-app-layout.drawer-collapsed .app-name {
@@ -182,10 +298,16 @@ vaadin-app-layout.drawer-collapsed vaadin-side-nav-item::part(label) {
 }
 
 .booking-item {
-  border: 1px solid var(--lumo-contrast-20pct);
-  border-radius: var(--lumo-border-radius-m);
-  padding: var(--lumo-space-s);
-  background: var(--lumo-base-color);
+  border: 1px solid var(--lumo-contrast-10pct);
+  border-radius: var(--lumo-border-radius-l);
+  padding: var(--lumo-space-m);
+  background-color: var(--lumo-base-color);
+  transition: background-color 0.3s;
+}
+
+.booking-item.past-booking {
+  opacity: 0.6;
+  background-color: var(--lumo-contrast-5pct);
 }
 
 .booking-title {
@@ -198,7 +320,7 @@ vaadin-app-layout.drawer-collapsed vaadin-side-nav-item::part(label) {
 }
 
 .booking-time-badge {
-  background: var(--lumo-primary-color);
+  background: var(--mci-blue-light);
   color: var(--lumo-primary-contrast-color);
   border-radius: var(--lumo-border-radius-m);
   padding: 2px 8px;
@@ -307,3 +429,38 @@ vaadin-app-layout.drawer-collapsed vaadin-side-nav-item::part(label) {
   column-gap: 10px;
 }
 
+/* Login & Register Background */
+.login-screen, .register-screen {
+  background: linear-gradient(135deg, var(--mci-blue) 0%, var(--mci-blue-light) 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-card {
+  background-color: white;
+  padding: var(--lumo-space-xl);
+  border-radius: var(--lumo-border-radius-l);
+  box-shadow: var(--lumo-box-shadow-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 420px;
+}
+
+.login-logo {
+  margin-bottom: var(--lumo-space-m);
+  height: 50px;
+}
+
+vaadin-login-form::part(form) {
+  padding: 0;
+}
+
+.login-footer-btns {
+  margin-top: var(--lumo-space-m);
+  border-top: 1px solid var(--lumo-contrast-10pct);
+  padding-top: var(--lumo-space-m);
+  width: 100%;
+}

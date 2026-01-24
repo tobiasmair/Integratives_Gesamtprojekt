@@ -8,7 +8,10 @@ import com.gesamtprojekt.application.ui.components.navigation.SideNavbar;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.applayout.AppLayout;
+import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.AfterNavigationEvent;
@@ -74,28 +77,49 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
     }
 
     private void addHeaderContent() {
+        DrawerToggle toggle = new DrawerToggle();
+        toggle.getStyle().set("color", "var(--mci-blue)");
+        toggle.getStyle().set("margin-right", "var(--lumo-space-s)");
+
         HorizontalLayout header = new HorizontalLayout();
         header.setWidthFull();
         header.setPadding(true);
         header.setAlignItems(FlexComponent.Alignment.CENTER);
-        header.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 
+        // Aktuelle Uhrzeit mittig
+        Span timeSpan = new Span();
+        timeSpan.getStyle()
+                .set("font-size", "var(--lumo-font-size-xl)")
+                .set("font-weight", "600")
+                .set("text-align", "center");
+        timeSpan.setId("live-clock"); // ID for javascript
+
+        // Glocken Symbol Rechts
         Client user = securityService.getAuthenticatedClient()
                 .orElseThrow(() -> new IllegalStateException("No authenticated user found"));
-
-        // Glocken Symbol
         this.notificationBell = new NotificationBell(notificationService, user);
         this.notificationBell.setUnreadCount(notificationService.countUnread(user));
+        this.notificationBell.getStyle().set("width", "50px");
 
-        header.add(notificationBell);
+        // JS Scrpt, der die Uhrzeit im Browser aktualisiert (kopiert aus RoomHeader)
+        getElement().executeJs(
+                "const clock = document.getElementById('live-clock');" +
+                        "setInterval(() => {" +
+                        "  clock.textContent = new Date().toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'});" +
+                        "}, 1000);"
+        );
+
+        header.add(toggle, timeSpan, notificationBell);
+        header.setFlexGrow(1, timeSpan);
+
         addToNavbar(header);
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        // alle 30 Sek nach updates fragen
-        attachEvent.getUI().setPollInterval(30000);
+        // alle 5 Sek nach updates fragen
+        attachEvent.getUI().setPollInterval(5000);
 
         // Listener der die Glocke aktualisiert
         attachEvent.getUI().addPollListener(e -> {

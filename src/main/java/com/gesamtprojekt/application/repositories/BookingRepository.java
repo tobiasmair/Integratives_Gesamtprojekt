@@ -90,6 +90,23 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 """)
     List<Object[]> bookingsPerMonth(@Param("year") int year);
 
+    @Query("""
+    SELECT b FROM Booking b
+    WHERE b.isActive = true
+      AND b.meetingRoom.isActive = true
+      AND lower(b.meetingRoom.name) = lower(:roomName)
+      AND b.endTime > :from
+      AND b.startTime < :to
+    ORDER BY b.startTime
+""")
+    List<Booking> findActiveBookingsForRoomNameBetween(
+            @Param("roomName") String roomName,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to
+    );
+
+
+
 
     // Counts für Today/Week/Month (einfach über StartTime)
     long countByIsActiveTrueAndStartTimeBetween(LocalDateTime start, LocalDateTime end);
@@ -117,5 +134,11 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end
     );
+    /**
+     * Findet alle Buchungen für einen Raum, die aktiv sind.
+     * Wir sortieren sie direkt nach Startzeit, damit die Logik in der View
+     * immer die chronologisch nächsten Buchungen zuerst sieht.
+     */
+    List<Booking> findByMeetingRoom_RoomIdAndIsActiveTrueOrderByStartTimeAsc(Long roomId);
 
 }

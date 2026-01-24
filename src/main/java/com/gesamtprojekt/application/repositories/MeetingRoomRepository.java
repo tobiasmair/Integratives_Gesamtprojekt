@@ -103,4 +103,13 @@ public interface MeetingRoomRepository extends JpaRepository<MeetingRoom, Long> 
             @Param("equipmentSet") Set<String> equipmentSet,
             @Param("equipmentCount") long equipmentCount);
 
+    // Findet den Raum, der einem bestimmten Client-Account zugeordnet ist
+    Optional<MeetingRoom> findByRoomUser_UserId(Long userId);
+
+    @Query("select r from MeetingRoom r where r.isActive = true and r.name = :name")
+    Optional<MeetingRoom> findActiveByExactName(@Param("name") String name);
+
+
+
+
 }
