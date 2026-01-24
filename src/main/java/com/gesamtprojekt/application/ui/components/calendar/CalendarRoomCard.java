@@ -15,11 +15,15 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.shared.Registration;
 
+import java.time.LocalDateTime;
+
 public class CalendarRoomCard extends Div {
 
     private final BookingService bookingService;
     private final MeetingRoomService meetingRoomService;
     private final SecurityService securityService;
+    private LocalDateTime startDateTime;
+    private LocalDateTime endDateTime;
 
     public CalendarRoomCard(CalendarRoomCardModel room, BookingService bookingService,
                             MeetingRoomService meetingRoomService, SecurityService securityService) {
@@ -31,8 +35,13 @@ public class CalendarRoomCard extends Div {
         add(buildCard(room));
     }
 
+    public void setFilterDateTime(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        this.startDateTime = startDateTime;
+        this.endDateTime = endDateTime;
+    }
+
     private VerticalLayout buildCard(CalendarRoomCardModel r) {
-        Image img = buildImage(r.imagePath());
+        Image img = buildImage(r.name());
         Span title = buildTitle(n(r.name()), r);
 
         VerticalLayout info = buildInfo(r);
@@ -46,10 +55,9 @@ public class CalendarRoomCard extends Div {
         return box;
     }
 
-    private Image buildImage(String imagePath) {
-        String src = (imagePath == null || imagePath.isBlank())
-                ? "https://picsum.photos/600/350"
-                : "/room-images?path=" + imagePath;
+    private Image buildImage(String roomName) {
+
+        String src = "/room-images/by-room?roomName=" + (roomName != null ? roomName : "dummypicture");
 
         Image img = new Image(src, "Room");
         img.setWidthFull();
@@ -68,7 +76,7 @@ public class CalendarRoomCard extends Div {
         title.getStyle().set("color", "var(--lumo-primary-text-color)");
 
         title.addClickListener(e -> {
-            RoomDetailsDialog dialog = new RoomDetailsDialog(room);
+            RoomDetailsDialog dialog = new RoomDetailsDialog(room, bookingService);
             dialog.open();
         });
 
@@ -142,7 +150,9 @@ public class CalendarRoomCard extends Div {
                     room.name(),
                     bookingService,
                     meetingRoomService,
-                    securityService
+                    securityService,
+                    startDateTime,
+                    endDateTime
             );
 
             dialog.addBookingCreatedListener(event -> {

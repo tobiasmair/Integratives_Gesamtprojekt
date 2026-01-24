@@ -42,6 +42,12 @@ public class RoomBookingDialog extends Dialog {
 
     public RoomBookingDialog(Long roomId, String roomName, BookingService bookingService,
                              MeetingRoomService meetingRoomService, SecurityService securityService) {
+        this(roomId, roomName, bookingService, meetingRoomService, securityService, null, null);
+    }
+
+    public RoomBookingDialog(Long roomId, String roomName, BookingService bookingService,
+                             MeetingRoomService meetingRoomService, SecurityService securityService,
+                             LocalDateTime startDateTime, LocalDateTime endDateTime) {
         this.roomId = roomId;
         this.bookingService = bookingService;
         this.meetingRoomService = meetingRoomService;
@@ -54,7 +60,7 @@ public class RoomBookingDialog extends Dialog {
             .set("max-height", "none");
 
         add(createContent(roomName));
-        initializeFields();
+        initializeFields(startDateTime, endDateTime);
     }
 
     private VerticalLayout createContent(String roomName) {
@@ -90,12 +96,17 @@ public class RoomBookingDialog extends Dialog {
         return content;
     }
 
-    private void initializeFields() {
-        LocalTime nowRounded = roundToNextHalfHour(LocalTime.now());
-
-        datePicker.setValue(java.time.LocalDate.now());
-        startTime.setValue(nowRounded);
-        endTime.setValue(nowRounded.plusHours(1));
+    private void initializeFields(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        if (startDateTime != null && endDateTime != null) {
+            datePicker.setValue(startDateTime.toLocalDate());
+            startTime.setValue(startDateTime.toLocalTime());
+            endTime.setValue(endDateTime.toLocalTime());
+        } else {
+            LocalTime nowRounded = roundToNextHalfHour(LocalTime.now());
+            datePicker.setValue(java.time.LocalDate.now());
+            startTime.setValue(nowRounded);
+            endTime.setValue(nowRounded.plusHours(1));
+        }
 
         startTime.setStep(Duration.ofMinutes(30));
         endTime.setStep(Duration.ofMinutes(30));

@@ -2,25 +2,24 @@ package com.gesamtprojekt.application.ui.components.calendar;
 
 import com.gesamtprojekt.application.model.Equipment;
 import com.gesamtprojekt.application.service.implementation.EquipmentService;
-import com.gesamtprojekt.application.ui.components.dashboard.BookingChangedEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.shared.Registration;
-import lombok.Getter;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -35,6 +34,11 @@ public class CalendarControlsBar extends VerticalLayout {
     private MultiSelectComboBox<String> equipment = new MultiSelectComboBox<>("Equipment");
     private final EquipmentService equipmentService;
 
+    private ViewMode currentMode = ViewMode.CALENDAR;
+    private Button calendarModeBtn;
+    private Button browseModeBtn;
+    private FormLayout topRow;
+
     public CalendarControlsBar(EquipmentService equipmentService) {
         this.equipmentService = equipmentService;
         setWidthFull();
@@ -42,15 +46,27 @@ public class CalendarControlsBar extends VerticalLayout {
         setSpacing(true);
         addClassName("calendar-controls");
 
-        add(buildTopRow());
+        add(buildModeToggle());
+        topRow = buildTopRow();
+        add(topRow);
         add(buildFiltersRow());
 
         addValueChangeListeners();
     }
 
-    // Getter
-    public LocalDateTime getStartDateTime() { return date.getValue().atTime(start.getValue()); }
-    public LocalDateTime getEndDateTime() { return date.getValue().atTime(end.getValue()); }
+
+    public LocalDateTime getStartDateTime() {
+        if (currentMode == ViewMode.BROWSE || date.getValue() == null || start.getValue() == null) {
+            return null;
+        }
+        return date.getValue().atTime(start.getValue());
+    }
+    public LocalDateTime getEndDateTime() {
+        if (currentMode == ViewMode.BROWSE || date.getValue() == null || end.getValue() == null) {
+            return null;
+        }
+        return date.getValue().atTime(end.getValue());
+    }
     public String getBuilding() { return building.getValue(); }
     public String getFloor() { return floor.getValue(); }
     public String getCapacity() { return capacity.getValue(); }
@@ -71,7 +87,14 @@ public class CalendarControlsBar extends VerticalLayout {
 
         // Nächste gerundete Stunde als Startzeit
         start = time("Start Time", nowRounded);
-        end = time("End Time", nowRounded.plusHours(1));
+
+        // End Time: 1 Stunde später, aber maximal 23:30 (um Mitternachts-Problem zu vermeiden)
+        LocalTime endTimeCalculated = nowRounded.plusHours(1);
+        if (endTimeCalculated.isBefore(nowRounded) || endTimeCalculated.equals(LocalTime.MIDNIGHT)) {
+            // Über Mitternacht:    setze auf 23:30 statt 0 Uhr
+            endTimeCalculated = LocalTime.of(23, 30);
+        }
+        end = time("End Time", endTimeCalculated);
 
         start.setStep(Duration.ofMinutes(30));
         end.setStep(Duration.ofMinutes(30));
@@ -147,6 +170,48 @@ public class CalendarControlsBar extends VerticalLayout {
 
     public Registration addFilterChangedListener(ComponentEventListener<FilterChangedEvent> listener) {
         return addListener(FilterChangedEvent.class, listener);
+    }
+
+    public Registration addModeChangedListener(ComponentEventListener<ModeChangedEvent> listener) {
+        return addListener(ModeChangedEvent.class, listener);
+    }
+
+    private HorizontalLayout buildModeToggle() {
+        HorizontalLayout toggleBar = new HorizontalLayout();
+        toggleBar.setWidthFull();
+        toggleBar.setPadding(false);
+        toggleBar.setSpacing(true);
+        toggleBar.getStyle().set("margin-bottom", "10px");
+
+        calendarModeBtn = new Button("Book by Date", new Icon(VaadinIcon.CALENDAR));
+        calendarModeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        calendarModeBtn.addClickListener(e -> switchMode(ViewMode.CALENDAR));
+
+        browseModeBtn = new Button("Browse Rooms", new Icon(VaadinIcon.SEARCH));
+        browseModeBtn.addClickListener(e -> switchMode(ViewMode.BROWSE));
+
+        toggleBar.add(calendarModeBtn, browseModeBtn);
+        return toggleBar;
+    }
+
+    private void switchMode(ViewMode newMode) {
+        if (currentMode == newMode) return;
+
+        currentMode = newMode;
+
+        // Button Styling anpassen
+        if (newMode == ViewMode.CALENDAR) {
+            calendarModeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            browseModeBtn.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            topRow.setVisible(true);
+        } else {
+            browseModeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            calendarModeBtn.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            topRow.setVisible(false);
+        }
+
+        fireEvent(new ModeChangedEvent(this, newMode));
+        fireEvent(new FilterChangedEvent(this));
     }
 
 }
