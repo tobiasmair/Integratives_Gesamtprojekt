@@ -3,11 +3,13 @@ package com.gesamtprojekt.application.ui.components.calendar;
 import com.gesamtprojekt.application.model.Equipment;
 import com.gesamtprojekt.application.service.implementation.EquipmentService;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -38,18 +40,35 @@ public class CalendarControlsBar extends VerticalLayout {
     private Button calendarModeBtn;
     private Button browseModeBtn;
     private FormLayout topRow;
+    private FormLayout filtersRow;
+    private VerticalLayout filtersContainer;
 
     public CalendarControlsBar(EquipmentService equipmentService) {
         this.equipmentService = equipmentService;
         setWidthFull();
         setPadding(false);
-        setSpacing(true);
+        setSpacing(false);
         addClassName("calendar-controls");
 
         add(buildModeToggle());
+        
         topRow = buildTopRow();
-        add(topRow);
-        add(buildFiltersRow());
+        filtersRow = buildFiltersRow();
+        
+        // Ein Container mit beiden Rows
+        filtersContainer = new VerticalLayout(topRow, filtersRow);
+        filtersContainer.setPadding(false);
+        filtersContainer.setSpacing(false);
+        filtersContainer.setWidthFull();
+        filtersContainer.addClassName("calendar-filters-container");
+        
+        // Details-Element für Mobile
+        Details mobileDetails = new Details("Filters", filtersContainer);
+        mobileDetails.setWidthFull();
+        mobileDetails.addClassName("calendar-filters-mobile-details");
+        mobileDetails.setOpened(true);
+        
+        add(mobileDetails);
 
         addValueChangeListeners();
     }
@@ -181,7 +200,8 @@ public class CalendarControlsBar extends VerticalLayout {
         toggleBar.setWidthFull();
         toggleBar.setPadding(false);
         toggleBar.setSpacing(true);
-        toggleBar.getStyle().set("margin-bottom", "10px");
+        toggleBar.getStyle().set("margin-bottom", "4px");
+        toggleBar.getStyle().set("background-color", "var(--lumo-contrast-5pct)");
 
         calendarModeBtn = new Button("Book by Date", new Icon(VaadinIcon.CALENDAR));
         calendarModeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
