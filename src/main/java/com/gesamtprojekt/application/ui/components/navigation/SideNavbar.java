@@ -49,11 +49,14 @@ public class SideNavbar extends FlexLayout {
     }
 
     private Header buildHeader(Button collapse) {
-        Span appName = new Span("MCI - meeting room booker");
+        Span appName = new Span("MCI - Booking Service");
         appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.SMALL, LumoUtility.Padding.Horizontal.MEDIUM, LumoUtility.Padding.Vertical.SMALL);
         appName.addClassName("app-name");
         //getStyle().set("padding-left", "var(--lumo-space-m");
 
+        Image logo = new Image("icons/mci_logo.png", "MCI Logo");
+        logo.setHeight("28px");
+        logo.addClassName("app-logo");
         HorizontalLayout logoContainer = new HorizontalLayout(logo, appName);
         logoContainer.setAlignItems(FlexComponent.Alignment.CENTER);
         logoContainer.setSpacing(true);
