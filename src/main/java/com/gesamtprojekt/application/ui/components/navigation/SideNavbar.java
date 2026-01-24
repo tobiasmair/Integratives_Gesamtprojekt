@@ -55,8 +55,9 @@ public class SideNavbar extends FlexLayout {
 
     private Header buildHeader(Button collapse) {
         Span appName = new Span("MCI - meeting room booker");
-        appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.SMALL);
+        appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.SMALL, LumoUtility.Padding.Horizontal.MEDIUM, LumoUtility.Padding.Vertical.SMALL);
         appName.addClassName("app-name");
+        //getStyle().set("padding-left", "var(--lumo-space-m");
 
         Header header = new Header(appName, collapse);
         header.addClassName("drawer-header");
@@ -152,8 +153,8 @@ public class SideNavbar extends FlexLayout {
 
     private void addClientSection(SideNav nav) {
         nav.addItem(new SideNavItem("My Dashboard", "", VaadinIcon.DASHBOARD.create()));
-        nav.addItem(new SideNavItem("Calendar", "calendar", VaadinIcon.CALENDAR.create()));
-        nav.addItem(new SideNavItem("Browse Rooms", "browserooms", VaadinIcon.SEARCH.create()));
+        nav.addItem(new SideNavItem("Book Rooms", "calendar", VaadinIcon.CALENDAR.create()));
+        //nav.addItem(new SideNavItem("Browse Rooms", "browserooms", VaadinIcon.SEARCH.create()));
     }
 
     private void addAdminSection(SideNav nav) {

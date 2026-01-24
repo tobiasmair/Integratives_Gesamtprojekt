@@ -76,7 +76,7 @@ public class CalendarRoomCard extends Div {
         title.getStyle().set("color", "var(--lumo-primary-text-color)");
 
         title.addClickListener(e -> {
-            RoomDetailsDialog dialog = new RoomDetailsDialog(room);
+            RoomDetailsDialog dialog = new RoomDetailsDialog(room, bookingService);
             dialog.open();
         });
 

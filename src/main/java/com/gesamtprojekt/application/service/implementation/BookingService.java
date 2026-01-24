@@ -72,6 +72,11 @@ public class BookingService implements BookingServiceInterface {
         return bookingRepository.findBookingByClientId(clientId);
     }
 
+    // Buchungen eines Raumes in einem Zeitraum finden
+    public List<Booking> findBookingsByRoomAndTimeRange(Long roomId, LocalDateTime start, LocalDateTime end) {
+        return bookingRepository.findByRoomAndTimeRange(roomId, start, end);
+    }
+
     // Booking löschen (isActive Flag setzen)
     public void deleteBooking(Booking booking) {
         booking.setIsActive(false);
