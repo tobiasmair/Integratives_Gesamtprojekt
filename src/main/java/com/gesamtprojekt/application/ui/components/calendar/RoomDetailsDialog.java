@@ -5,6 +5,7 @@ import com.gesamtprojekt.application.service.implementation.BookingService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H4;
@@ -12,6 +13,7 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -78,6 +80,17 @@ public class RoomDetailsDialog extends Dialog {
         infoSection.add(infoRow(VaadinIcon.BUILDING, "Building: " + (room.building() != null ? room.building() : "")));
         infoSection.add(infoRow(VaadinIcon.USERS, "Capacity: " + (room.capacity() != null ? room.capacity() : 0) + " people"));
         infoSection.add(infoRow(VaadinIcon.LINES, "Floor: " + (room.floor() != null ? room.floor() : 0)));
+
+        // Lageplan Link
+        Anchor mapLink = new Anchor("#", "Show Floor Plan");
+        mapLink.getStyle().set("font-size", "var(--lumo-font-size-xs)");
+        Icon mapIcon = VaadinIcon.MAP_MARKER.create();
+        mapIcon.setSize("12px");
+        HorizontalLayout mapWrapper = new HorizontalLayout(mapIcon, mapLink);
+        mapWrapper.setSpacing(false);
+        mapWrapper.setAlignItems(HorizontalLayout.Alignment.CENTER);
+        mapWrapper.addClickListener(e -> Notification.show("Opening floor plan for floor " + (room.floor() != null ? room.floor() : "unknown")));
+        infoSection.add(mapWrapper);
 
         if (room.tags() != null && !room.tags().isEmpty()) {
             Span equipmentLabel = new Span("Equipment:");
