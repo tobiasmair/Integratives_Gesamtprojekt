@@ -12,7 +12,11 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
@@ -71,6 +75,17 @@ public class RoomBookingDialog extends Dialog {
         H2 header = new H2("Book Room: " + (roomName != null ? roomName : ""));
         header.getStyle().set("margin", "0 0 10px 0");
 
+        // Lageplan Link
+        MeetingRoom room = meetingRoomService.findRoomForEdit(roomId);
+        Anchor mapLink = new Anchor("#", "Show Floor Plan");
+        mapLink.getStyle().set("font-size", "var(--lumo-font-size-xs)");
+        Icon mapIcon = VaadinIcon.MAP_MARKER.create();
+        mapIcon.setSize("12px");
+        HorizontalLayout mapWrapper = new HorizontalLayout(mapIcon, mapLink);
+        mapWrapper.setSpacing(false);
+        mapWrapper.setAlignItems(HorizontalLayout.Alignment.CENTER);
+        mapWrapper.addClickListener(e -> Notification.show("Opening floor plan for floor " + (room != null ? room.getFloor() : "unknown")));
+
         datePicker.setWidthFull();
 
         HorizontalLayout timeRow = new HorizontalLayout(startTime, endTime);
@@ -91,7 +106,7 @@ public class RoomBookingDialog extends Dialog {
         buttonRow.setWidthFull();
         buttonRow.setJustifyContentMode(JustifyContentMode.END);
 
-        content.add(header, datePicker, timeRow, purposeField, buttonRow);
+        content.add(header, mapWrapper, datePicker, timeRow, purposeField, buttonRow);
         content.setWidth("450px");
         return content;
     }
