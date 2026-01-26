@@ -80,6 +80,16 @@ vaadin-app-layout.drawer-collapsed {
   background-color: var(--mci-blue);
   color: white;
   border-right: 1px solid rgba(255, 255, 255, 0.1)
+  overflow: hidden;
+}
+
+.drawer-scroller {
+  flex: 1;
+  min-height: 0;
+}
+
+.drawer-scroller::part(content) {
+  overflow-x: hidden;
 }
 
 .drawer-header {

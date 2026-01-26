@@ -182,17 +182,30 @@ public class QuickBookingContainer extends Div {
             return;
         }
 
-        if (start.isBefore(now)) {
+        // Alte Buchungen darf Start in der Vergangenheit liegen
+        if (currentEditingBookingId == null && start.isBefore(now)) {
             Notification.show("Start time must be in the future.", 3000, Notification.Position.TOP_CENTER)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             roomGroup.setItems(List.of());
             return;
         }
 
-        List<MeetingRoom> availableRooms = meetingRoomService.findAvailableRoomsInTimeframe(start, end);
+        List<MeetingRoom> availableRooms;
+
+        // Beim editieren aktuelle Buchung ignorieren
+        if (currentEditingBookingId != null) {
+            availableRooms = meetingRoomService.findAvailableRoomsExcludingBooking(start, end, currentEditingBookingId);
+        } else {
+            availableRooms = meetingRoomService.findAvailableRoomsInTimeframe(start, end);
+        }
+
+        MeetingRoom selectedRoom = roomGroup.getValue();
 
         roomGroup.setItems(availableRooms);
-        if (!availableRooms.isEmpty()) {
+
+        if (selectedRoom != null && availableRooms.contains(selectedRoom)) {
+            roomGroup.setValue(selectedRoom);
+        } else if (!availableRooms.isEmpty()) {
             roomGroup.setValue(availableRooms.get(0));
         }
     }

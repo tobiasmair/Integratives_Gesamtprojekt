@@ -33,6 +33,10 @@ public class SideNavbar extends FlexLayout {
         Footer footer = buildFooter();
 
         add(header, buildProfileSection(), scroller, footer);
+
+        setFlexGrow(0, header);
+        setFlexGrow(1, scroller);
+        setFlexGrow(0, footer);
     }
 
     public void setCollapsed(boolean collapsed) {
@@ -69,7 +73,7 @@ public class SideNavbar extends FlexLayout {
     private Scroller buildScroller(Component content) {
         Scroller scroller = new Scroller(content);
         scroller.addClassName("drawer-scroller");
-        scroller.setSizeFull();
+        //scroller.setSizeFull();
         return scroller;
     }
 
