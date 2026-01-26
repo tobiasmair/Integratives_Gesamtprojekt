@@ -32,7 +32,12 @@ public class DashboardView extends VerticalLayout implements BeforeEnterObserver
         this.securityService = securityService;
 
         addClassName("dashboard-view");
-        setSizeFull();
+
+        //setSizeFull();
+        setPadding(false);
+        setSpacing(false);
+
+        getStyle().set("overflow", "hidden");
 
         add(createTwoColumnLayout());
     }
@@ -55,6 +60,7 @@ public class DashboardView extends VerticalLayout implements BeforeEnterObserver
         bookings.addBookingChangedListener(event -> quick.loadRooms());
 
         HorizontalLayout layout = new HorizontalLayout(quick, bookings);
+        layout.addClassName("dashboard-layout");
         layout.setWidthFull();
 
         // RESPONSIVE
@@ -63,12 +69,8 @@ public class DashboardView extends VerticalLayout implements BeforeEnterObserver
                 LumoUtility.Display.FLEX
         );
 
-        // Auf großen Bildschirm nebeneinander, ansonsten untereinander
-        quick.getStyle().set("flex", "1 1 400px");
-        bookings.getStyle().set("flex", "1 1 400px");
-
-        layout.setPadding(true);
-        layout.setSpacing(true);
+        quick.addClassName("dashboard-card");
+        bookings.addClassName("dashboard-card");
 
         return layout;
     }

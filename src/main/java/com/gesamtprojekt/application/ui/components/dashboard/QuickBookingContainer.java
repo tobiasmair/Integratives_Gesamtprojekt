@@ -71,6 +71,7 @@ public class QuickBookingContainer extends Div {
         content.setSpacing(false);
         content.setWidthFull();
         content.setHeightFull();
+        content.getStyle().set("overflow", "hidden");
 
         this.title = createHeader();
         this.bookButton = createBookButton();
