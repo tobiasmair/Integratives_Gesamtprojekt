@@ -79,7 +79,7 @@ vaadin-app-layout.drawer-collapsed {
 .drawer {
   background-color: var(--mci-blue);
   color: white;
-  border-right: 1px solid rgba(255, 255, 255, 0.1)
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
   overflow: hidden;
 }
 
@@ -283,7 +283,7 @@ vaadin-app-layout.drawer-collapsed vaadin-side-nav-item::part(label) {
   border: 1px solid var(--lumo-contrast-20pct);
   border-radius: var(--lumo-border-radius-l);
   padding: var(--lumo-space-s);
-  width: stretch;
+  /*width: stretch;*/
 }
 
 .rooms-list {

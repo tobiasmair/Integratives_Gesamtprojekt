@@ -28,6 +28,10 @@ public class UserManagementStatsBar extends HorizontalLayout {
         setSpacing(true);
         addClassName("user-stats-bar");
 
+        getStyle().set("flex-wrap", "wrap"); // Umbruch erlauben
+        setSpacing(true);
+        setPadding(false);
+
         add(
                 createStatCard("Total Users", totalUsersValue, VaadinIcon.USERS),
                 createStatCard("Total Lecturers", totalLecturersValue, VaadinIcon.ACADEMY_CAP),
@@ -54,6 +58,9 @@ public class UserManagementStatsBar extends HorizontalLayout {
                 LumoUtility.BoxShadow.SMALL,
                 LumoUtility.Padding.MEDIUM
         );
+
+        card.getStyle().set("min-width", "200px");
+        card.getStyle().set("flex", "1 1 0");
 
         HorizontalLayout header = new HorizontalLayout(new Span(title), icon.create());
         header.setJustifyContentMode(JustifyContentMode.BETWEEN);
