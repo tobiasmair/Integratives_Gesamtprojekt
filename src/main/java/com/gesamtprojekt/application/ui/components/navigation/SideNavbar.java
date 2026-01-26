@@ -49,16 +49,14 @@ public class SideNavbar extends FlexLayout {
     }
 
     private Header buildHeader(Button collapse) {
+        Span appName = new Span("MCI - Booking Service");
+        appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.SMALL, LumoUtility.Padding.Horizontal.MEDIUM, LumoUtility.Padding.Vertical.SMALL);
+        appName.addClassName("app-name");
+        //getStyle().set("padding-left", "var(--lumo-space-m");
 
-        // import vom MCI Logo
         Image logo = new Image("icons/mci_logo.png", "MCI Logo");
         logo.setHeight("28px");
         logo.addClassName("app-logo");
-
-        Span appName = new Span("MCI - Meeting Booker");
-        appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.SMALL);
-        appName.addClassName("app-name");
-
         HorizontalLayout logoContainer = new HorizontalLayout(logo, appName);
         logoContainer.setAlignItems(FlexComponent.Alignment.CENTER);
         logoContainer.setSpacing(true);
@@ -158,7 +156,7 @@ public class SideNavbar extends FlexLayout {
 
     private void addClientSection(SideNav nav) {
         nav.addItem(new SideNavItem("My Dashboard", "", VaadinIcon.DASHBOARD.create()));
-        nav.addItem(new SideNavItem("Calendar", "calendar", VaadinIcon.CALENDAR.create()));
+        nav.addItem(new SideNavItem("Book Rooms", "calendar", VaadinIcon.CALENDAR.create()));
         //nav.addItem(new SideNavItem("Browse Rooms", "browserooms", VaadinIcon.SEARCH.create()));
     }
 

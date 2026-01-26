@@ -72,6 +72,11 @@ public class BookingService implements BookingServiceInterface {
         return bookingRepository.findBookingByClientId(clientId);
     }
 
+    // Buchungen eines Raumes in einem Zeitraum finden
+    public List<Booking> findBookingsByRoomAndTimeRange(Long roomId, LocalDateTime start, LocalDateTime end) {
+        return bookingRepository.findByRoomAndTimeRange(roomId, start, end);
+    }
+
     // Booking löschen (isActive Flag setzen)
     public void deleteBooking(Booking booking) {
         booking.setIsActive(false);
@@ -106,4 +111,11 @@ public class BookingService implements BookingServiceInterface {
     public List<Booking> findAllActiveBookingsForRoom(Long roomId) {
         return bookingRepository.findByMeetingRoom_RoomIdAndIsActiveTrueOrderByStartTimeAsc(roomId);
     }
+
+    public List<Booking> getBookingsForDoorDisplayByRoomName(String roomName) {
+        LocalDateTime from = LocalDateTime.now();
+        LocalDateTime to = from.plusHours(24);
+        return bookingRepository.findActiveBookingsForRoomNameBetween(roomName, from, to);
+    }
+
 }

@@ -370,6 +370,41 @@ vaadin-app-layout.drawer-collapsed vaadin-side-nav-item::part(label) {
   padding: 8px;
 }
 
+/* Desktop: Details verstecken, Container direkt anzeigen */
+.calendar-filters-mobile-details::part(summary) {
+  display: none;
+}
+
+.calendar-filters-mobile-details::part(content) {
+  padding: 0;
+}
+
+.calendar-filters-mobile-details[opened] {
+  border: none;
+}
+
+/* Mobile: Details-Summary anzeigen, Container im Details */
+@media (max-width: 650px) {
+  .calendar-filters-mobile-details::part(summary) {
+    display: flex;
+    background-color: var(--lumo-contrast-5pct);
+    border-radius: var(--lumo-border-radius-m);
+    font-weight: 500;
+    padding: var(--lumo-space-m);
+    cursor: pointer;
+  }
+
+  .calendar-filters-mobile-details[opened]::part(summary) {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    margin-bottom: var(--lumo-space-s);
+  }
+
+  .calendar-filters-mobile-details::part(content) {
+    padding: var(--lumo-space-s);
+  }
+}
+
 
 /* obere Sektion bleibt fix, nur unten scrollt */
 .calendar-rooms-scroll {
