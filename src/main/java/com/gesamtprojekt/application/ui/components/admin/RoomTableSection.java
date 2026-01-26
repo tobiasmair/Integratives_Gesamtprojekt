@@ -56,23 +56,34 @@ public class RoomTableSection extends VerticalLayout {
     private HorizontalLayout buildToolbar() {
         searchField.setPlaceholder("Search rooms by name...");
         searchField.setPrefixComponent(VaadinIcon.SEARCH.create());
-        searchField.setWidth("400px");
+
+        searchField.getStyle().set("flex", "1 1 300px");
+        searchField.getStyle().set("max-width", "500px");
+
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
         searchField.addValueChangeListener(e -> updateList());
 
         buildingFilter.setValue("All Buildings");
+        buildingFilter.getStyle().set("flex-shrink", "0");
         buildingFilter.addValueChangeListener(e -> updateList());
 
         statusFilter.setValue("ACTIVE");
+        statusFilter.getStyle().set("flex-shrink", "0");
         statusFilter.addValueChangeListener(e -> updateList());
 
         addRoomBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        addRoomBtn.getStyle().set("flex-shrink", "0");
         addRoomBtn.addClickListener(e -> addRoomDialog());
 
         HorizontalLayout toolbar = new HorizontalLayout(searchField, buildingFilter, statusFilter, addRoomBtn);
         toolbar.setWidthFull();
+
+        toolbar.getStyle().set("flex-wrap", "wrap");
+        toolbar.getStyle().set("row-gap", "var(--lumo-space-m)");
+
+        //toolbar.setFlexGrow(1, searchField);
+        toolbar.setJustifyContentMode(JustifyContentMode.END);
         toolbar.setAlignItems(Alignment.BASELINE);
-        toolbar.setFlexGrow(1, searchField);
         return toolbar;
     }
 

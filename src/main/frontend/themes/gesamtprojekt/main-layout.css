@@ -15,31 +15,81 @@ vaadin-app-layout.drawer-collapsed {
   --drawer-text-secondary: rgba(255, 255, 255, 0.6);
 }
 
-/* Fix für das seitliche Scrollen im Dashboard */
-@media (max-width: 800px) {
-  .dashboard-view .vaadin-horizontal-layout {
-    flex-direction: column !important;
-    overflow-x: hidden;
+/* Dashboard */
+.dashboard-view {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+/* Zweispaltiges Layout */
+.dashboard-layout {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-height: 0;
+  padding: var(--lumo-space-m);
+  gap: var(--lumo-space-m);
+  box-sizing: border-box;
+}
+
+/* Desktop-Modus: Karten nebeneinander */
+.dashboard-card {
+  flex: 1 1 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+/* Mobile & Sidebar-Einklapp */
+@media (max-width: 1000px) {
+  .dashboard-view {
+    height: auto;
+    overflow-y: auto;
+    display: block;
   }
 
-  .quick-booking-container,
-  .my-bookings-container {
-    width: 100% !important;
-    min-width: unset !important;
+  .dashboard-layout {
+    display: flex;
+    flex-direction: column;
+    gap: var(--lumo-space-m);
+    height: auto;
+  }
+
+  .dashboard-card {
+    height: 600px;
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 }
 
-/* Sicherstellen, dass der Drawer auf Mobile bedienbar ist */
-@media (max-width: 800px) {
-  vaadin-app-layout::part(drawer) {
-    z-index: 100;
-  }
+.quick-booking-container vaadin-vertical-layout,
+.my-bookings-container vaadin-vertical-layout {
+  height: 100% !important;
 }
 
 .drawer {
   background-color: var(--mci-blue);
   color: white;
-  border-right: 1px solid rgba(255, 255, 255, 0.1)
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.drawer-scroller {
+  flex: 1;
+  min-height: 0;
+}
+
+.drawer-scroller::part(content) {
+  overflow-x: hidden;
 }
 
 .drawer-header {
@@ -57,7 +107,7 @@ vaadin-app-layout.drawer-collapsed {
 }
 
 .collapse-btn {
-  mind-width: 30px;
+  min-width: 30px;
   margin: 0;
 }
 
@@ -137,10 +187,11 @@ vaadin-app-layout.drawer-collapsed .profile-text {
 vaadin-app-layout.drawer-collapsed .profile-box {
   display: flex;
   align-items: center;
+  justify-content: center;
   margin-top: var(--lumo-space-m);
   margin-bottom: var(--lumo-space-m);
-  padding: var(--lumo-space-s) var(--lumo-space-s);
-  background: var(--lumo-contrast-5pct);
+  padding: var(--lumo-space-s);
+  background: rgba(255, 255, 255, 0.05);
   min-height: 40px;
 }
 
@@ -214,10 +265,6 @@ vaadin-app-layout.drawer-collapsed vaadin-side-nav-item::part(label) {
   display: none;
 }
 
-.dashboard-view {
-  /*background: aqua;*/
-}
-
 .quick-booking-container {
   padding: var(--lumo-space-m);
   border: 4px solid var(--lumo-contrast-10pct);
@@ -236,7 +283,7 @@ vaadin-app-layout.drawer-collapsed vaadin-side-nav-item::part(label) {
   border: 1px solid var(--lumo-contrast-20pct);
   border-radius: var(--lumo-border-radius-l);
   padding: var(--lumo-space-s);
-  width: stretch;
+  /*width: stretch;*/
 }
 
 .rooms-list {
