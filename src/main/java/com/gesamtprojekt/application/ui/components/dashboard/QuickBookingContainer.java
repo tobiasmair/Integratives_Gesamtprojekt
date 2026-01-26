@@ -30,6 +30,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 public class QuickBookingContainer extends Div {
 
@@ -290,7 +291,8 @@ public class QuickBookingContainer extends Div {
 
             booking.setBookingStatus("CONFIRMED");  // status
 
-            bookingService.createBooking(booking);
+            Optional<Long> startExitId = Optional.empty();
+            bookingService.createBooking(booking, startExitId);
 
             Notification.show("Room booked successfully!", 3000, Notification.Position.TOP_CENTER)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);

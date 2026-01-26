@@ -27,6 +27,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 public class RoomBookingDialog extends Dialog {
 
@@ -133,7 +134,8 @@ public class RoomBookingDialog extends Dialog {
             booking.setPurpose(purposeField.getValue());
             booking.setBookingStatus("CONFIRMED");
 
-            bookingService.createBooking(booking);
+            Optional<Long> startExitId = Optional.empty();
+            bookingService.createBooking(booking, startExitId);
 
             Notification.show("Room booked successfully!", 3000, Notification.Position.TOP_CENTER)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
