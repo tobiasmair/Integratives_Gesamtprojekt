@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface ClientRepository extends JpaRepository<Client, Long> {
 
-    List<Client> findByIsActiveTrue();
+    List<Client> findByIsActiveTrueAndUserTypeNot(String userType);
 
     Optional<Client> findByUsername(String username);
 
@@ -24,7 +24,7 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
     List<Client> searchByFilters(@Param("searchTerm") String searchTerm, @Param("role") String role);
 
     // Anzahl aktive Clients zählen
-    long countByisActiveTrue();
+    long countByisActiveTrueAndUserTypeNot(String userType);
 
     // Anzahl aktive Clients nach Benutzertyp zählen
     long countByUserTypeAndIsActiveTrue(String userType);

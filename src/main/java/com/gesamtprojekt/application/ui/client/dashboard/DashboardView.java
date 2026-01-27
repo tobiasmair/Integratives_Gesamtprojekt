@@ -13,10 +13,11 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.PermitAll;
 
 @Route(value = "", layout = MainLayout.class)
-@PageTitle("Dashboard")
+@PageTitle("Dashboard | MCI Meeting Booker")
 //@RolesAllowed({"USER", "ADMIN"})
 @PermitAll
 public class DashboardView extends VerticalLayout implements BeforeEnterObserver {
@@ -31,7 +32,12 @@ public class DashboardView extends VerticalLayout implements BeforeEnterObserver
         this.securityService = securityService;
 
         addClassName("dashboard-view");
-        setSizeFull();
+
+        //setSizeFull();
+        setPadding(false);
+        setSpacing(false);
+
+        getStyle().set("overflow", "hidden");
 
         add(createTwoColumnLayout());
     }
@@ -53,17 +59,18 @@ public class DashboardView extends VerticalLayout implements BeforeEnterObserver
         quick.addBookingChangedListener(event -> bookings.refresh());
         bookings.addBookingChangedListener(event -> quick.loadRooms());
 
-        quick.setWidthFull();
-        bookings.setWidthFull();
-
-        var layout = new HorizontalLayout(quick, bookings);
+        HorizontalLayout layout = new HorizontalLayout(quick, bookings);
+        layout.addClassName("dashboard-layout");
         layout.setWidthFull();
-        layout.setHeightFull();
-        layout.setAlignItems(Alignment.STRETCH);
-        layout.setPadding(false);
-        layout.setSpacing(true);
-        layout.setFlexGrow(1, quick);
-        layout.setFlexGrow(1, bookings);
+
+        // RESPONSIVE
+        layout.addClassNames(
+                LumoUtility.FlexWrap.WRAP,
+                LumoUtility.Display.FLEX
+        );
+
+        quick.addClassName("dashboard-card");
+        bookings.addClassName("dashboard-card");
 
         return layout;
     }

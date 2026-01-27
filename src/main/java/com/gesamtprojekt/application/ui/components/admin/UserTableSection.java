@@ -29,7 +29,7 @@ public class UserTableSection extends VerticalLayout {
 
     private final Grid<Client> grid = new Grid<>(Client.class, false);
     private final TextField searchField = new TextField();
-    private final ComboBox<String> roleFilter = new ComboBox<>("", List.of("All Roles", "ADMIN", "USER", "ROOM"));
+    private final ComboBox<String> roleFilter = new ComboBox<>("", List.of("All Roles", "ADMIN", "USER"));
     private final Button addClientBtn = new Button("Add User");
 
     public UserTableSection(ClientService clientService, BookingService bookingService) {
@@ -46,23 +46,32 @@ public class UserTableSection extends VerticalLayout {
     private HorizontalLayout buildToolbar() {
         searchField.setPlaceholder("Search by Name or Email...");
         searchField.setPrefixComponent(VaadinIcon.SEARCH.create());
-        searchField.setWidth("400px");
+
+        searchField.getStyle().set("flex", "1 1 300px");
+        searchField.getStyle().set("max-width", "500px");
+
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
         searchField.addValueChangeListener(e -> updateList());
 
         roleFilter.setValue("All Roles");
+        roleFilter.getStyle().set("flex-shrink", "0");
         roleFilter.addValueChangeListener(e -> updateList());
 
         //ComboBox<String> deptFilter = new ComboBox<>("", List.of("All Departments", "DIBSE", "MCI 1"));
         //deptFilter.setValue("All Departments");
 
         addClientBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        addClientBtn.getStyle().set("flex-shrink", "0");
         addClientBtn.addClickListener(e -> addClientDialog());
 
         HorizontalLayout toolbar = new HorizontalLayout(searchField, roleFilter, addClientBtn);
         toolbar.setWidthFull();
+
+        toolbar.getStyle().set("flex-wrap", "wrap");
+        toolbar.getStyle().set("row-gap", "var(--lumo-space-m)");
+
+        toolbar.setJustifyContentMode(JustifyContentMode.END);
         toolbar.setAlignItems(Alignment.BASELINE);
-        toolbar.setFlexGrow(1, searchField);
         return toolbar;
     }
 

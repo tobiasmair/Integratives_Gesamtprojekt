@@ -27,6 +27,7 @@ import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -38,8 +39,6 @@ public class QuickBookingContainer extends Div {
     private final MeetingRoomService meetingRoomService;
     private final SecurityService securityService;
 
-    //private final Tab favTab = new Tab("Favourite rooms");
-    //private final Tabs tabs = new Tabs(favTab, allTab);
     private final Tab allTab = new Tab("All available rooms");
     private final Tabs tabs = new Tabs(allTab);
 
@@ -73,6 +72,7 @@ public class QuickBookingContainer extends Div {
         content.setSpacing(false);
         content.setWidthFull();
         content.setHeightFull();
+        content.getStyle().set("overflow", "hidden");
 
         this.title = createHeader();
         this.bookButton = createBookButton();
@@ -81,12 +81,10 @@ public class QuickBookingContainer extends Div {
         var roomsSection = createRoomsSection();
         var purposeField = createMeetingPurposeField();
 
-        //content.add(createHeader());
         content.add(title);
         content.add(dateTimeRow);
         content.add(roomsSection);
         content.add(purposeField);
-        //content.add(createBookButton());
         content.add(bookButton);
 
         content.setFlexGrow(0, title);
@@ -99,10 +97,18 @@ public class QuickBookingContainer extends Div {
         LocalTime nowRounded = roundToNextHalfHour(LocalTime.now());
 
         datePicker.setValue(java.time.LocalDate.now());
+        datePicker.setMin(LocalDate.now());
 
         // Nächste gerundete Stunde als Startzeit
         startTime.setValue(nowRounded);
-        endTime.setValue(nowRounded.plusHours(1));
+
+        // End Time: 1 Stunde später, aber maximal 23:30 (um Mitternachts-Problem zu vermeiden)
+        LocalTime endTimeCalculated = nowRounded.plusHours(1);
+        if (endTimeCalculated.isBefore(nowRounded) || endTimeCalculated.equals(LocalTime.MIDNIGHT)) {
+            // Über Mitternacht - setze auf 23:30 statt
+            endTimeCalculated = LocalTime.of(23, 30);
+        }
+        endTime.setValue(endTimeCalculated);
 
         startTime.setStep(Duration.ofMinutes(30));
         endTime.setStep(Duration.ofMinutes(30));
@@ -119,6 +125,14 @@ public class QuickBookingContainer extends Div {
     private HorizontalLayout createDateTimeRow() {
         var row = new HorizontalLayout(datePicker, startTime, endTime);
         row.setWidthFull();
+        // Responsive untereinander
+        row.getStyle().set("flex-wrap", "wrap");
+
+        // volle breite auf mobilen Geräten
+        datePicker.getStyle().set("min-width", "120px").set("flex", "1");
+        startTime.getStyle().set("min-width", "100px").set("flex", "1");
+        endTime.getStyle().set("min-width", "100px").set("flex", "1");
+
         return row;
     }
 
@@ -145,16 +159,6 @@ public class QuickBookingContainer extends Div {
         return box;
     }
 
-    /*
-    private void onTabChanged() {
-        if (tabs.getSelectedTab() == favTab) {
-            loadFavouriteRooms();
-            return;
-        }
-        loadAllRooms();
-    }
-     */
-
     // Wenn sich Datum ändert -> lade die Räume neu
     private void setupEventListeners() {
         datePicker.addValueChangeListener(e -> loadRooms());
@@ -170,6 +174,7 @@ public class QuickBookingContainer extends Div {
 
         LocalDateTime start = datePicker.getValue().atTime(startTime.getValue());
         LocalDateTime end = datePicker.getValue().atTime(endTime.getValue());
+        LocalDateTime now = LocalDateTime.now();
 
         if (end.isBefore(start) || end.isEqual(start)) {
             Notification.show("End time must be after start time.", 3000, Notification.Position.TOP_CENTER)
@@ -178,76 +183,57 @@ public class QuickBookingContainer extends Div {
             return;
         }
 
-        List<MeetingRoom> availableRooms = meetingRoomService.findAvailableRoomsInTimeframe(start, end);
+        // Alte Buchungen darf Start in der Vergangenheit liegen
+        if (currentEditingBookingId == null && start.isBefore(now)) {
+            Notification.show("Start time must be in the future.", 3000, Notification.Position.TOP_CENTER)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            roomGroup.setItems(List.of());
+            return;
+        }
+
+        List<MeetingRoom> availableRooms;
+
+        // Beim editieren aktuelle Buchung ignorieren
+        if (currentEditingBookingId != null) {
+            availableRooms = meetingRoomService.findAvailableRoomsExcludingBooking(start, end, currentEditingBookingId);
+        } else {
+            availableRooms = meetingRoomService.findAvailableRoomsInTimeframe(start, end);
+        }
+
+        MeetingRoom selectedRoom = roomGroup.getValue();
 
         roomGroup.setItems(availableRooms);
-        if (!availableRooms.isEmpty()) {
+
+        if (selectedRoom != null && availableRooms.contains(selectedRoom)) {
+            roomGroup.setValue(selectedRoom);
+        } else if (!availableRooms.isEmpty()) {
             roomGroup.setValue(availableRooms.get(0));
         }
     }
-
-    /*
-    private void loadFavouriteRooms() {
-        setRooms(java.util.List.of(
-                new RoomItem("A", "Meeting Room A", "Up to 90", true),
-                new RoomItem("B", "Meeting Room B", "Up to 12", true),
-                new RoomItem("C", "Meeting Room C", "Up to 20", true)
-        ));
-    }
-
-    private void loadAllRooms() {
-        setRooms(java.util.List.of(
-                new RoomItem("A", "Meeting Room A", "Up to 90", true),
-                new RoomItem("D", "Lecture Room D", "Up to 120", false),
-                new RoomItem("E", "Focus Room E", "Up to 4", false)
-        ));
-    }
-
-    private void setRooms(List<RoomItem> rooms) {
-        roomGroup.setItems(rooms);
-        roomGroup.setValue(rooms.isEmpty() ? null : rooms.getFirst());
-    }
-
-    private HorizontalLayout createRoomRow(RoomItem room) {
-        var title = new Span(room.name());
-        title.addClassName("room-title");
-
-        var cap = new Span(room.capacity());
-        cap.addClassName("room-capacity");
-
-        var text = new VerticalLayout(title, cap);
-        text.setPadding(false);
-        text.setSpacing(false);
-
-        Icon star = room.favourite() ? VaadinIcon.STAR.create() : VaadinIcon.STAR_O.create();
-        star.addClassName("room-star");
-
-        var row = new HorizontalLayout(text, star);
-        row.addClassName("room-row");
-        row.setWidthFull();
-        row.setAlignItems(FlexComponent.Alignment.CENTER);
-        row.expand(text);
-
-        return row;
-    }
-     */
 
     private void setupRoomGroup() {
         roomGroup.setLabel(null);
         roomGroup.addClassName("rooms-radio");
         roomGroup.setRenderer(new ComponentRenderer<>(room -> {
-            var title = new Span(room.getName());
+            Span roomName = new Span(room.getName());
+
+            Span locationInfo = new Span(room.getLocation() + " | Floor " + room.getFloor());
+            locationInfo.getStyle().set("margin-left", "auto");
+
+            HorizontalLayout topRow = new HorizontalLayout(roomName, locationInfo);
+            topRow.setWidthFull();
+            topRow.setPadding(false);
 
             var cap = new Span("Capacity: " + room.getCapacity());
 
-            var text = new VerticalLayout(title, cap);
-            text.setPadding(false);
-            text.setSpacing(false);
+            VerticalLayout container = new VerticalLayout(topRow, cap);
+            container.setPadding(false);
+            container.setSpacing(false);
+            container.setWidthFull();
 
-            var row = new HorizontalLayout(text);
+            HorizontalLayout row = new HorizontalLayout(container);
             row.setWidthFull();
             row.setAlignItems(FlexComponent.Alignment.CENTER);
-            row.expand(text);
 
             return row;
         }));
@@ -303,7 +289,14 @@ public class QuickBookingContainer extends Div {
             // Formular zurücksetzen
             LocalTime nowRounded = roundToNextHalfHour(LocalTime.now());
             startTime.setValue(nowRounded);
-            endTime.setValue(nowRounded.plusHours(1));
+
+            // End Time: 1 Stunde später, aber maximal 23:30 (um Mitternachts-Problem zu vermeiden)
+            LocalTime endTimeReset = nowRounded.plusHours(1);
+            if (endTimeReset.isBefore(nowRounded) || endTimeReset.equals(LocalTime.MIDNIGHT)) {
+                endTimeReset = LocalTime.of(23, 30);
+            }
+            endTime.setValue(endTimeReset);
+
             purposeField.clear();
             loadRooms();
 
