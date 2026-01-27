@@ -16,10 +16,7 @@ public class RoomImageStorageService {
         createDir();
     }
 
-    /**
-     * Speichert das Bild am Server im Ordner uploads/rooms
-     * und gibt als "path" nur den Dateinamen zurück (z.B. 8f3a... .jpg).
-     */
+
     public StoredImage save(InputStream in, String originalName, String mime) {
         String fileName = UUID.randomUUID() + ext(originalName);
         Path target = baseDir.resolve(fileName);
@@ -28,8 +25,51 @@ public class RoomImageStorageService {
     }
 
     /**
-     * Öffnet ein gespeichertes Bild anhand des Dateinamens (nicht voller Pfad!).
+     * Speichert das Bild mit dem Raumnamen als Dateiname.
+     * Überschreibt existierende Bilder mit demselben Raumnamen.
+     * Normalisiert problematische Zeichen im Raumnamen (/, \, :, *, ?, ", <, >, |).
      */
+    public StoredImage saveWithRoomName(InputStream in, String roomName, String originalName, String mime) {
+        // Normalisiere den Raumnamen für Dateisystem
+        String safeName = roomName.replaceAll("[/\\\\:*?\"<>|]", "_");
+
+        // Verwende Extension aus Original-Dateiname
+        String extension = ext(originalName);
+        if (extension.isEmpty()) {
+            // Fallback: Extension aus MIME-Type ableiten
+            if (mime != null) {
+                if (mime.contains("png")) extension = ".png";
+                else if (mime.contains("webp")) extension = ".webp";
+                else extension = ".jpg";
+            } else {
+                extension = ".jpg";
+            }
+        }
+
+        String fileName = safeName + extension;
+        Path target = baseDir.resolve(fileName);
+
+        // Lösche existierendes Bild mit gleichem Raumnamen (alle Extensions)
+        deleteExistingRoomImages(safeName);
+
+        copy(in, target);
+        return new StoredImage(fileName, normalizeMime(mime, fileName), originalName);
+    }
+
+    /**
+     * Löscht alle existierenden Bilder für einen Raum (alle Extensions).
+     */
+    private void deleteExistingRoomImages(String safeName) {
+        for (String ext : new String[]{".jpeg", ".jpg", ".png", ".webp"}) {
+            Path existingFile = baseDir.resolve(safeName + ext);
+            try {
+                Files.deleteIfExists(existingFile);
+            } catch (IOException e) {
+                // Ignoriere Fehler beim Löschen
+            }
+        }
+    }
+
     public OpenedImage openByFileName(String fileName) {
         try {
             Path p = baseDir.resolve(fileName);
@@ -39,6 +79,30 @@ public class RoomImageStorageService {
         } catch (Exception e) {
             throw new IllegalStateException("Cannot open image: " + fileName, e);
         }
+    }
+
+    public OpenedImage getRoomImage(String roomName) {
+        if (roomName != null && !roomName.isBlank()) {
+
+            String safeName = roomName.replaceAll("[/\\\\:*?\"<>|]", "_");
+
+
+            for (String ext : new String[]{".jpeg", ".jpg", ".png", ".webp"}) {
+                Path roomImagePath = baseDir.resolve(safeName + ext);
+                if (Files.exists(roomImagePath)) {
+                    try {
+                        InputStream in = Files.newInputStream(roomImagePath, StandardOpenOption.READ);
+                        String mime = guessMime(safeName + ext);
+                        return new OpenedImage(in, mime);
+                    } catch (Exception e) {
+
+                    }
+                }
+            }
+        }
+
+
+        return openByFileName("dummypicture1.jpeg");
     }
 
     private void createDir() {

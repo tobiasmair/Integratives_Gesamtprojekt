@@ -71,6 +71,7 @@ public class QuickBookingContainer extends Div {
         content.setSpacing(false);
         content.setWidthFull();
         content.setHeightFull();
+        content.getStyle().set("overflow", "hidden");
 
         this.title = createHeader();
         this.bookButton = createBookButton();
@@ -99,7 +100,14 @@ public class QuickBookingContainer extends Div {
 
         // Nächste gerundete Stunde als Startzeit
         startTime.setValue(nowRounded);
-        endTime.setValue(nowRounded.plusHours(1));
+
+        // End Time: 1 Stunde später, aber maximal 23:30 (um Mitternachts-Problem zu vermeiden)
+        LocalTime endTimeCalculated = nowRounded.plusHours(1);
+        if (endTimeCalculated.isBefore(nowRounded) || endTimeCalculated.equals(LocalTime.MIDNIGHT)) {
+            // Über Mitternacht - setze auf 23:30 statt
+            endTimeCalculated = LocalTime.of(23, 30);
+        }
+        endTime.setValue(endTimeCalculated);
 
         startTime.setStep(Duration.ofMinutes(30));
         endTime.setStep(Duration.ofMinutes(30));
@@ -174,17 +182,30 @@ public class QuickBookingContainer extends Div {
             return;
         }
 
-        if (start.isBefore(now)) {
+        // Alte Buchungen darf Start in der Vergangenheit liegen
+        if (currentEditingBookingId == null && start.isBefore(now)) {
             Notification.show("Start time must be in the future.", 3000, Notification.Position.TOP_CENTER)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             roomGroup.setItems(List.of());
             return;
         }
 
-        List<MeetingRoom> availableRooms = meetingRoomService.findAvailableRoomsInTimeframe(start, end);
+        List<MeetingRoom> availableRooms;
+
+        // Beim editieren aktuelle Buchung ignorieren
+        if (currentEditingBookingId != null) {
+            availableRooms = meetingRoomService.findAvailableRoomsExcludingBooking(start, end, currentEditingBookingId);
+        } else {
+            availableRooms = meetingRoomService.findAvailableRoomsInTimeframe(start, end);
+        }
+
+        MeetingRoom selectedRoom = roomGroup.getValue();
 
         roomGroup.setItems(availableRooms);
-        if (!availableRooms.isEmpty()) {
+
+        if (selectedRoom != null && availableRooms.contains(selectedRoom)) {
+            roomGroup.setValue(selectedRoom);
+        } else if (!availableRooms.isEmpty()) {
             roomGroup.setValue(availableRooms.get(0));
         }
     }
@@ -266,7 +287,14 @@ public class QuickBookingContainer extends Div {
             // Formular zurücksetzen
             LocalTime nowRounded = roundToNextHalfHour(LocalTime.now());
             startTime.setValue(nowRounded);
-            endTime.setValue(nowRounded.plusHours(1));
+
+            // End Time: 1 Stunde später, aber maximal 23:30 (um Mitternachts-Problem zu vermeiden)
+            LocalTime endTimeReset = nowRounded.plusHours(1);
+            if (endTimeReset.isBefore(nowRounded) || endTimeReset.equals(LocalTime.MIDNIGHT)) {
+                endTimeReset = LocalTime.of(23, 30);
+            }
+            endTime.setValue(endTimeReset);
+
             purposeField.clear();
             loadRooms();
 

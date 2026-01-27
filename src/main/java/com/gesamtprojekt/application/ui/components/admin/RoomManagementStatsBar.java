@@ -23,6 +23,10 @@ public class RoomManagementStatsBar extends HorizontalLayout {
         setSpacing(true);
         addClassName("room-stats-bar");
 
+        getStyle().set("flex-wrap", "wrap"); // Umbruch erlauben
+        setSpacing(true);
+        setPadding(false);
+
 
         add(
                 card("Total Rooms", totalRoomsValue, VaadinIcon.HOME),
@@ -50,6 +54,8 @@ public class RoomManagementStatsBar extends HorizontalLayout {
                 LumoUtility.Padding.MEDIUM
         );
 
+        c.getStyle().set("min-width", "200px");
+        c.getStyle().set("flex", "1 1 0");
 
         var header = new HorizontalLayout(new Span(title), icon.create());
         header.setJustifyContentMode(JustifyContentMode.BETWEEN);
