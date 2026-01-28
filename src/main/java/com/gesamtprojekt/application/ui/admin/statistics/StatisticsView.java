@@ -55,7 +55,7 @@ public class StatisticsView extends VerticalLayout {
         setPadding(true);
         setSpacing(true);
 
-        add(buildHeader());
+        //add(buildHeader());
         add(buildKpiRow());
         add(buildTabBar());
         add(buildContentArea());
@@ -66,28 +66,11 @@ public class StatisticsView extends VerticalLayout {
         show(topRoomsView, btnTopRooms);
     }
 
-    private Component buildHeader() {
-        H1 title = new H1("Statistics Overview");
-        title.getStyle().set("margin", "0");
 
-        Button refresh = new Button("Refresh", e -> {
-            loadAll();
-            // Keep current selection
-            if (btnMonthly.getThemeNames().contains("primary")) show(monthlyBookingsView, btnMonthly);
-            else if (btnUtilization.getThemeNames().contains("primary")) show(roomUtilizationView, btnUtilization);
-            else show(topRoomsView, btnTopRooms);
-        });
-
-        HorizontalLayout header = new HorizontalLayout(title, refresh);
-        header.setWidthFull();
-        header.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
-        header.expand(title);
-        return header;
-    }
 
     private HorizontalLayout buildKpiRow() {
         HorizontalLayout row = new HorizontalLayout(
-                kpi("Active Bookings", totalBookings),
+                kpi("Total Bookings", totalBookings),
                 kpi("Active Rooms", activeRooms),
                 kpi("Buildings", buildings),
                 kpi("Equipment", equipmentCount),
