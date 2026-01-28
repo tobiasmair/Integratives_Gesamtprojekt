@@ -132,7 +132,7 @@ public class CalendarControlsBar extends VerticalLayout {
 
     private FormLayout buildFiltersRow() {
         building = combo("Building", List.of("All Buildings", "MCI I", "MCI II", "MCI III", "MCI IV", "MCI V"));
-        floor = combo("Floor", List.of("Any Floor", "1", "2", "3"));
+        floor = combo("Floor", List.of("Any Floor", "1", "2", "3", "4", "5"));
         capacity = combo("Min Capacity", List.of("Any", "5+", "10+", "20+", "50+"));
 
         // Equipment aus Datenbank laden
@@ -201,7 +201,7 @@ public class CalendarControlsBar extends VerticalLayout {
         toggleBar.setPadding(false);
         toggleBar.setSpacing(true);
         toggleBar.getStyle().set("margin-bottom", "4px");
-        toggleBar.getStyle().set("background-color", "var(--lumo-contrast-5pct)");
+        //toggleBar.getStyle().set("background-color", "var(--lumo-contrast-5pct)");
 
         calendarModeBtn = new Button("Book by Date", new Icon(VaadinIcon.CALENDAR));
         calendarModeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
