@@ -87,7 +87,7 @@ public class StatisticsView extends VerticalLayout {
 
     private HorizontalLayout buildKpiRow() {
         HorizontalLayout row = new HorizontalLayout(
-                kpi("Active Bookings", totalBookings),
+                kpi("Total Bookings", totalBookings),
                 kpi("Active Rooms", activeRooms),
                 kpi("Buildings", buildings),
                 kpi("Equipment", equipmentCount),
