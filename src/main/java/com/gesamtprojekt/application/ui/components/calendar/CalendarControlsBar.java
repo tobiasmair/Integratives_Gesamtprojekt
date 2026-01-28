@@ -201,7 +201,7 @@ public class CalendarControlsBar extends VerticalLayout {
         toggleBar.setPadding(false);
         toggleBar.setSpacing(true);
         toggleBar.getStyle().set("margin-bottom", "4px");
-        toggleBar.getStyle().set("background-color", "var(--lumo-contrast-5pct)");
+        //toggleBar.getStyle().set("background-color", "var(--lumo-contrast-5pct)");
 
         calendarModeBtn = new Button("Book by Date", new Icon(VaadinIcon.CALENDAR));
         calendarModeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
