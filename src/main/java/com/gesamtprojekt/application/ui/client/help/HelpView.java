@@ -12,7 +12,7 @@ import jakarta.annotation.security.RolesAllowed;
 
 @Route(value = "help", layout = MainLayout.class)
 @PageTitle("Help | MCI Meeting Booker")
-@RolesAllowed({"USER", "ADMIN", "ROOM"})
+@RolesAllowed({"USER", "ADMIN"})
 public class HelpView extends VerticalLayout {
 
     private final VerticalLayout contentArea = new VerticalLayout();
