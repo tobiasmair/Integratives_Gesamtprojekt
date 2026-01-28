@@ -11,7 +11,13 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableScheduling
 @Theme(value = "gesamtprojekt")
-@PWA(name = "MCI Meeting Booker", shortName = "MCI Booker", iconPath = "icons/mci_logo.png")
+@PWA(
+        name = "MCI Booking Service",
+        shortName = "MCI Booker",
+        iconPath = "icons/mci_logo.png",
+        offlinePath = "offline.html",
+        offlineResources = {"icons/mci_logo.png"}
+)
 public class Application implements AppShellConfigurator {
 
     public static void main(String[] args) {

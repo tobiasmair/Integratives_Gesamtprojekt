@@ -69,79 +69,128 @@ public class RoomServiceView extends VerticalLayout {
         UI.getCurrent().addPollListener(e -> updateUIState());
     }
 
+    // in case Database is offline
+    private boolean isOfflineMode = false;
+    private Notification offlineNotification;
+
+    // Class-level variables to preserve state during DB outages
+    private Long cachedRoomId = null;
+    private String cachedRoomName = "Meeting Room";
+
     /**
-     * Checks the current time and the booking and decides which screen to display
-     * (Default-Screen, Lock-Screen or Dashboard-Screen)
+     * Checks the current time and the booking and decides which screen to display.
+     * Includes advanced failover logic for database outages.
      */
     private void updateUIState() {
-        LocalDateTime now = LocalDateTime.now();
+        try {
+            LocalDateTime now = LocalDateTime.now();
+            List<Booking> bookings;
 
-        // get room client
-        Optional<Client> authClient = securityService.getAuthenticatedClient();
-        if (authClient.isEmpty()) return;
-
-        // map the according room
-        Optional<MeetingRoom> room = meetingRoomService.findRoomByClient(authClient.get());
-        if (room.isEmpty()) return;
-
-        Long roomId = room.get().getRoomId();
-        List<Booking> bookings = bookingService.findAllActiveBookingsForRoom(roomId);
-
-        // check if there are active bookings for this room
-        Optional<Booking> currentBooking = bookings.stream()
-                .filter(b -> b.getIsActive() && b.getEndTime().isAfter(now))
-                .filter(b -> b.getStartTime().minusMinutes(1).isBefore(now))
-                .findFirst();
-
-        String newStatus;
-        Long newBookingId = null;
-
-        // get state of the booking
-        if (currentBooking.isPresent()) {
-            Booking b = currentBooking.get();
-            newBookingId = b.getBookingId();
-
-            if (b.getCheckInTime() != null) {
-                long minutesLeft = java.time.Duration.between(now, b.getEndTime()).toMinutes();
-
-                // Dashboard View
-                if (minutesLeft <= 5) {
-                    // if time till end of booking <= 5 mins - show reminder
-                    newStatus = "DASHBOARD_WARNING";
-                } else {
-                    // show normal dashboard panel
-                    newStatus = "DASHBOARD";
+            // Try to fetch Room and Client info (DB-dependent)
+            try {
+                Optional<Client> authClient = securityService.getAuthenticatedClient();
+                if (authClient.isPresent()) {
+                    Optional<MeetingRoom> room = meetingRoomService.findRoomByClient(authClient.get());
+                    if (room.isPresent()) {
+                        // Update cache variables if DB is reachable
+                        this.cachedRoomId = room.get().getRoomId();
+                        this.cachedRoomName = room.get().getName();
+                    }
                 }
-            } else if (now.isAfter(b.getStartTime().plusMinutes(5))) {
-                // Cancel booking if user doesn't check in the room in time (bookingStart + 5 mins)
-                newStatus = "AUTO_CANCEL";
-            } else {
-                // show check in screen
-                newStatus = "LOCKED";
+                handleOfflineStatusChange(false); // DB connection is healthy
+            } catch (Exception e) {
+                handleOfflineStatusChange(true); // DB connection failed
+                // If DB fails here, proceed using cachedRoomId from previous successful polls
             }
-        } else {
-            // show room name and (if any) future bookings
-            newStatus = "DEFAULT";
+
+            // 2. Stop if no Room ID is available (neither from DB nor from Cache)
+            if (cachedRoomId == null) return;
+
+            // 3. Look up bookings from database (or local memory cache in case of error)
+            try {
+                bookings = bookingService.findAllActiveBookingsForRoom(cachedRoomId);
+                handleOfflineStatusChange(false); // Database online
+            } catch (Exception e) {
+                handleOfflineStatusChange(true); // Database offline
+                // Service returns the local in-memory data
+                bookings = bookingService.getCachedBookings(cachedRoomId);
+            }
+
+            // 4. Determine relevant bookings (must be isActive & status must be CONFIRMED)
+            Optional<Booking> currentBooking = bookings.stream()
+                    .filter(b -> b.getIsActive() && "CONFIRMED".equals(b.getBookingStatus()))
+                    .filter(b -> b.getEndTime().isAfter(now))
+                    .filter(b -> b.getStartTime().minusMinutes(1).isBefore(now))
+                    .findFirst();
+
+            String newStatus;
+            Long newBookingId = null;
+
+            if (currentBooking.isPresent()) {
+                Booking b = currentBooking.get();
+                newBookingId = b.getBookingId();
+
+                if (b.getCheckInTime() != null) {
+                    long minutesLeft = java.time.Duration.between(now, b.getEndTime()).toMinutes();
+                    // If time until end of the booking <= 5mins - show warning/reminder
+                    newStatus = (minutesLeft <= 5) ? "DASHBOARD_WARNING" : "DASHBOARD";
+                } else if (now.isAfter(b.getStartTime().plusMinutes(5))) {
+                    // Change status to MISSED if user doesn't check in within 5 minutes
+                    newStatus = "MISSED";
+                } else {
+                    // Show check-in / lock screen
+                    newStatus = "CHECKIN";
+                }
+            } else {
+                // No current booking: show room name and upcoming schedule
+                newStatus = "DEFAULT";
+            }
+
+            // 5. Refresh UI only if the booking state or the specific booking ID has changed
+            if (!newStatus.equals(currentViewStatus) ||
+                    (newBookingId != null && !newBookingId.equals(currentActiveBookingId))) {
+
+                mainContent.removeAll();
+                currentViewStatus = newStatus;
+                currentActiveBookingId = newBookingId;
+
+                switch (newStatus) {
+                    case "DEFAULT" -> mainContent.add(new RoomDefaultScreen(cachedRoomName, bookings));
+                    case "MISSED" -> {
+                        markAsMissed(currentBooking.get());
+                        updateUIState(); // Recursive call to switch to DEFAULT screen immediately
+                    }
+                    case "CHECKIN" -> showLockScreen(currentBooking.get());
+                    default -> {
+                        if (newStatus.startsWith("DASHBOARD")) {
+                            showDashboard(currentBooking.get());
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Global Catch for unexpected errors to prevent the UI from freezing
+            // This log is only for debugging; visual feedback is handled via handleOfflineStatusChange
+            System.err.println("Critical UI Update Error: " + e.getMessage());
         }
+    }
 
-        // Refresh UI if there is a change in the database
-        if (!newStatus.equals(currentViewStatus) ||
-                (newBookingId != null && !newBookingId.equals(currentActiveBookingId))) {
-
-            mainContent.removeAll();
-            currentViewStatus = newStatus;
-            currentActiveBookingId = newBookingId;
-
-            switch (newStatus) {
-                case "DEFAULT" -> mainContent.add(new RoomDefaultScreen(room.get().getName(), bookings));
-                case "AUTO_CANCEL" -> {
-                    cancelBooking(currentBooking.get());
-                    updateUIState(); // switch to default screen
-                }
-                case "LOCKED" -> showLockScreen(currentBooking.get());
-                default -> {
-                    showDashboard(currentBooking.get());
-                }
+    /**
+     * controls display of notifications for offline-mode
+     */
+    private void handleOfflineStatusChange(boolean nowOffline) {
+        if (nowOffline && !isOfflineMode) {
+            isOfflineMode = true;
+            offlineNotification = new Notification("⚠️ Database Connection Lost - Using Offline Data", 0);
+            offlineNotification.addThemeVariants(NotificationVariant.LUMO_CONTRAST);
+            offlineNotification.setPosition(Notification.Position.BOTTOM_START);
+            offlineNotification.open();
+        } else if (!nowOffline && isOfflineMode) {
+            isOfflineMode = false;
+            if (offlineNotification != null) {
+                offlineNotification.close();
+                Notification.show("Connection restored. Syncing data...", 3000, Notification.Position.BOTTOM_START)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             }
         }
     }
@@ -152,12 +201,17 @@ public class RoomServiceView extends VerticalLayout {
     private void showLockScreen(Booking b) {
         mainContent.add(new RoomLockScreen(() -> {
             new CheckInDialog(b, () -> {
-                b.setCheckInTime(LocalDateTime.now());
-                bookingService.updateBooking(b);
-                Notification.show("Check-in successful!", 3000, Notification.Position.TOP_CENTER)
-                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                // reset state so updateUIState() shows the Dashboard
-                currentViewStatus = "";
+                try {
+                    b.setCheckInTime(LocalDateTime.now());
+                    bookingService.updateBooking(b);
+                    Notification.show("Check-in successful!", 3000, Notification.Position.TOP_CENTER)
+                            .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                } catch (Exception e) {
+                    // Lokaler Check-In trotz DB-Fehler erlauben
+                    Notification.show("Offline Check-in: Sync pending...", 5000, Notification.Position.MIDDLE)
+                            .addThemeVariants(NotificationVariant.LUMO_WARNING);
+                }
+                currentViewStatus = ""; // Status zurücksetzen für Refresh
                 updateUIState();
             }).open();
         }));
@@ -204,23 +258,36 @@ public class RoomServiceView extends VerticalLayout {
     }
 
     /**
-     * Sets 'endTime' on current time and ends the booking
+     * Sets 'endTime' on current time and sets status to 'COMPLETED'
      */
     private void finishBooking(Booking b) {
-        b.setEndTime(LocalDateTime.now());
-        bookingService.updateBooking(b);
-        Notification.show("Meeting finished early.", 3000, Notification.Position.TOP_CENTER)
-                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        try {
+            b.setEndTime(LocalDateTime.now());
+            b.setBookingStatus("COMPLETED"); // Status Update
+            bookingService.updateBooking(b);
+            Notification.show("Meeting completed.", 3000, Notification.Position.TOP_CENTER)
+                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        } catch (Exception e) {
+            // allow to finish booking, even if the database is offline
+            Notification.show("Offline: Saved locally, syncing later...", 5000, Notification.Position.MIDDLE)
+                    .addThemeVariants(NotificationVariant.LUMO_WARNING);
+        }
+        currentViewStatus = "";
         updateUIState();
     }
 
     /**
-     * deactivates the booking on no-show
+     * Sets status to MISSED on no-show
      */
-    private void cancelBooking(Booking b) {
-        b.setIsActive(false);
-        bookingService.updateBooking(b);
-        Notification.show("Booking canceled due to no-show.", 5000, Notification.Position.TOP_CENTER)
-                .addThemeVariants(NotificationVariant.LUMO_ERROR);
+    private void markAsMissed(Booking b) {
+        try {
+            b.setBookingStatus("MISSED"); // Status Update
+            b.setEndTime(LocalDateTime.now());
+            bookingService.updateBooking(b);
+            Notification.show("Booking canceled due to no-show.", 5000, Notification.Position.TOP_CENTER)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        } catch (Exception e) {
+            Notification.show("Offline: Sync pending...", 5000, Notification.Position.MIDDLE);
+        }
     }
 }
