@@ -72,7 +72,7 @@ public class HelpView extends VerticalLayout {
         H2 faqTitle = new H2("Frequently Asked Questions");
         faqLayout.add(faqTitle);
 
-        /* FAQ 1
+        //FAQ 1
         Paragraph p1 = new Paragraph(
                 "To book a meeting room, navigate to 'Book Rooms' in the sidebar.\n" +
                         "Select your desired date and time slot in the calendar view.\n" +
@@ -98,17 +98,6 @@ public class HelpView extends VerticalLayout {
 
 
 // FAQ 3
-        Paragraph p3 = new Paragraph(
-                "You can book rooms up to 3 months in advance.\n" +
-                        "This ensures fair availability for all users and allows for proper room management."
-        );
-        p3.getStyle().set("white-space", "pre-line");
-
-        Details faq3 = new Details("How far in advance can I book a room?", p3);
-        faq3.setWidthFull();
-
-
-// FAQ 4
         Paragraph p4 = new Paragraph(
                 "If you arrive at your booked room and it's occupied, please check the room door display.\n" +
                         "If there's a conflict, contact the IT support team immediately at support@mci.edu.\n" +
@@ -144,38 +133,20 @@ public class HelpView extends VerticalLayout {
         Details faq6 = new Details("Who can I contact for technical support?", p6);
         faq6.setWidthFull();
 
-
-// FAQ 7
-        Paragraph p7 = new Paragraph(
-                "Yes, you can book multiple rooms for the same time slot if needed.\n" +
-                        "Simply make separate bookings for each room you require.\n" +
-                        "All your bookings will be visible in your dashboard."
-        );
-        p7.getStyle().set("white-space", "pre-line");
-
-        Details faq7 = new Details("Can I book multiple rooms at the same time?", p7);
-        faq7.setWidthFull();
-
-
-// FAQ 8
-        Paragraph p8 = new Paragraph(
-                "The room door display shows the current booking status,\n" +
-                        "upcoming bookings for the day, and real-time availability.\n" +
-                        "This helps you quickly see if a room is available for immediate use."
-        );
-        p8.getStyle().set("white-space", "pre-line");
-
-        Details faq8 = new Details("What information is shown on the room door display?", p8);
-        faq8.setWidthFull();*/
-
-
 // FAQ 9
         Paragraph p9 = new Paragraph(
                 "Yes, that is possible. Some rooms can be connected to book meeting rooms for very large groups.\n" +
-                        "At the moment, rooms must be booked individually via the booking app.\n" +
-                        "The following rooms can be connected:\n" +
-                        "301 + 302\n" +
-                        "405 + 406"
+                        "At the moment, rooms must be booked individually via the booking app.\n" + "\n" +
+                        "The following rooms can be connected:\n" + "\n" +
+                        "MCI I:\n" +
+                        "301 + 302" + " - total capacity: 132 pax\n" + "\n" +
+                        "MCI II:\n" +
+                        "051 + 052 + 053" + " - total capacity: 100 pax\n" +
+                        "551 + 552" + " - total capacity: 94 pax\n" + "\n" +
+                        "MCI III:\n" +
+                        "112 + 113" + " - total capacity: 90 pax\n" + "\n" +
+                        "To book adjoining rooms as one room, please book each of the two rooms " +
+                        "separately as individual bookings."
         );
         p9.getStyle().set("white-space", "pre-line");
 
@@ -185,7 +156,21 @@ public class HelpView extends VerticalLayout {
         );
         faq9.setWidthFull();
 
-        faqLayout.add(faq9);
+        // FAQ 10
+        Paragraph p10 = new Paragraph(
+                "Yes, rooms can only be booked during official MCI opening hours:\n" +
+                        "Monday to Sunday from 7:00 a.m. to 11:00 p.m.\n" +
+                        "If you would like to book rooms outside these times, please send a written request to roombooking@mci.edu at least 48 hours before the start of the meeting."
+        );
+        p10.getStyle().set("white-space", "pre-line");
+
+        Details faq10 = new Details(
+                "Are there any time restrictions for booking rooms?",
+                p10
+        );
+        faq10.setWidthFull();
+
+        faqLayout.add(faq9, faq10, faq1, faq2, faq4, faq5, faq6);
 
         return faqLayout;
     }
