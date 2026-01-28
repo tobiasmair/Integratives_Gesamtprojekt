@@ -18,6 +18,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class BookingItem extends Div {
 
@@ -35,7 +36,7 @@ public class BookingItem extends Div {
         addClassName("booking-item");
 
         // Optisches Feedback für vergangene Buchungen
-        if (booking.getEndTime().isBefore(LocalDateTime.now())) {
+        if (booking.getEndTime().isBefore(LocalDateTime.now()) || Objects.equals(booking.getBookingStatus(), "MISSED")) {
             addClassName("past-booking");
         }
 
@@ -217,7 +218,11 @@ public class BookingItem extends Div {
         dialog.add(text);
 
         Button deleteButton = new Button("Delete", event -> {
+
+            // update bookingStatus to CANCELLED before deleting
+            booking.setBookingStatus("CANCELLED");
             bookingService.deleteBooking(booking);
+
             //updateList();
             dialog.close();
             Notification.show("Booking deleted");
