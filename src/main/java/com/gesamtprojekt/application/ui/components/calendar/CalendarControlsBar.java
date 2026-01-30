@@ -12,6 +12,8 @@ import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -102,23 +104,40 @@ public class CalendarControlsBar extends VerticalLayout {
     }
 
     private FormLayout buildTopRow() {
+        // Öffnungszeiten definieren
+        LocalTime opensAt = LocalTime.of(7, 0);
+        LocalTime closesAt = LocalTime.of(22, 0);
+
         LocalTime nowRounded = roundToNextHalfHour(LocalTime.now());
+
+        // jetzt vor Öffnung
+        if (nowRounded.isBefore(opensAt)) {
+            nowRounded = opensAt;
+        }
+        // jetzt vor oder nach Öffnung
+        else if (nowRounded.isAfter(closesAt.minusMinutes(30))) {
+            nowRounded = opensAt;
+        }
 
         // Nächste gerundete Stunde als Startzeit
         start = time("Start Time", nowRounded);
+        start.setMin(opensAt);
+        start.setMax(closesAt.minusMinutes(30));
 
-        // End Time: 1 Stunde später, aber maximal 23:30 (um Mitternachts-Problem zu vermeiden)
         LocalTime endTimeCalculated = nowRounded.plusHours(1);
-        if (endTimeCalculated.isBefore(nowRounded) || endTimeCalculated.equals(LocalTime.MIDNIGHT)) {
-            // Über Mitternacht:    setze auf 23:30 statt 0 Uhr
-            endTimeCalculated = LocalTime.of(23, 30);
+        if (endTimeCalculated.isAfter(closesAt)) {
+            endTimeCalculated = closesAt;
         }
+
         end = time("End Time", endTimeCalculated);
+        end.setMin(opensAt.plusMinutes(30));
+        end.setMax(closesAt);
 
         start.setStep(Duration.ofMinutes(30));
         end.setStep(Duration.ofMinutes(30));
 
         date.setValue(LocalDate.now());
+        date.setMin(LocalDate.now());
         date.setWidthFull();
 
         FormLayout top = new FormLayout(date, start, end);

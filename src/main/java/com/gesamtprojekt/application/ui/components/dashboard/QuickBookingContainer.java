@@ -53,6 +53,9 @@ public class QuickBookingContainer extends Div {
 
     private Long currentEditingBookingId = null;
 
+    private LocalTime opensAt = LocalTime.of(7, 0);
+    private LocalTime closesAt = LocalTime.of(22, 0);
+
     public QuickBookingContainer(BookingService bookingService, MeetingRoomService meetingRoomService, SecurityService securityService) {
         this.bookingService = bookingService;
         this.meetingRoomService = meetingRoomService;
@@ -98,15 +101,17 @@ public class QuickBookingContainer extends Div {
         datePicker.setValue(java.time.LocalDate.now());
         datePicker.setMin(LocalDate.now());
 
+        // Einschränkungen basierend auf Öffnungszeiten
+        startTime.setMin(opensAt);
+        startTime.setMax(closesAt.minusMinutes(30));
+        endTime.setMin(opensAt.plusMinutes(30));
+        endTime.setMax(closesAt);
+
         // Nächste gerundete Stunde als Startzeit
         startTime.setValue(nowRounded);
 
-        // End Time: 1 Stunde später, aber maximal 23:30 (um Mitternachts-Problem zu vermeiden)
+        // End Time setzen plus 1 Stunde
         LocalTime endTimeCalculated = nowRounded.plusHours(1);
-        if (endTimeCalculated.isBefore(nowRounded) || endTimeCalculated.equals(LocalTime.MIDNIGHT)) {
-            // Über Mitternacht - setze auf 23:30 statt
-            endTimeCalculated = LocalTime.of(23, 30);
-        }
         endTime.setValue(endTimeCalculated);
 
         startTime.setStep(Duration.ofMinutes(30));
@@ -188,6 +193,13 @@ public class QuickBookingContainer extends Div {
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             roomGroup.setItems(List.of());
             return;
+        }
+
+        // Öffnungszeiten prüfen
+        if (startTime.getValue().isBefore(opensAt) || endTime.getValue().isAfter(closesAt)) {
+            Notification.show("The building is closed! (07:00 - 22:00)", 3000, Notification.Position.TOP_CENTER)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            roomGroup.setItems(List.of());
         }
 
         List<MeetingRoom> availableRooms;

@@ -8,6 +8,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,17 @@ public class BookingService implements BookingServiceInterface {
 
     @Transactional
     public void createBooking(Booking booking) {
+        // Öffnungszeiten überprüfen
+        LocalTime start = booking.getStartTime().toLocalTime();
+        LocalTime end = booking.getEndTime().toLocalTime();
+
+        LocalTime opensAt = LocalTime.of(7, 0);
+        LocalTime closesAt = LocalTime.of(22, 0);
+
+        if (start.isBefore(opensAt) || end.isAfter(closesAt)) {
+            throw new RuntimeException("The building is closed. Bookings are only allowed between 07:00 and 22:00.");
+        }
+
         // Auf Überschneidung prüfen
         boolean conflict = bookingRepository.existsOverlappingBooking(
                 booking.getMeetingRoom().getRoomId(),

@@ -9,13 +9,10 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -30,6 +27,7 @@ import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.shared.Registration;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -139,19 +137,35 @@ public class RoomBookingDialog extends Dialog {
     }
 
     private void initializeFields(LocalDateTime startDateTime, LocalDateTime endDateTime) {
-        if (startDateTime != null && endDateTime != null) {
+        // Öffnungszeiten setzen
+        LocalTime opensAt = LocalTime.of(7, 0);
+        LocalTime closesAt = LocalTime.of(22, 0);
+
+        startTime.setMin(opensAt);
+        startTime.setMax(closesAt.minusMinutes(30));
+
+        endTime.setMin(opensAt.plusMinutes(30));
+        endTime.setMax(closesAt);
+
+        startTime.setStep(Duration.ofMinutes(30));
+        endTime.setStep(Duration.ofMinutes(30));
+
+        // Initialisierung Werte
+        if (startDateTime != null) {
             datePicker.setValue(startDateTime.toLocalDate());
             startTime.setValue(startDateTime.toLocalTime());
             endTime.setValue(endDateTime.toLocalTime());
         } else {
-            LocalTime nowRounded = roundToNextHalfHour(LocalTime.now());
-            datePicker.setValue(java.time.LocalDate.now());
-            startTime.setValue(nowRounded);
-            endTime.setValue(nowRounded.plusHours(1));
-        }
+            LocalTime now = roundToNextHalfHour(LocalTime.now());
+            // vor 7 auf 7 setzen
+            if (now.isBefore(opensAt)) now = opensAt;
+            // nach 22 setze auf morgen 7 Uhr
+            if (now.isAfter(closesAt.minusHours(1))) now = opensAt;
 
-        startTime.setStep(Duration.ofMinutes(30));
-        endTime.setStep(Duration.ofMinutes(30));
+            datePicker.setValue(LocalDate.now());
+            startTime.setValue(now);
+            endTime.setValue(now.plusHours(1));
+        }
     }
 
     private void saveBooking() {
