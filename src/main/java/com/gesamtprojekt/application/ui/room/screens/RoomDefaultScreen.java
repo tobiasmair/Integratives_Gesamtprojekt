@@ -37,6 +37,7 @@ public class RoomDefaultScreen extends VerticalLayout {
 
         List<Booking> upcomingToday = bookings.stream()
                 .filter(Booking::getIsActive)
+                .filter(b -> "CONFIRMED".equals(b.getBookingStatus()))
                 .filter(b -> b.getStartTime().toLocalDate().equals(today))
                 .filter(b -> b.getStartTime().isAfter(now))
                 .sorted(Comparator.comparing(Booking::getStartTime))
