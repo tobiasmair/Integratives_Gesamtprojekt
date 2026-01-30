@@ -10,10 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.time.LocalTime;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +31,11 @@ public class MeetingRoomService implements MeetingRoomServiceInterface {
             LocalDateTime endTime) {
         if (startTime == null || endTime == null) {
             return findAvailableRooms();
+        }
+        // Auserhalb Öffnungszeiten leere Liste
+        if (startTime.toLocalTime().isBefore(LocalTime.of(7, 0)) ||
+                endTime.toLocalTime().isAfter(LocalTime.of(22, 0))) {
+            return Collections.emptyList();
         }
         return meetingRoomRepository.findAvailableRoomsInTimeframe(startTime, endTime);
     }

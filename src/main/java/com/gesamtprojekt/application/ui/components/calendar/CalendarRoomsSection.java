@@ -15,6 +15,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.shared.Registration;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -63,6 +64,10 @@ public class CalendarRoomsSection extends VerticalLayout {
      */
 
     public void reload(LocalDateTime start, LocalDateTime end, String b, String f, String cap, Set<String> equip) {
+        // Öffnungszeiten
+        LocalTime opensAt = LocalTime.of(7, 0);
+        LocalTime closesAt = LocalTime.of(22, 0);
+        
         grid.removeAll();
 
         // Browse Mode: Nur Filter, kein Datum
@@ -73,7 +78,23 @@ public class CalendarRoomsSection extends VerticalLayout {
 
         // Calendar Mode: Mit Datum und Verfügbarkeit
         if (end.isBefore(start) || end.isEqual(start)) {
-            Notification.show("End time must be after start time.", 3000, Notification.Position.TOP_CENTER)
+            Notification.show("End time must be after start time", 3000, Notification.Position.TOP_CENTER)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            grid.removeAll();
+            return;
+        }
+
+        // Nicht in der Vergangenheit
+        if (start.isBefore(LocalDateTime.now())) {
+            Notification.show("Start time must be in the future", 3000, Notification.Position.TOP_CENTER)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            grid.removeAll();
+            return;
+        }
+
+        // Öffnungszeiten prüfen
+        if (start.toLocalTime().isBefore(opensAt) || end.toLocalTime().isAfter(closesAt)) {
+            Notification.show("The building is closed! (07:00 - 22:00)", 3000, Notification.Position.TOP_CENTER)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             grid.removeAll();
             return;

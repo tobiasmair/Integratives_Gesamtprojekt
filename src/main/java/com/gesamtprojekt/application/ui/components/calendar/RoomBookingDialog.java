@@ -9,16 +9,15 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -28,6 +27,7 @@ import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.shared.Registration;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -77,14 +77,39 @@ public class RoomBookingDialog extends Dialog {
 
         // Lageplan Link
         MeetingRoom room = meetingRoomService.findRoomForEdit(roomId);
-        Anchor mapLink = new Anchor("#", "Show Floor Plan");
+        Button mapLink = new Button("Show Floor Plan");
+        mapLink.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
         mapLink.getStyle().set("font-size", "var(--lumo-font-size-xs)");
         Icon mapIcon = VaadinIcon.MAP_MARKER.create();
         mapIcon.setSize("12px");
         HorizontalLayout mapWrapper = new HorizontalLayout(mapIcon, mapLink);
         mapWrapper.setSpacing(false);
         mapWrapper.setAlignItems(HorizontalLayout.Alignment.CENTER);
-        mapWrapper.addClickListener(e -> Notification.show("Opening floor plan for floor " + (room != null ? room.getFloor() : "unknown")));
+        mapWrapper.addClickListener(e -> {
+            if (room == null) {
+                Notification.show("No floor plan available");
+                return;
+            }
+
+            // Dialog erstellen
+            Dialog dialog = new Dialog();
+            dialog.setHeaderTitle("Floor Plan: " + room.getName());
+
+            Image floorPlan = buildBlueprint(room.getName());
+
+            // Layout im Dialog
+            VerticalLayout dialogLayout = new VerticalLayout(floorPlan);
+            dialogLayout.setPadding(false);
+            dialogLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+
+            dialog.add(dialogLayout);
+
+            // Schließen-Button im Footer
+            Button closeButtonWrapper = new Button("Close", event -> dialog.close());
+            dialog.getFooter().add(closeButtonWrapper);
+
+            dialog.open();
+        });
 
         datePicker.setWidthFull();
 
@@ -112,19 +137,35 @@ public class RoomBookingDialog extends Dialog {
     }
 
     private void initializeFields(LocalDateTime startDateTime, LocalDateTime endDateTime) {
-        if (startDateTime != null && endDateTime != null) {
+        // Öffnungszeiten setzen
+        LocalTime opensAt = LocalTime.of(7, 0);
+        LocalTime closesAt = LocalTime.of(22, 0);
+
+        startTime.setMin(opensAt);
+        startTime.setMax(closesAt.minusMinutes(30));
+
+        endTime.setMin(opensAt.plusMinutes(30));
+        endTime.setMax(closesAt);
+
+        startTime.setStep(Duration.ofMinutes(30));
+        endTime.setStep(Duration.ofMinutes(30));
+
+        // Initialisierung Werte
+        if (startDateTime != null) {
             datePicker.setValue(startDateTime.toLocalDate());
             startTime.setValue(startDateTime.toLocalTime());
             endTime.setValue(endDateTime.toLocalTime());
         } else {
-            LocalTime nowRounded = roundToNextHalfHour(LocalTime.now());
-            datePicker.setValue(java.time.LocalDate.now());
-            startTime.setValue(nowRounded);
-            endTime.setValue(nowRounded.plusHours(1));
-        }
+            LocalTime now = roundToNextHalfHour(LocalTime.now());
+            // vor 7 auf 7 setzen
+            if (now.isBefore(opensAt)) now = opensAt;
+            // nach 22 setze auf morgen 7 Uhr
+            if (now.isAfter(closesAt.minusHours(1))) now = opensAt;
 
-        startTime.setStep(Duration.ofMinutes(30));
-        endTime.setStep(Duration.ofMinutes(30));
+            datePicker.setValue(LocalDate.now());
+            startTime.setValue(now);
+            endTime.setValue(now.plusHours(1));
+        }
     }
 
     private void saveBooking() {
@@ -193,5 +234,30 @@ public class RoomBookingDialog extends Dialog {
 
     public Registration addBookingCreatedListener(ComponentEventListener<BookingCreatedEvent> listener) {
         return addListener(BookingCreatedEvent.class, listener);
+    }
+
+    // Blueprint Lageplan PNG suchen
+    private Image buildBlueprint(String roomName) {
+        String src = "room_blueprint/" + roomName + ".png";
+
+        Image img = new Image(src, "Blueprint of " + roomName + src);
+
+        img.setWidthFull();
+        img.getStyle().set("max-height", "600px");
+        img.getStyle().set("min-height", "300px");
+        img.getStyle()
+                .set("object-fit", "contain")
+                .set("background-color", "#f5f5f5")
+                .set("border-radius", "12px")
+                .set("box-shadow", "var(--lumo-box-shadow-m)");
+
+        // Fallback: Generischer Lageplan
+        img.getElement().executeJs(
+                "this.addEventListener('error', function() {" +
+                        "  this.src = 'room_blueprint/Generic_Map.png';" +
+                        "});"
+        );
+
+        return img;
     }
 }

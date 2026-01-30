@@ -7,12 +7,13 @@ import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -74,6 +75,22 @@ public class BookingItem extends Div {
         titleRow.getChildren().findFirst().ifPresent(c -> c.setClassName("booking-title"));
         titleRow.getChildren().skip(1).findFirst().ifPresent(c -> c.setClassName("booking-status"));
 
+        // Datum
+        var dateRow = new HorizontalLayout();
+        dateRow.setSpacing(true);
+        dateRow.setAlignItems(FlexComponent.Alignment.CENTER);
+
+        Icon dateIcon = VaadinIcon.CALENDAR.create();
+        dateIcon.setSize("12px");
+
+        Span dateSpan = new Span(dateText);
+        dateSpan.addClassName("booking-date");
+        dateSpan.getStyle()
+                .set("font-size", "var(--lumo-font-size-s)")
+                .set("font-weight", "600");
+
+        dateRow.add(dateIcon, dateSpan);
+
         // Raum & Gebäude Info
         MeetingRoom roomEntity = booking.getMeetingRoom();
         String locationInfo = roomEntity != null ?
@@ -100,14 +117,39 @@ public class BookingItem extends Div {
         walkTime.getStyle().set("font-size", "var(--lumo-font-size-xs)").set("color", "var(--lumo-tertiary-text-color)");
 
         // Lageplan Link
-        Anchor mapLink = new Anchor("#", "Show Floor Plan");
+        Button mapLink = new Button("Show Floor Plan");
+        mapLink.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
         mapLink.getStyle().set("font-size", "var(--lumo-font-size-xs)");
         Icon mapIcon = VaadinIcon.MAP_MARKER.create();
         mapIcon.setSize("12px");
         HorizontalLayout mapWrapper = new HorizontalLayout(mapIcon, mapLink);
         mapWrapper.setSpacing(false);
-        mapWrapper.setAlignItems(FlexComponent.Alignment.CENTER);
-        mapWrapper.addClickListener(e -> Notification.show("Opening floor plan for floor " + (roomEntity != null ? roomEntity.getFloor() : "unknown")));
+        mapWrapper.setAlignItems(HorizontalLayout.Alignment.CENTER);
+        mapWrapper.addClickListener(e -> {
+            if (roomEntity == null) {
+                Notification.show("No floor plan available");
+                return;
+            }
+
+            // Dialog erstellen
+            Dialog dialog = new Dialog();
+            dialog.setHeaderTitle("Floor Plan: " + roomEntity.getName());
+
+            Image floorPlan = buildBlueprint(roomEntity.getName());
+
+            // Layout im Dialog
+            VerticalLayout dialogLayout = new VerticalLayout(floorPlan);
+            dialogLayout.setPadding(false);
+            dialogLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+
+            dialog.add(dialogLayout);
+
+            // Schließen-Button im Footer
+            Button closeButton = new Button("Close", event -> dialog.close());
+            dialog.getFooter().add(closeButton);
+
+            dialog.open();
+        });
 
         navigationRow.add(walkIcon, walkTime, new Span(" • "), mapWrapper);
 
@@ -127,7 +169,7 @@ public class BookingItem extends Div {
         codeWrapper.getStyle().set("margin-top", "4px");
         codeWrapper.setSpacing(true);
 
-        var section = new VerticalLayout(titleRow, locationRow, navigationRow, codeWrapper);
+        var section = new VerticalLayout(titleRow, dateRow, locationRow, navigationRow, codeWrapper);
         section.setPadding(false);
         section.setSpacing(false);
         return section;
@@ -197,9 +239,11 @@ public class BookingItem extends Div {
                 }
 
                 dialog.close();
-                Notification.show("Booking updated");
+                Notification.show("Booking updated", 3000, Notification.Position.TOP_CENTER)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             } catch (Exception e) {
-                Notification.show("Error updating booking: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
+                Notification.show("Error updating booking: " + e.getMessage(), 3000, Notification.Position.TOP_CENTER)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -226,6 +270,8 @@ public class BookingItem extends Div {
             //updateList();
             dialog.close();
             Notification.show("Booking deleted");
+            Notification.show("Booking deleted", 3000, Notification.Position.TOP_CENTER)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
             // Container benachrichtigen
             if (runnable != null) {
                 runnable.run();
@@ -237,6 +283,31 @@ public class BookingItem extends Div {
 
         dialog.getFooter().add(cancelButton, deleteButton);
         dialog.open();
+    }
+
+    // Blueprint Lageplan PNG suchen
+    private Image buildBlueprint(String roomName) {
+        String src = "room_blueprint/" + roomName + ".png";
+
+        Image img = new Image(src, "Blueprint of " + roomName + src);
+
+        img.setWidthFull();
+        img.getStyle().set("max-height", "600px");
+        img.getStyle().set("min-height", "300px");
+        img.getStyle()
+                .set("object-fit", "contain")
+                .set("background-color", "#f5f5f5")
+                .set("border-radius", "12px")
+                .set("box-shadow", "var(--lumo-box-shadow-m)");
+
+        // Fallback: Generischer Lageplan
+        img.getElement().executeJs(
+                "this.addEventListener('error', function() {" +
+                        "  this.src = 'room_blueprint/Generic_Map.png';" +
+                        "});"
+        );
+
+        return img;
     }
 
 }
