@@ -158,7 +158,9 @@ public class UserTableSection extends VerticalLayout {
                 updateList();
                 fireEvent(new StatsChangedEvent(this)); // Container benachrichtigen
                 dialog.close();
-                Notification.show("User updated.");
+
+                Notification.show("User updated", 3000, Notification.Position.TOP_CENTER)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             }
         });
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -182,7 +184,9 @@ public class UserTableSection extends VerticalLayout {
             updateList();
             fireEvent(new StatsChangedEvent(this)); // Container benachrichtigen
             dialog.close();
-            Notification.show("User deleted.");
+
+            Notification.show("User deleted", 3000, Notification.Position.TOP_CENTER)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
         });
         deleteButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_ERROR);
 

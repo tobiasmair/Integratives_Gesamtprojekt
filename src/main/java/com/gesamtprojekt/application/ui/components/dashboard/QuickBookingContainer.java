@@ -176,7 +176,7 @@ public class QuickBookingContainer extends Div {
         LocalDateTime now = LocalDateTime.now();
 
         if (end.isBefore(start) || end.isEqual(start)) {
-            Notification.show("End time must be after start time.", 3000, Notification.Position.TOP_CENTER)
+            Notification.show("End time must be after start time", 3000, Notification.Position.TOP_CENTER)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             roomGroup.setItems(List.of());
             return;
@@ -184,7 +184,7 @@ public class QuickBookingContainer extends Div {
 
         // Alte Buchungen darf Start in der Vergangenheit liegen
         if (currentEditingBookingId == null && start.isBefore(now)) {
-            Notification.show("Start time must be in the future.", 3000, Notification.Position.TOP_CENTER)
+            Notification.show("Start time must be in the future", 3000, Notification.Position.TOP_CENTER)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             roomGroup.setItems(List.of());
             return;

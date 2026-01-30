@@ -148,7 +148,7 @@ public class RoomTableSection extends VerticalLayout {
         RoomChangedBroadcaster.broadcast(new RoomChangedBroadcaster.RoomChangedEvent("Room updated"));
         dialog.close();
 
-        Notification.show("Room updated.", 3000, Notification.Position.TOP_CENTER)
+        Notification.show("Room updated", 3000, Notification.Position.TOP_CENTER)
                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
 
@@ -178,8 +178,8 @@ public class RoomTableSection extends VerticalLayout {
 
         dialog.close();
 
-        Notification.show("Room deleted.", 3000, Notification.Position.TOP_CENTER)
-                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        Notification.show("Room deleted", 3000, Notification.Position.TOP_CENTER)
+                .addThemeVariants(NotificationVariant.LUMO_ERROR);
     }
 
     private void addRoomDialog() {
@@ -210,7 +210,7 @@ public class RoomTableSection extends VerticalLayout {
             RoomChangedBroadcaster.broadcast(new RoomChangedBroadcaster.RoomChangedEvent("Room created"));
             dialog.close();
 
-            Notification.show("Room created.", 3000, Notification.Position.TOP_CENTER)
+            Notification.show("Room created", 3000, Notification.Position.TOP_CENTER)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
         } catch (Exception ex) {
             Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_CENTER)
