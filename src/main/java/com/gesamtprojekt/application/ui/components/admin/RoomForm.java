@@ -225,7 +225,7 @@ public class RoomForm extends FormLayout {
         status.setItems("ACTIVE", "INACTIVE");
         status.setValue("ACTIVE");
         status.setWidthFull();
-        floor.setItems(1, 2, 3, 4, 5);
+        floor.setItems(0, 1, 2, 3, 4, 5);
         floor.setRequiredIndicatorVisible(true);
         floor.setWidthFull();
 

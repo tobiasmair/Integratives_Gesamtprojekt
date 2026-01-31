@@ -404,7 +404,7 @@ vaadin-app-layout.drawer-collapsed vaadin-side-nav-item::part(label) {
 
 .calendar-room-card {
   width: 240px;
-  border: 1px solid var(--lumo-contrast-10pct);
+  border: 4px solid var(--lumo-contrast-40pct);
   border-radius: 12px;
   background: var(--lumo-base-color);
   overflow: hidden;
