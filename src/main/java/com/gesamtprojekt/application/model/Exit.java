@@ -23,9 +23,11 @@ public class Exit {
     @Column(name = "name")
     private String name;
 
-    @ElementCollection
-    @CollectionTable(name = "exit_building_times", joinColumns = @JoinColumn(name = "exit_id"))
-    @MapKeyColumn(name = "building_name")
-    @Column(name = "time_to_building")
-    private Map<String, Integer> timeToBuildings = new HashMap<>();
+    public Long getId() {
+        return exitId;
+    }
 }
+
+
+
+

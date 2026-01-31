@@ -95,8 +95,8 @@ public class MeetingRoom {
     private Exit nearestExit;
 
     // Zeit zum nächsten Ausgang in Sekunden
-    @Column(name = "time_to_exit")
-    private Integer timeToExit;
+    @Column(name = "time_to_nearest_exit")
+    private Integer timeToNearestExit;
 
     private Set<Equipment> equipment = new LinkedHashSet<>();
 }

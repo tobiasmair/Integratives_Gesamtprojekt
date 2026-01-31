@@ -1,9 +1,11 @@
 package com.gesamtprojekt.application.ui.components.calendar;
 
 import com.gesamtprojekt.application.model.Booking;
+import com.gesamtprojekt.application.model.Exit;
 import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.security.SecurityService;
 import com.gesamtprojekt.application.service.implementation.BookingService;
+import com.gesamtprojekt.application.service.implementation.ExitService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -39,11 +41,13 @@ public class RoomBookingDialog extends Dialog {
     private final MeetingRoomService meetingRoomService;
     private final SecurityService securityService;
     private final Long roomId;
+    private final ExitService exitService;
 
     private final DatePicker datePicker = new DatePicker("Date");
     private final TimePicker startTime = new TimePicker("Start");
     private final TimePicker endTime = new TimePicker("End");
     private final TextArea purposeField = new TextArea("Meeting purpose");
+    private final ComboBox<Exit> exitDropdown = new ComboBox<>("Select Exit");
 
     public RoomBookingDialog(Long roomId, String roomName, BookingService bookingService,
                              MeetingRoomService meetingRoomService, SecurityService securityService) {
@@ -98,6 +102,12 @@ public class RoomBookingDialog extends Dialog {
         purposeField.setHeight("60px");
         purposeField.getStyle().set("resize", "none");
 
+        // Exit dropdown
+        exitDropdown.setWidthFull();
+        exitDropdown.setItemLabelGenerator(Exit::getName);
+        exitDropdown.setPlaceholder("Select your starting exit");
+        exitDropdown.setItems(fetchExits());
+
         Button bookButton = new Button("Book", e -> saveBooking());
         bookButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
@@ -110,6 +120,10 @@ public class RoomBookingDialog extends Dialog {
         content.add(header, mapWrapper, datePicker, timeRow, purposeField, buttonRow);
         content.setWidth("450px");
         return content;
+    }
+
+    private List<Exit> fetchExits() {
+        return exitService.findAllExits();
     }
 
     private void initializeFields(LocalDateTime startDateTime, LocalDateTime endDateTime) {
@@ -127,6 +141,7 @@ public class RoomBookingDialog extends Dialog {
         startTime.setStep(Duration.ofMinutes(30));
         endTime.setStep(Duration.ofMinutes(30));
     }
+
 
     private void saveBooking() {
         try {
@@ -150,6 +165,22 @@ public class RoomBookingDialog extends Dialog {
             }
 
             MeetingRoom room = meetingRoomService.findRoomForEdit(roomId);
+
+            LocalDateTime now = LocalDateTime.now();
+            if (start.isBefore(now.plusMinutes(60))) {
+                if (exitDropdown.isEmpty()) {
+                    throw new RuntimeException("Please select your starting exit.");
+                }
+
+                Exit selectedExit = exitDropdown.getValue();
+                Integer travelTime = exitService.getDistanceBetweenExits(selectedExit.getId(), room.getNearestExit().getId());
+
+                if (travelTime == null || travelTime > Duration.between(now, start).toSeconds()) {
+                    Notification.show("The room cannot be reached within the remaining time.", 5000, Notification.Position.TOP_CENTER)
+                            .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                    return;
+                }
+            }
 
             Booking booking = new Booking();
             booking.setMeetingRoom(room);

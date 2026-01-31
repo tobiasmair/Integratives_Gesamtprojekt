@@ -5,6 +5,7 @@ import com.gesamtprojekt.application.repositories.ExitRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -13,8 +14,18 @@ public class ExitService {
 
     private final ExitRepository exitRepository;
 
+    // Finde Ausgang nach ID
     public Exit findExitById(Long exitId) {
         return exitRepository.findById(exitId)
-                .orElseThrow(() -> new RuntimeException("Start exit not found"));
+                .orElseThrow(() -> new RuntimeException("Exit not found with ID: " + exitId));
+    }
+
+    // Finde die Zeit zwischen zwei Ausgängen
+    public Integer getDistanceBetweenExits(Long exitFromId, Long exitToId) {
+        return exitRepository.findTimeBetweenExits(exitFromId, exitToId);
+    }
+
+    public List<Exit> findAllExits() {
+        return exitRepository.findAllExits();
     }
 }

@@ -7,6 +7,7 @@ import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.model.Notification;
 import com.gesamtprojekt.application.repositories.BookingRepository;
 import com.gesamtprojekt.application.repositories.MeetingRoomRepository;
+import com.gesamtprojekt.application.repositories.ExitDistanceRepository;
 import com.gesamtprojekt.application.service.BookingServiceInterface;
 import com.gesamtprojekt.application.service.implementation.ExitService;
 import com.gesamtprojekt.application.service.dto.NotificationType;
@@ -27,10 +28,28 @@ public class BookingService implements BookingServiceInterface {
     private final DefaultNavigationService navigationService;
     private final ExitService exitService;
     private final NotificationService notificationService;
+    private final MeetingRoomRepository meetingRoomRepository;
+    private final ExitDistanceRepository exitDistanceRepository;
 
     @Transactional
     public void createBooking(Booking booking, Optional<Long> startExitId) {
-        // Auf Überschneidung prüfen
+        validateBookingTime(booking);
+
+        if (isBookingWithinOneHour(booking)) {
+            if (startExitId.isEmpty()) {
+                throw new RuntimeException("Please select the nearest exit for bookings starting within the next hour.");
+            }
+
+            validateTravelTime(booking, startExitId.get());
+        }
+
+        booking.setBookingCode(generateRandomBookingCode());
+        bookingRepository.save(booking);
+
+        createNotifications(booking);
+    }
+
+    private void validateBookingTime(Booking booking) {
         boolean conflict = bookingRepository.existsOverlappingBooking(
                 booking.getMeetingRoom().getRoomId(),
                 booking.getStartTime(), booking.getEndTime()
@@ -39,29 +58,37 @@ public class BookingService implements BookingServiceInterface {
         if (conflict) {
             throw new RuntimeException("Booking conflict detected for the selected room and time.");
         }
+    }
 
-        // Reisezeit prüfen (nur wenn vorherige Buchung und Räume gesetzt sind und die Buchung in weniger wie 1 Stunde ist)
+    private boolean isBookingWithinOneHour(Booking booking) {
         long currentTimeInSeconds = System.currentTimeMillis() / 1000;
         long bookingTimeInSeconds = booking.getStartTime().toEpochSecond(java.time.ZoneOffset.UTC);
-        if ((bookingTimeInSeconds - currentTimeInSeconds) <= 3600) { // 3600 seconds = 1 hour
-            if (startExitId.isEmpty()) {
-                throw new RuntimeException("Please select the nearest exit for bookings within the next hour.");
-            }
+        return (bookingTimeInSeconds - currentTimeInSeconds) <= 3600;
+    }
 
-            Exit startExit = exitService.findExitById(startExitId.get());
-            if (!navigationService.isBookingPossible(startExit, booking.getMeetingRoom(), (int) bookingTimeInSeconds)) {
-                throw new RuntimeException("Booking not possible. Travel time exceeds booking time.");
-            } else {
-                throw new RuntimeException("Start room ID is required for bookings within the next hour.");
-            }
+    private void validateTravelTime(Booking booking, Long startExitId) {
+        Exit startExit = exitService.findExitById(startExitId);
+        MeetingRoom meetingRoom = meetingRoomRepository.findById(booking.getMeetingRoom().getRoomId())
+                .orElseThrow(() -> new RuntimeException("Meeting room not found."));
+
+        Integer timeToNearestExit = meetingRoom.getTimeToNearestExit();
+        Integer timeBetweenExits = exitDistanceRepository.findTimeBetweenExits(startExit.getId(), meetingRoom.getNearestExit().getId());
+
+        if (timeToNearestExit == null || timeBetweenExits == null) {
+            throw new RuntimeException("Travel time data is missing for the selected room or exits.");
         }
 
-        // Code setzen
-        booking.setBookingCode(generateRandomBookingCode());
+        int totalTravelTime = timeToNearestExit + timeBetweenExits;
+        long currentTimeInSeconds = System.currentTimeMillis() / 1000;
+        long bookingTimeInSeconds = booking.getStartTime().toEpochSecond(java.time.ZoneOffset.UTC);
 
-        bookingRepository.save(booking);
+        if ((bookingTimeInSeconds - currentTimeInSeconds) < totalTravelTime) {
+            throw new RuntimeException("Booking not possible. Travel time exceeds booking time.");
+        }
+    }
 
-        // Notification
+    private void createNotifications(Booking booking) {
+        // Confirmation notification
         notificationService.createNotification(
                 booking,
                 NotificationType.CONFIRMATION
@@ -70,7 +97,7 @@ public class BookingService implements BookingServiceInterface {
         // Notification für kurzfristige Buchunen
         LocalDateTime now = LocalDateTime.now();
         if (booking.getStartTime().isBefore(now.plusMinutes(15)) &&
-            booking.getStartTime().isAfter(now)) {
+                booking.getStartTime().isAfter(now)) {
 
             notificationService.createNotification(
                     booking,
@@ -78,6 +105,7 @@ public class BookingService implements BookingServiceInterface {
             );
         }
     }
+
 
     // Buchungs Code generieren
     private String generateRandomBookingCode() {
