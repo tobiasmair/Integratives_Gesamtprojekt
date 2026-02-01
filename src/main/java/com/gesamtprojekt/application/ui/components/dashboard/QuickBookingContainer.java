@@ -166,9 +166,40 @@ public class QuickBookingContainer extends Div {
     // Wenn sich Datum ändert -> lade die Räume neu
     private void setupEventListeners() {
         datePicker.addValueChangeListener(e -> loadRooms());
-        startTime.addValueChangeListener(e -> loadRooms());
+
+        startTime.addValueChangeListener(e -> {
+            if (startTime.getValue() == null) return;
+
+            // Start Öffnungszeiten halten
+            LocalTime s = clampToOpeningHours(startTime.getValue());
+
+            if (!s.equals(startTime.getValue())) {
+                startTime.setValue(s);
+            }
+
+            // End = Start + 30min, max closesAt
+            LocalTime proposedEnd = s.plusMinutes(30);
+            if (proposedEnd.isAfter(closesAt)) {
+                proposedEnd = closesAt;
+            }
+
+            endTime.setValue(proposedEnd);
+
+            loadRooms();
+        });
+
         endTime.addValueChangeListener(e -> loadRooms());
     }
+
+    // Bereich Öffnungszeiten
+    private LocalTime clampToOpeningHours(LocalTime time) {
+        LocalTime latestStart = closesAt.minusMinutes(30);
+
+        if (time.isBefore(opensAt)) return opensAt;
+        if (time.isAfter(latestStart)) return latestStart;
+        return time;
+    }
+
 
     // Nur freie Räume laden
     public void loadRooms() {
@@ -200,6 +231,7 @@ public class QuickBookingContainer extends Div {
             Notification.show("The building is closed! (07:00 - 22:00)", 3000, Notification.Position.TOP_CENTER)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             roomGroup.setItems(List.of());
+            return;
         }
 
         List<MeetingRoom> availableRooms;
