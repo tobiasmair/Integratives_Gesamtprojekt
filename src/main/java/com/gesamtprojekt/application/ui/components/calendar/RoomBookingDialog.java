@@ -5,6 +5,7 @@ import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.security.SecurityService;
 import com.gesamtprojekt.application.service.implementation.BookingService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
+import com.gesamtprojekt.application.util.BookingValidator;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
@@ -177,10 +178,12 @@ public class RoomBookingDialog extends Dialog {
             LocalDateTime start = datePicker.getValue().atTime(startTime.getValue());
             LocalDateTime end = datePicker.getValue().atTime(endTime.getValue());
 
-            if (end.isBefore(start) || end.isEqual(start)) {
-                throw new RuntimeException("End time must be after start time.");
+            // Zentrale Validierung
+            if (!BookingValidator.isTimeRangeValid(start, end, false)) {
+                return;
             }
 
+            // Verfügbarkeit prüfen
             List<MeetingRoom> availableRooms = meetingRoomService.findAvailableRoomsInTimeframe(start, end);
             boolean isAvailable = availableRooms.stream()
                     .anyMatch(room -> room.getRoomId().equals(roomId));
@@ -189,8 +192,8 @@ public class RoomBookingDialog extends Dialog {
                 throw new RuntimeException("Room is not available in the selected timeframe.");
             }
 
+            // Buchungsobjekt vorbereiten und speichern
             MeetingRoom room = meetingRoomService.findRoomForEdit(roomId);
-
             Booking booking = new Booking();
             booking.setMeetingRoom(room);
             booking.setClient(securityService.getAuthenticatedClient()
@@ -206,7 +209,6 @@ public class RoomBookingDialog extends Dialog {
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
             fireEvent(new BookingCreatedEvent(this));
-
             close();
 
         } catch (Exception ex) {

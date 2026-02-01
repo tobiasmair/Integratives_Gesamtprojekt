@@ -5,6 +5,7 @@ import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.security.SecurityService;
 import com.gesamtprojekt.application.service.implementation.BookingService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
+import com.gesamtprojekt.application.util.BookingValidator;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.html.Div;
@@ -209,42 +210,25 @@ public class QuickBookingContainer extends Div {
 
         LocalDateTime start = datePicker.getValue().atTime(startTime.getValue());
         LocalDateTime end = datePicker.getValue().atTime(endTime.getValue());
-        LocalDateTime now = LocalDateTime.now();
 
-        if (end.isBefore(start) || end.isEqual(start)) {
-            Notification.show("End time must be after start time", 3000, Notification.Position.TOP_CENTER)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-            roomGroup.setItems(List.of());
-            return;
-        }
+        // Validierung über die Utility-Klasse
+        boolean isValid = BookingValidator.isTimeRangeValid(start, end, currentEditingBookingId != null);
 
-        // Alte Buchungen darf Start in der Vergangenheit liegen
-        if (currentEditingBookingId == null && start.isBefore(now)) {
-            Notification.show("Start time must be in the future", 3000, Notification.Position.TOP_CENTER)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-            roomGroup.setItems(List.of());
-            return;
-        }
-
-        // Öffnungszeiten prüfen
-        if (startTime.getValue().isBefore(opensAt) || endTime.getValue().isAfter(closesAt)) {
-            Notification.show("The building is closed! (07:00 - 22:00)", 3000, Notification.Position.TOP_CENTER)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        if (!isValid) {
             roomGroup.setItems(List.of());
             return;
         }
 
         List<MeetingRoom> availableRooms;
 
-        // Beim editieren aktuelle Buchung ignorieren
         if (currentEditingBookingId != null) {
             availableRooms = meetingRoomService.findAvailableRoomsExcludingBooking(start, end, currentEditingBookingId);
         } else {
             availableRooms = meetingRoomService.findAvailableRoomsInTimeframe(start, end);
         }
 
+        // UI aktualisieren
         MeetingRoom selectedRoom = roomGroup.getValue();
-
         roomGroup.setItems(availableRooms);
 
         if (selectedRoom != null && availableRooms.contains(selectedRoom)) {
