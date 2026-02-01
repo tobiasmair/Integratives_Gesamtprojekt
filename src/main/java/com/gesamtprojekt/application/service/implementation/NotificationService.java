@@ -2,7 +2,6 @@ package com.gesamtprojekt.application.service.implementation;
 
 import com.gesamtprojekt.application.model.Booking;
 import com.gesamtprojekt.application.model.Client;
-import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.model.Notification;
 import com.gesamtprojekt.application.repositories.NotificationRepository;
 import com.gesamtprojekt.application.service.dto.NotificationType;
@@ -30,25 +29,27 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
-    // Alle Benachrichtigungen für den aktuellen User laden
+    // Nur relevante Notifications (aktive, nicht beendete Buchungen)
     public List<Notification> findAllByUser(Client client) {
-        return notificationRepository.findByBooking_ClientOrderByCreatedAtDesc(client);
+        if (client == null) return List.of();
+        return notificationRepository.findRelevantByClientOrderByCreatedAtDesc(client, LocalDateTime.now());
     }
 
-    // Zählen der ungelesenen Nachrichten
     public long countUnread(Client client) {
         if (client == null) return 0;
-        return notificationRepository.countByBooking_ClientAndIsReadFalse(client);
+        return notificationRepository.countRelevantUnreadByClient(client, LocalDateTime.now());
     }
 
-    // Alle Nachrichten eines Users als gelesen markieren
     @Transactional
     public void markAllAsRead(Client client) {
-        List<Notification> unreadNotifications = notificationRepository.findByBooking_ClientAndIsReadFalse(client);
+        if (client == null) return;
 
-        if (!unreadNotifications.isEmpty()) {
-            unreadNotifications.forEach(n -> n.setRead(true));
-            notificationRepository.saveAll(unreadNotifications);
+        List<Notification> unreadRelevant =
+                notificationRepository.findRelevantUnreadByClient(client, LocalDateTime.now());
+
+        if (!unreadRelevant.isEmpty()) {
+            unreadRelevant.forEach(n -> n.setRead(true));
+            notificationRepository.saveAll(unreadRelevant);
         }
     }
 }
