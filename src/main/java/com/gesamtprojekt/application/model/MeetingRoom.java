@@ -62,14 +62,14 @@ public class MeetingRoom {
     @Column(name = "hasLightControl")
     private Boolean hasLightControl = false;
 
-    @Column(name = "hasWhiteboard")
-    private Boolean hasWhiteboard = false;
-
     @Column(name = "hasVentilationControl")
     private Boolean hasVentilationControl = false;
 
     @Column(name = "hasBeamerControl")
     private Boolean hasBeamerControl = false;
+
+    @Column(name = "hasWhiteboard")
+    private Boolean hasWhiteboard = false;
 
     @Column(name = "hasVacuumRobot")
     private Boolean hasVacuumRobot = false;

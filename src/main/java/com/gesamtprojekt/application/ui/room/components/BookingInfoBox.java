@@ -45,9 +45,9 @@ public class BookingInfoBox extends VerticalLayout {
         topText.add(new Span("Current Meeting"));
         topText.add(new H3("End Time: " + booking.getEndTime().format(formatter)));
 
-        room.setHasLightControl(true);
+        // debug output
         topText.add(new H3("HasLightControl: " + room.getHasLightControl()));
-        topText.add(new H3("Vaccum: " + room.getHasVacuumRobot()));
+        topText.add(new H3("Vacuum: " + room.getHasVacuumRobot()));
         topText.add(new H3("Whiteboard: " + room.getHasWhiteboard()));
         topText.add(new H3("Door: " + room.getHasDoorControl()));
 
