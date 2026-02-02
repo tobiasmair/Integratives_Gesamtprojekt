@@ -54,8 +54,8 @@ public class QuickBookingContainer extends Div {
 
     private Long currentEditingBookingId = null;
 
-    private LocalTime opensAt = LocalTime.of(7, 0);
-    private LocalTime closesAt = LocalTime.of(22, 0);
+    private LocalTime opensAt = BookingValidator.OPENS_AT;
+    private LocalTime closesAt = BookingValidator.CLOSES_AT;
 
     public QuickBookingContainer(BookingService bookingService, MeetingRoomService meetingRoomService, SecurityService securityService) {
         this.bookingService = bookingService;
@@ -172,14 +172,14 @@ public class QuickBookingContainer extends Div {
             if (startTime.getValue() == null) return;
 
             // Start Öffnungszeiten halten
-            LocalTime s = clampToOpeningHours(startTime.getValue());
+            LocalTime s = BookingValidator.clampToOpeningHours(startTime.getValue());
 
             if (!s.equals(startTime.getValue())) {
                 startTime.setValue(s);
             }
 
-            // End = Start + 30min, max closesAt
-            LocalTime proposedEnd = s.plusMinutes(30);
+            // End = Start + 60min, max closesAt
+            LocalTime proposedEnd = s.plusHours(1);
             if (proposedEnd.isAfter(closesAt)) {
                 proposedEnd = closesAt;
             }
@@ -191,16 +191,6 @@ public class QuickBookingContainer extends Div {
 
         endTime.addValueChangeListener(e -> loadRooms());
     }
-
-    // Bereich Öffnungszeiten
-    private LocalTime clampToOpeningHours(LocalTime time) {
-        LocalTime latestStart = closesAt.minusMinutes(30);
-
-        if (time.isBefore(opensAt)) return opensAt;
-        if (time.isAfter(latestStart)) return latestStart;
-        return time;
-    }
-
 
     // Nur freie Räume laden
     public void loadRooms() {

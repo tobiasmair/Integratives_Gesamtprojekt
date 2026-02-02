@@ -47,4 +47,15 @@ public class BookingValidator {
         if (minutes <= 30) return time.withMinute(30).withSecond(0).withNano(0);
         return time.plusHours(1).withMinute(0).withSecond(0).withNano(0);
     }
+
+    // Bereich Öffnungszeiten
+    public static LocalTime clampToOpeningHours(LocalTime time) {
+        if (time == null) return OPENS_AT;
+
+        LocalTime latestStart = CLOSES_AT.minusMinutes(30);
+
+        if (time.isBefore(OPENS_AT)) return OPENS_AT;
+        if (time.isAfter(latestStart)) return latestStart;
+        return time;
+    }
 }

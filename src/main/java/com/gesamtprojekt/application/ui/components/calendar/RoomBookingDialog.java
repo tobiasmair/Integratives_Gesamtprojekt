@@ -138,30 +138,24 @@ public class RoomBookingDialog extends Dialog {
     }
 
     private void initializeFields(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        // Read only
+        datePicker.setReadOnly(true);
+        startTime.setReadOnly(true);
+        endTime.setReadOnly(true);
+
         // Öffnungszeiten setzen
-        LocalTime opensAt = LocalTime.of(7, 0);
-        LocalTime closesAt = LocalTime.of(22, 0);
+        LocalTime opensAt = BookingValidator.OPENS_AT;
+        LocalTime closesAt = BookingValidator.CLOSES_AT;
 
-        startTime.setMin(opensAt);
-        startTime.setMax(closesAt.minusMinutes(30));
-
-        endTime.setMin(opensAt.plusMinutes(30));
-        endTime.setMax(closesAt);
-
-        startTime.setStep(Duration.ofMinutes(30));
-        endTime.setStep(Duration.ofMinutes(30));
-
-        // Initialisierung Werte
-        if (startDateTime != null) {
+        // Werte aus der CalendarRoomCard übernehmen
+        if (startDateTime != null && endDateTime != null) {
             datePicker.setValue(startDateTime.toLocalDate());
             startTime.setValue(startDateTime.toLocalTime());
             endTime.setValue(endDateTime.toLocalTime());
         } else {
-            LocalTime now = roundToNextHalfHour(LocalTime.now());
-            // vor 7 auf 7 setzen
-            if (now.isBefore(opensAt)) now = opensAt;
-            // nach 22 setze auf morgen 7 Uhr
-            if (now.isAfter(closesAt.minusHours(1))) now = opensAt;
+            // Fallback
+            LocalTime now = BookingValidator.roundToNextHalfHour(LocalTime.now());
+            now = BookingValidator.clampToOpeningHours(now);
 
             datePicker.setValue(LocalDate.now());
             startTime.setValue(now);

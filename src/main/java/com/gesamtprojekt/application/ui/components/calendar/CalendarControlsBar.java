@@ -96,7 +96,29 @@ public class CalendarControlsBar extends VerticalLayout {
 
     private void addValueChangeListeners() {
         date.addValueChangeListener(e -> fireEvent(new FilterChangedEvent(this)));
-        start.addValueChangeListener(e -> fireEvent(new FilterChangedEvent(this)));
+
+        // Logik für automatische Endzeit-Anpassung
+        start.addValueChangeListener(e -> {
+            LocalTime startTimeValue = e.getValue();
+            if (startTimeValue == null) return;
+
+            LocalTime clampedStart = BookingValidator.clampToOpeningHours(startTimeValue);
+
+            if (!clampedStart.equals(startTimeValue)) {
+                start.setValue(clampedStart);
+                return;
+            }
+
+            // Automatische Endzeit (+1 Stunde)
+            LocalTime proposedEnd = clampedStart.plusHours(1);
+            if (proposedEnd.isAfter(BookingValidator.CLOSES_AT)) {
+                proposedEnd = BookingValidator.CLOSES_AT;
+            }
+
+            end.setValue(proposedEnd);
+            fireEvent(new FilterChangedEvent(this));
+        });
+
         end.addValueChangeListener(e -> fireEvent(new FilterChangedEvent(this)));
         building.addValueChangeListener(e -> fireEvent(new FilterChangedEvent(this)));
         floor.addValueChangeListener(e -> fireEvent(new FilterChangedEvent(this)));
