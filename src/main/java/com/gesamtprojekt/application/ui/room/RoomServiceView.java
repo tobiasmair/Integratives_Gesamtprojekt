@@ -77,6 +77,8 @@ public class RoomServiceView extends VerticalLayout {
     private Long cachedRoomId = null;
     private String cachedRoomName = "Meeting Room";
 
+    private MeetingRoom currentRoom;
+
     /**
      * Checks the current time and the booking and decides which screen to display.
      * Includes advanced failover logic for database outages.
@@ -95,6 +97,9 @@ public class RoomServiceView extends VerticalLayout {
                         // Update cache variables if DB is reachable
                         this.cachedRoomId = room.get().getRoomId();
                         this.cachedRoomName = room.get().getName();
+
+                        // save room instance
+                        this.currentRoom = room.get();
                     }
                 }
                 handleOfflineStatusChange(false); // DB connection is healthy
@@ -103,10 +108,10 @@ public class RoomServiceView extends VerticalLayout {
                 // If DB fails here, proceed using cachedRoomId from previous successful polls
             }
 
-            // 2. Stop if no Room ID is available (neither from DB nor from Cache)
+            // Stop if no Room ID is available (neither from DB nor from Cache)
             if (cachedRoomId == null) return;
 
-            // 3. Look up bookings from database (or local memory cache in case of error)
+            // Look up bookings from database (or local memory cache in case of error)
             try {
                 bookings = bookingService.findAllActiveBookingsForRoom(cachedRoomId);
                 handleOfflineStatusChange(false); // Database online
@@ -116,11 +121,11 @@ public class RoomServiceView extends VerticalLayout {
                 bookings = bookingService.getCachedBookings(cachedRoomId);
             }
 
-            // 4. Determine relevant bookings (must be isActive & status must be CONFIRMED)
+            // Determine relevant bookings (must be isActive & status must be CONFIRMED)
             Optional<Booking> currentBooking = bookings.stream()
                     .filter(b -> b.getIsActive() && "CONFIRMED".equals(b.getBookingStatus()))
                     .filter(b -> b.getEndTime().isAfter(now))
-                    .filter(b -> b.getStartTime().minusMinutes(1).isBefore(now))
+                    .filter(b -> b.getStartTime().minusMinutes(10).isBefore(now))
                     .findFirst();
 
             String newStatus;
@@ -225,15 +230,17 @@ public class RoomServiceView extends VerticalLayout {
         dashboardLayout.setAlignItems(Alignment.CENTER);
         dashboardLayout.setSpacing(true);
 
-        BookingInfoBox infoBox = new BookingInfoBox(b, () -> confirmFinishBooking(b));
+        BookingInfoBox infoBox = new BookingInfoBox(b, () -> confirmFinishBooking(b), currentRoom);
 
-        ButtonContainer buttons = new ButtonContainer();
+        // Übergebe das currentRoom Objekt an den ButtonContainer
+        ButtonContainer buttons = new ButtonContainer(currentRoom);
+
         buttons.addDoorLockButton();
-        buttons.addButton("Light", VaadinIcon.LIGHTBULB, "Light on", "Light off");
-        buttons.addButton("Blinds", VaadinIcon.SUN_O, "Blinds up", "Blinds down");
-        buttons.addButton("Whiteboard", VaadinIcon.PRESENTATION, "Whiteboard on", "Whiteboard off");
-        buttons.addButton("Beamer", VaadinIcon.FILM, "Beamer on", "Beamer off");
-        buttons.addButton("AC", VaadinIcon.CONTROLLER, "AC on", "AC off");
+        buttons.addButton("Light", VaadinIcon.LIGHTBULB, "Light on", "Light off", true);
+        buttons.addButton("Blinds", VaadinIcon.SUN_O, "Blinds up", "Blinds down", true);
+        buttons.addButton("Whiteboard", VaadinIcon.PRESENTATION, "Whiteboard on", "Whiteboard off", true); // Immer aktiv
+        buttons.addButton("Beamer", VaadinIcon.FILM, "Beamer on", "Beamer off", true);
+        buttons.addButton("AC", VaadinIcon.CONTROLLER, "AC on", "AC off", true);
 
         dashboardLayout.add(infoBox, buttons);
         mainContent.add(dashboardLayout);

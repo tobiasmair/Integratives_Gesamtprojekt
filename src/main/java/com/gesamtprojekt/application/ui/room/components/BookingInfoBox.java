@@ -1,6 +1,7 @@
 package com.gesamtprojekt.application.ui.room.components;
 
 import com.gesamtprojekt.application.model.Booking;
+import com.gesamtprojekt.application.model.MeetingRoom;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H3;
@@ -17,7 +18,10 @@ import java.time.format.DateTimeFormatter;
  */
 public class BookingInfoBox extends VerticalLayout {
 
-    public BookingInfoBox(Booking booking, Runnable onFinish) {
+    private final MeetingRoom room;
+
+    public BookingInfoBox(Booking booking, Runnable onFinish, MeetingRoom room) {
+        this.room = room;
 
         // styling of the box
         setWidth("300px");
@@ -40,6 +44,15 @@ public class BookingInfoBox extends VerticalLayout {
 
         topText.add(new Span("Current Meeting"));
         topText.add(new H3("End Time: " + booking.getEndTime().format(formatter)));
+
+        room.setHasLightControl(true);
+        topText.add(new H3("HasLightControl: " + room.getHasLightControl()));
+        topText.add(new H3("Vaccum: " + room.getHasVacuumRobot()));
+        topText.add(new H3("Whiteboard: " + room.getHasWhiteboard()));
+        topText.add(new H3("Door: " + room.getHasDoorControl()));
+
+
+
 
         // checks the remaining time till the end of the booking
         LocalDateTime now = LocalDateTime.now();

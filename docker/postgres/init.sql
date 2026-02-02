@@ -471,4 +471,3 @@ ALTER TABLE ONLY public.booking
 --
 
 \unrestrict IjcuWbBMyfZsSb9WSwky4DKTTeVZVPupJGHkLGj3dmatxBhX3T1pCxsqD0l6oSQ
-

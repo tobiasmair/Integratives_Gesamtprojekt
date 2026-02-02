@@ -53,20 +53,26 @@ public class MeetingRoom {
     private String imageOriginalName;
 
     // Steuerungs-Flags
+    @Column(name = "hasDoorControl")
+    private Boolean hasDoorControl = false;
+
     @Column(name = "hasBlindControl")
-    private Boolean hasBlindControl;
+    private Boolean hasBlindControl = false;
 
     @Column(name = "hasLightControl")
-    private Boolean hasLightControl;
+    private Boolean hasLightControl = false;
+
+    @Column(name = "hasWhiteboard")
+    private Boolean hasWhiteboard = false;
 
     @Column(name = "hasVentilationControl")
-    private Boolean hasVentilationControl;
+    private Boolean hasVentilationControl = false;
 
     @Column(name = "hasBeamerControl")
-    private Boolean hasBeamerControl;
+    private Boolean hasBeamerControl = false;
 
     @Column(name = "hasVacuumRobot")
-    private Boolean hasVacuumRobot;
+    private Boolean hasVacuumRobot = false;
 
     // wird für Soft-Delete/Filter verwendet
     @Column(name = "isActive")
