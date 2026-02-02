@@ -9,8 +9,9 @@ import com.gesamtprojekt.application.repositories.BookingRepository;
 import com.gesamtprojekt.application.repositories.MeetingRoomRepository;
 import com.gesamtprojekt.application.repositories.ExitDistanceRepository;
 import com.gesamtprojekt.application.service.BookingServiceInterface;
-import com.gesamtprojekt.application.service.implementation.ExitService;
+import com.gesamtprojekt.application.repositories.ExitRepository;
 import com.gesamtprojekt.application.service.dto.NotificationType;
+import com.gesamtprojekt.application.exceptions.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ public class BookingService implements BookingServiceInterface {
     private final ExitService exitService;
     private final NotificationService notificationService;
     private final MeetingRoomRepository meetingRoomRepository;
+    private final ExitRepository exitRepository;
     private final ExitDistanceRepository exitDistanceRepository;
 
     @Transactional
@@ -37,7 +39,8 @@ public class BookingService implements BookingServiceInterface {
 
         if (isBookingWithinOneHour(booking)) {
             if (startExitId.isEmpty()) {
-                throw new RuntimeException("Please select the nearest exit for bookings starting within the next hour.");
+                List<Exit> availableExits = exitRepository.findAllByIsActiveTrue(); // Controller erstellt Label building + exit name
+                throw new MissingStartExitException(availableExits);
             }
 
             validateTravelTime(booking, startExitId.get());
@@ -56,7 +59,7 @@ public class BookingService implements BookingServiceInterface {
         );
 
         if (conflict) {
-            throw new RuntimeException("Booking conflict detected for the selected room and time.");
+            throw new BookingValidationException("Booking conflict detected for the selected room and time.");
         }
     }
 
@@ -67,15 +70,16 @@ public class BookingService implements BookingServiceInterface {
     }
 
     private void validateTravelTime(Booking booking, Long startExitId) {
-        Exit startExit = exitService.findExitById(startExitId);
+        Exit startExit = exitRepository.findByIdAndIsActiveTrue(startExitId)
+                .orElseThrow(() -> new BookingValidationException("Start exit not found."));
         MeetingRoom meetingRoom = meetingRoomRepository.findById(booking.getMeetingRoom().getRoomId())
-                .orElseThrow(() -> new RuntimeException("Meeting room not found."));
+                .orElseThrow(() -> new BookingValidationException("Meeting room not found."));
 
         Integer timeToNearestExit = meetingRoom.getTimeToNearestExit();
         Integer timeBetweenExits = exitDistanceRepository.findTimeBetweenExits(startExit.getId(), meetingRoom.getNearestExit().getId());
 
         if (timeToNearestExit == null || timeBetweenExits == null) {
-            throw new RuntimeException("Travel time data is missing for the selected room or exits.");
+            throw new BookingValidationException("Travel time data is missing for the selected room or exits.");
         }
 
         int totalTravelTime = timeToNearestExit + timeBetweenExits;
@@ -83,7 +87,7 @@ public class BookingService implements BookingServiceInterface {
         long bookingTimeInSeconds = booking.getStartTime().toEpochSecond(java.time.ZoneOffset.UTC);
 
         if ((bookingTimeInSeconds - currentTimeInSeconds) < totalTravelTime) {
-            throw new RuntimeException("Booking not possible. Travel time exceeds booking time.");
+            throw new BookingValidationException("Booking not possible. Travel time exceeds booking time.");
         }
     }
 
@@ -140,7 +144,7 @@ public class BookingService implements BookingServiceInterface {
                 booking.getBookingId()
         );
         if (conflict) {
-            throw new RuntimeException("Booking conflict detected for the selected room and time.");
+            throw new BookingValidationException("Booking conflict detected for the selected room and time.");
         }
 
         bookingRepository.save(booking);

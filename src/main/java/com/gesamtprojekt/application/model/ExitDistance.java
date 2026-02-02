@@ -20,5 +20,5 @@ public class ExitDistance {
     private Exit exitTo;
 
     @Column(name = "time_in_seconds", nullable = false)
-    private Integer timeInSeconds; // Precomputed time between exits
+    private Integer timeInSeconds; // Vorberechnete Zeit in Sekunden
 }

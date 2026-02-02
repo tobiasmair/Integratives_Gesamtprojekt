@@ -88,15 +88,14 @@ public class MeetingRoom {
             joinColumns = @JoinColumn(name = "room_id", referencedColumnName = "roomId"),
             inverseJoinColumns = @JoinColumn(name = "equipment_id", referencedColumnName = "equipmentId")
     )
+    private Set<Equipment> equipment = new LinkedHashSet<>();
 
-    // Relation zu Exit (n:1)
+    // fester naechster Exit (n:1)
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "exit_id", referencedColumnName = "exitId")
+    @JoinColumn(name = "exit_id", referencedColumnName = "exit_id")
     private Exit nearestExit;
 
-    // Zeit zum nächsten Ausgang in Sekunden
+    // Zeit zum naechsten Ausgang in Sekunden
     @Column(name = "time_to_nearest_exit")
     private Integer timeToNearestExit;
-
-    private Set<Equipment> equipment = new LinkedHashSet<>();
 }

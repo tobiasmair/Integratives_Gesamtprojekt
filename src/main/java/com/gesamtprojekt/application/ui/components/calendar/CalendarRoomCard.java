@@ -151,6 +151,7 @@ public class CalendarRoomCard extends Div {
                     bookingService,
                     meetingRoomService,
                     securityService,
+                    null,
                     startDateTime,
                     endDateTime
             );

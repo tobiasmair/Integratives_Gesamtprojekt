@@ -6,8 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -17,11 +16,22 @@ import java.util.Map;
 @Table(name = "exit")
 public class Exit {
     @Id
+    @Column(name = "exit_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long exitId;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "building_id", nullable = false)
+    private Building building;
+
+    @Column(nullable = false)
+    private boolean isActive;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     public Long getId() {
         return exitId;
