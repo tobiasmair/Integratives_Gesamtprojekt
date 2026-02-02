@@ -97,9 +97,10 @@ public class QuickBookingContainer extends Div {
         content.setFlexGrow(0, bookButton);
 
         // Initialwerte setzen
-        LocalTime nowRounded = roundToNextHalfHour(LocalTime.now());
+        LocalTime nowRounded = BookingValidator.roundToNextHalfHour(LocalTime.now());
+        nowRounded = BookingValidator.clampToOpeningHours(nowRounded);
 
-        datePicker.setValue(java.time.LocalDate.now());
+        datePicker.setValue(LocalDate.now());
         datePicker.setMin(LocalDate.now());
 
         // Einschränkungen basierend auf Öffnungszeiten
@@ -108,11 +109,13 @@ public class QuickBookingContainer extends Div {
         endTime.setMin(opensAt.plusMinutes(30));
         endTime.setMax(closesAt);
 
-        // Nächste gerundete Stunde als Startzeit
         startTime.setValue(nowRounded);
 
-        // End Time setzen plus 1 Stunde
+        // End Time setzen: Start + 1 Stunde, maximal Schließzeit
         LocalTime endTimeCalculated = nowRounded.plusHours(1);
+        if (endTimeCalculated.isAfter(closesAt) || endTimeCalculated.isBefore(nowRounded)) {
+            endTimeCalculated = closesAt;
+        }
         endTime.setValue(endTimeCalculated);
 
         startTime.setStep(Duration.ofMinutes(30));
@@ -303,13 +306,15 @@ public class QuickBookingContainer extends Div {
             fireEvent(new BookingChangedEvent(this));
 
             // Formular zurücksetzen
-            LocalTime nowRounded = roundToNextHalfHour(LocalTime.now());
+            LocalTime nowRounded = BookingValidator.roundToNextHalfHour(LocalTime.now());
+            nowRounded = BookingValidator.clampToOpeningHours(nowRounded);
+
             startTime.setValue(nowRounded);
 
-            // End Time: 1 Stunde später, aber maximal 23:30 (um Mitternachts-Problem zu vermeiden)
+            // Endzeit berechnen: Start + 1 Stunde, aber maximal closesAt
             LocalTime endTimeReset = nowRounded.plusHours(1);
-            if (endTimeReset.isBefore(nowRounded) || endTimeReset.equals(LocalTime.MIDNIGHT)) {
-                endTimeReset = LocalTime.of(23, 30);
+            if (endTimeReset.isAfter(closesAt) || endTimeReset.isBefore(nowRounded)) {
+                endTimeReset = closesAt;
             }
             endTime.setValue(endTimeReset);
 
