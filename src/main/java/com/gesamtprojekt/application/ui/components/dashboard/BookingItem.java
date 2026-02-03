@@ -219,7 +219,7 @@ public class BookingItem extends Div {
         dialog.setHeaderTitle("Edit Booking: " + booking.getPurpose());
         dialog.setWidth("800px");
 
-        QuickBookingContainer editForm = new QuickBookingContainer(bookingService, meetingRoomService, null);
+        QuickBookingContainer editForm = new QuickBookingContainer(bookingService, meetingRoomService, null, null);
         // Daten laden
         editForm.setBooking(booking);
         // Button + Titel verstecken

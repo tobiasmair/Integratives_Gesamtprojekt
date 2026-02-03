@@ -3,6 +3,7 @@ package com.gesamtprojekt.application.ui.client.dashboard;
 import com.gesamtprojekt.application.model.Client;
 import com.gesamtprojekt.application.security.SecurityService;
 import com.gesamtprojekt.application.service.implementation.BookingService;
+import com.gesamtprojekt.application.service.implementation.ExitService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.gesamtprojekt.application.ui.client.MainLayout;
 import com.gesamtprojekt.application.ui.components.dashboard.MyBookingsContainer;
@@ -25,11 +26,13 @@ public class DashboardView extends VerticalLayout implements BeforeEnterObserver
     private final BookingService bookingService;
     private final MeetingRoomService meetingRoomService;
     private final SecurityService securityService;
+    private final ExitService exitService;
 
-    public DashboardView(BookingService bookingService, MeetingRoomService meetingRoomService, SecurityService securityService) {
+    public DashboardView(BookingService bookingService, MeetingRoomService meetingRoomService, SecurityService securityService, ExitService exitService) {
         this.bookingService = bookingService;
         this.meetingRoomService = meetingRoomService;
         this.securityService = securityService;
+        this.exitService = exitService;
 
         addClassName("dashboard-view");
 
@@ -52,7 +55,7 @@ public class DashboardView extends VerticalLayout implements BeforeEnterObserver
     }
 
     private HorizontalLayout createTwoColumnLayout() {
-        var quick = new QuickBookingContainer(bookingService, meetingRoomService, securityService);
+        var quick = new QuickBookingContainer(bookingService, meetingRoomService, securityService, exitService);
         var bookings = new MyBookingsContainer(bookingService, meetingRoomService, securityService);
 
         // Listener registrieren

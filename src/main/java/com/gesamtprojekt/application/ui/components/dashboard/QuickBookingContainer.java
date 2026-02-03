@@ -1,12 +1,16 @@
 package com.gesamtprojekt.application.ui.components.dashboard;
 
+import com.gesamtprojekt.application.exceptions.MissingStartExitException;
 import com.gesamtprojekt.application.model.Booking;
+import com.gesamtprojekt.application.model.Exit;
 import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.security.SecurityService;
 import com.gesamtprojekt.application.service.implementation.BookingService;
+import com.gesamtprojekt.application.service.implementation.ExitService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.gesamtprojekt.application.util.BookingValidator;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
@@ -39,6 +43,7 @@ public class QuickBookingContainer extends Div {
     private final BookingService bookingService;
     private final MeetingRoomService meetingRoomService;
     private final SecurityService securityService;
+    private final ExitService exitService;
 
     private final Tab allTab = new Tab("All available rooms");
     private final Tabs tabs = new Tabs(allTab);
@@ -50,6 +55,8 @@ public class QuickBookingContainer extends Div {
     private final TimePicker endTime = new TimePicker("End");
     private final TextArea purposeField = new TextArea("Meeting purpose");
 
+    private final ComboBox<Exit> exitDropdown = new ComboBox<>("Select Exit");
+
     private H3 title;
     private Button bookButton;
 
@@ -58,10 +65,11 @@ public class QuickBookingContainer extends Div {
     private LocalTime opensAt = BookingValidator.OPENS_AT;
     private LocalTime closesAt = BookingValidator.CLOSES_AT;
 
-    public QuickBookingContainer(BookingService bookingService, MeetingRoomService meetingRoomService, SecurityService securityService) {
+    public QuickBookingContainer(BookingService bookingService, MeetingRoomService meetingRoomService, SecurityService securityService, ExitService exitService) {
         this.bookingService = bookingService;
         this.meetingRoomService = meetingRoomService;
         this.securityService = securityService;
+        this.exitService = exitService;
 
         addClassName("quick-booking-container");
         add(createContent());
@@ -78,6 +86,10 @@ public class QuickBookingContainer extends Div {
         content.setHeightFull();
         content.getStyle().set("overflow", "hidden");
 
+        exitDropdown.setVisible(false);
+        exitDropdown.setItemLabelGenerator(Exit::getName);
+        exitDropdown.setWidthFull();
+
         this.title = createHeader();
         this.bookButton = createBookButton();
 
@@ -89,6 +101,7 @@ public class QuickBookingContainer extends Div {
         content.add(dateTimeRow);
         content.add(roomsSection);
         content.add(purposeField);
+        content.add(exitDropdown);
         content.add(bookButton);
 
         content.setFlexGrow(0, title);
@@ -194,6 +207,16 @@ public class QuickBookingContainer extends Div {
         });
 
         endTime.addValueChangeListener(e -> loadRooms());
+
+        exitDropdown.addValueChangeListener(e -> {
+            if (e.getValue() != null) {
+                Notification.show(
+                        "Exit selected. Please confirm booking.",
+                        3000,
+                        Notification.Position.TOP_CENTER
+                );
+            }
+        });
     }
 
     // Nur freie Räume laden
@@ -299,8 +322,34 @@ public class QuickBookingContainer extends Div {
 
             booking.setBookingStatus("CONFIRMED");  // status
 
-            Optional<Long> startExitId = Optional.empty();
-            bookingService.createBooking(booking, startExitId);
+            // Validierung, ob Buchung kurzfristig ist und ggf. Start-Exit benötigt wird
+            try {
+                bookingService.createBooking(
+                        booking,
+                        Optional.ofNullable(exitDropdown.getValue()).map(Exit::getId)
+                );
+
+                Notification.show("Room booked successfully!", 3000, Notification.Position.TOP_CENTER)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+
+            } catch (MissingStartExitException ex) {
+
+                exitDropdown.setItems(ex.getAvailableExits());
+                exitDropdown.setVisible(true);
+
+                Notification.show(
+                        "This booking starts soon. Please select your starting exit.",
+                        5000,
+                        Notification.Position.TOP_CENTER
+                ).addThemeVariants(NotificationVariant.LUMO_WARNING);
+
+                return; // Buchung abbrechen
+
+            } catch (Exception ex) {
+                Notification.show(ex.getMessage(), 5000, Notification.Position.TOP_CENTER)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            }
+
 
             Notification.show("Room booked successfully!", 3000, Notification.Position.TOP_CENTER)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);

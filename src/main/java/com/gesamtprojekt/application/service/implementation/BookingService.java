@@ -41,7 +41,6 @@ public class BookingService implements BookingServiceInterface {
     public void createBooking(Booking booking, Optional<Long> startExitId) {
 
         validateOpeningTimes(booking);
-
         validateBookingTime(booking);
 
         if (isBookingWithinOneHour(booking)) {
@@ -55,7 +54,6 @@ public class BookingService implements BookingServiceInterface {
 
         booking.setBookingCode(generateRandomBookingCode());
         bookingRepository.save(booking);
-
         createNotifications(booking);
     }
 
