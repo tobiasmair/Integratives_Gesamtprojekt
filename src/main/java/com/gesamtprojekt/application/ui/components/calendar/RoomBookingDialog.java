@@ -1,17 +1,21 @@
 package com.gesamtprojekt.application.ui.components.calendar;
 
 import com.gesamtprojekt.application.model.Booking;
+import com.gesamtprojekt.application.model.Exit;
 import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.security.SecurityService;
 import com.gesamtprojekt.application.service.implementation.BookingService;
+import com.gesamtprojekt.application.service.implementation.ExitService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.gesamtprojekt.application.util.BookingValidator;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.Icon;
@@ -32,6 +36,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 public class RoomBookingDialog extends Dialog {
 
@@ -39,24 +44,29 @@ public class RoomBookingDialog extends Dialog {
     private final MeetingRoomService meetingRoomService;
     private final SecurityService securityService;
     private final Long roomId;
+    private final ExitService exitService;
 
     private final DatePicker datePicker = new DatePicker("Date");
     private final TimePicker startTime = new TimePicker("Start");
     private final TimePicker endTime = new TimePicker("End");
     private final TextArea purposeField = new TextArea("Meeting purpose");
-
-    public RoomBookingDialog(Long roomId, String roomName, BookingService bookingService,
-                             MeetingRoomService meetingRoomService, SecurityService securityService) {
-        this(roomId, roomName, bookingService, meetingRoomService, securityService, null, null);
-    }
+    private final ComboBox<Exit> exitDropdown = new ComboBox<>("Select Exit");
 
     public RoomBookingDialog(Long roomId, String roomName, BookingService bookingService,
                              MeetingRoomService meetingRoomService, SecurityService securityService,
+                             ExitService exitService) {
+        this(roomId, roomName, bookingService, meetingRoomService, securityService, exitService, null, null);
+    }
+
+
+    public RoomBookingDialog(Long roomId, String roomName, BookingService bookingService,
+                             MeetingRoomService meetingRoomService, SecurityService securityService, ExitService exitService,
                              LocalDateTime startDateTime, LocalDateTime endDateTime) {
         this.roomId = roomId;
         this.bookingService = bookingService;
         this.meetingRoomService = meetingRoomService;
         this.securityService = securityService;
+        this.exitService = exitService;
 
         setCloseOnEsc(true);
         setCloseOnOutsideClick(false);
@@ -123,6 +133,16 @@ public class RoomBookingDialog extends Dialog {
         purposeField.setHeight("60px");
         purposeField.getStyle().set("resize", "none");
 
+        // Exit dropdown
+        exitDropdown.setVisible(false);
+        exitDropdown.setWidthFull();
+        exitDropdown.setItemLabelGenerator(Exit::getName);
+        exitDropdown.setPlaceholder("Select your starting exit");
+
+        datePicker.addValueChangeListener(e -> updateExitVisibility());
+        startTime.addValueChangeListener(e -> updateExitVisibility());
+        updateExitVisibility();
+
         Button bookButton = new Button("Book", e -> saveBooking());
         bookButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
@@ -132,9 +152,13 @@ public class RoomBookingDialog extends Dialog {
         buttonRow.setWidthFull();
         buttonRow.setJustifyContentMode(JustifyContentMode.END);
 
-        content.add(header, mapWrapper, datePicker, timeRow, purposeField, buttonRow);
+        content.add(header, mapWrapper, datePicker, timeRow, exitDropdown, purposeField, buttonRow);
         content.setWidth("450px");
         return content;
+    }
+
+    private List<Exit> fetchExits() {
+        return exitService != null ? exitService.getAllExits() : List.of();
     }
 
     private void initializeFields(LocalDateTime startDateTime, LocalDateTime endDateTime) {
@@ -188,6 +212,7 @@ public class RoomBookingDialog extends Dialog {
 
             // Buchungsobjekt vorbereiten und speichern
             MeetingRoom room = meetingRoomService.findRoomForEdit(roomId);
+
             Booking booking = new Booking();
             booking.setMeetingRoom(room);
             booking.setClient(securityService.getAuthenticatedClient()
@@ -197,12 +222,15 @@ public class RoomBookingDialog extends Dialog {
             booking.setPurpose(purposeField.getValue());
             booking.setBookingStatus("CONFIRMED");
 
-            bookingService.createBooking(booking);
+            Optional<Long> startExitId = resolveStartExitId();
+
+            bookingService.createBooking(booking, startExitId);
 
             Notification.show("Room booked successfully!", 3000, Notification.Position.TOP_CENTER)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
             fireEvent(new BookingCreatedEvent(this));
+
             close();
 
         } catch (Exception ex) {
@@ -255,5 +283,40 @@ public class RoomBookingDialog extends Dialog {
         );
 
         return img;
+    }
+
+    private void updateExitVisibility() {
+        if (datePicker.getValue() == null || startTime.getValue() == null) {
+            exitDropdown.setVisible(false);
+            return;
+        }
+
+        LocalDateTime start = datePicker.getValue().atTime(startTime.getValue());
+        boolean lessThan60 = start.isBefore(LocalDateTime.now().plusMinutes(60));
+
+        if (lessThan60) {
+            if (exitDropdown.getListDataView().getItems().count() == 0) {
+                List<Exit> exits = fetchExits();
+                exitDropdown.setItems(exits);
+            }
+            exitDropdown.setVisible(true);
+        } else {
+            exitDropdown.setVisible(false);
+            exitDropdown.clear();
+        }
+    }
+
+    private Optional<Long> resolveStartExitId() {
+        if (!exitDropdown.isVisible()) {
+            return Optional.empty();
+        }
+
+        Exit selectedExit = exitDropdown.getValue();
+
+        if (selectedExit == null) {
+            throw new RuntimeException("Please select your starting exit.");
+        }
+
+        return Optional.of(selectedExit.getId());
     }
 }
