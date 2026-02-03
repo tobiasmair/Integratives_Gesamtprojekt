@@ -45,25 +45,24 @@ public class BookingInfoBox extends VerticalLayout {
         topText.add(new Span("Current Meeting"));
         topText.add(new H3("End Time: " + booking.getEndTime().format(formatter)));
 
-        // debug output
-        topText.add(new H3("HasLightControl: " + room.getHasLightControl()));
-        topText.add(new H3("Vacuum: " + room.getHasVacuumRobot()));
-        topText.add(new H3("Whiteboard: " + room.getHasWhiteboard()));
-        topText.add(new H3("Door: " + room.getHasDoorControl()));
-
-
-
 
         // checks the remaining time till the end of the booking
         LocalDateTime now = LocalDateTime.now();
         long minutesUntilEnd = Duration.between(now, booking.getEndTime()).toMinutes();
 
-        // if the time is 5 mins or fewer, show the reminder
+        // if the meeting ends is 5 mins or less, show the reminder
         if (minutesUntilEnd <= 5 && minutesUntilEnd >= 0) {
             Span warning = new Span("Reminder: Your booking is ending soon!");
             warning.getStyle().set("margin-top", "25px");
 
             topText.add(warning);
+
+            if (room.getHasVacuumRobot()){
+            Span vacuum_robot_message = new Span("Attention: Vacuum Robot released");
+            vacuum_robot_message.getStyle().set("margin-top", "25px");
+            topText.add(vacuum_robot_message);
+            }
+
         }
 
         // finish booking button to end meeting manually

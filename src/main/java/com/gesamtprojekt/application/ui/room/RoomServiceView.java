@@ -237,11 +237,11 @@ public class RoomServiceView extends VerticalLayout {
 
         buttons.addDoorLockButton();
         // enabled true until db issue is fixed
-        buttons.addButton("Light", VaadinIcon.LIGHTBULB, "Light on", "Light off", true);
-        buttons.addButton("Blinds", VaadinIcon.SUN_O, "Blinds up", "Blinds down", true);
-        buttons.addButton("Whiteboard", VaadinIcon.PRESENTATION, "Whiteboard on", "Whiteboard off", true);
-        buttons.addButton("Beamer", VaadinIcon.FILM, "Beamer on", "Beamer off", true);
-        buttons.addButton("AC", VaadinIcon.CONTROLLER, "AC on", "AC off", true);
+        buttons.addButton("Light", VaadinIcon.LIGHTBULB, "Light on", "Light off", currentRoom != null && currentRoom.getHasLightControl());
+        buttons.addButton("Blinds", VaadinIcon.SUN_O, "Blinds up", "Blinds down", currentRoom != null && currentRoom.getHasBlindControl());
+        buttons.addButton("Whiteboard", VaadinIcon.PRESENTATION, "Whiteboard on", "Whiteboard off", currentRoom != null && currentRoom.getHasWhiteboard());
+        buttons.addButton("Beamer", VaadinIcon.FILM, "Beamer on", "Beamer off", currentRoom != null && currentRoom.getHasBeamerControl());
+        buttons.addButton("AC", VaadinIcon.CONTROLLER, "AC on", "AC off", currentRoom != null && currentRoom.getHasVentilationControl());
 
         dashboardLayout.add(infoBox, buttons);
         mainContent.add(dashboardLayout);

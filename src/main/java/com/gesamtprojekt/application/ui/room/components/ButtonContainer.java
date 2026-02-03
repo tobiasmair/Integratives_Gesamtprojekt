@@ -37,7 +37,7 @@ public class ButtonContainer extends VerticalLayout {
     public void addDoorLockButton() {
 
         // check equipment flag
-        boolean enabled = true; // hardcoded for now - update when db issue is fixed
+        boolean enabled = room != null && room.getHasDoorControl();
 
         final boolean[] isLocked = {false}; // save state client side
         Icon icon = VaadinIcon.LOCK.create();
