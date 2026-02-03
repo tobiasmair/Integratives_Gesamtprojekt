@@ -7,6 +7,7 @@ import com.gesamtprojekt.application.security.SecurityService;
 import com.gesamtprojekt.application.service.implementation.BookingService;
 import com.gesamtprojekt.application.service.implementation.ExitService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
+import com.gesamtprojekt.application.util.BookingValidator;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
@@ -16,11 +17,12 @@ import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -30,6 +32,7 @@ import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.shared.Registration;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -54,6 +57,7 @@ public class RoomBookingDialog extends Dialog {
                              ExitService exitService) {
         this(roomId, roomName, bookingService, meetingRoomService, securityService, exitService, null, null);
     }
+
 
     public RoomBookingDialog(Long roomId, String roomName, BookingService bookingService,
                              MeetingRoomService meetingRoomService, SecurityService securityService, ExitService exitService,
@@ -84,14 +88,39 @@ public class RoomBookingDialog extends Dialog {
 
         // Lageplan Link
         MeetingRoom room = meetingRoomService.findRoomForEdit(roomId);
-        Anchor mapLink = new Anchor("#", "Show Floor Plan");
+        Button mapLink = new Button("Show Floor Plan");
+        mapLink.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
         mapLink.getStyle().set("font-size", "var(--lumo-font-size-xs)");
         Icon mapIcon = VaadinIcon.MAP_MARKER.create();
         mapIcon.setSize("12px");
         HorizontalLayout mapWrapper = new HorizontalLayout(mapIcon, mapLink);
         mapWrapper.setSpacing(false);
         mapWrapper.setAlignItems(HorizontalLayout.Alignment.CENTER);
-        mapWrapper.addClickListener(e -> Notification.show("Opening floor plan for floor " + (room != null ? room.getFloor() : "unknown")));
+        mapWrapper.addClickListener(e -> {
+            if (room == null) {
+                Notification.show("No floor plan available");
+                return;
+            }
+
+            // Dialog erstellen
+            Dialog dialog = new Dialog();
+            dialog.setHeaderTitle("Floor Plan: " + room.getName());
+
+            Image floorPlan = buildBlueprint(room.getName());
+
+            // Layout im Dialog
+            VerticalLayout dialogLayout = new VerticalLayout(floorPlan);
+            dialogLayout.setPadding(false);
+            dialogLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+
+            dialog.add(dialogLayout);
+
+            // Schließen-Button im Footer
+            Button closeButtonWrapper = new Button("Close", event -> dialog.close());
+            dialog.getFooter().add(closeButtonWrapper);
+
+            dialog.open();
+        });
 
         datePicker.setWidthFull();
 
@@ -107,7 +136,6 @@ public class RoomBookingDialog extends Dialog {
         // Exit dropdown
         exitDropdown.setVisible(false);
         exitDropdown.setWidthFull();
-        exitDropdown.setItems(fetchExits());
         exitDropdown.setItemLabelGenerator(Exit::getName);
         exitDropdown.setPlaceholder("Select your starting exit");
 
@@ -134,21 +162,30 @@ public class RoomBookingDialog extends Dialog {
     }
 
     private void initializeFields(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        // Read only
+        datePicker.setReadOnly(true);
+        startTime.setReadOnly(true);
+        endTime.setReadOnly(true);
+
+        // Öffnungszeiten setzen
+        LocalTime opensAt = BookingValidator.OPENS_AT;
+        LocalTime closesAt = BookingValidator.CLOSES_AT;
+
+        // Werte aus der CalendarRoomCard übernehmen
         if (startDateTime != null && endDateTime != null) {
             datePicker.setValue(startDateTime.toLocalDate());
             startTime.setValue(startDateTime.toLocalTime());
             endTime.setValue(endDateTime.toLocalTime());
         } else {
-            LocalTime nowRounded = roundToNextHalfHour(LocalTime.now());
-            datePicker.setValue(java.time.LocalDate.now());
-            startTime.setValue(nowRounded);
-            endTime.setValue(nowRounded.plusHours(1));
+            // Fallback
+            LocalTime now = BookingValidator.roundToNextHalfHour(LocalTime.now());
+            now = BookingValidator.clampToOpeningHours(now);
+
+            datePicker.setValue(LocalDate.now());
+            startTime.setValue(now);
+            endTime.setValue(now.plusHours(1));
         }
-
-        startTime.setStep(Duration.ofMinutes(30));
-        endTime.setStep(Duration.ofMinutes(30));
     }
-
 
     private void saveBooking() {
         try {
@@ -159,10 +196,12 @@ public class RoomBookingDialog extends Dialog {
             LocalDateTime start = datePicker.getValue().atTime(startTime.getValue());
             LocalDateTime end = datePicker.getValue().atTime(endTime.getValue());
 
-            if (end.isBefore(start) || end.isEqual(start)) {
-                throw new RuntimeException("End time must be after start time.");
+            // Zentrale Validierung
+            if (!BookingValidator.isTimeRangeValid(start, end, false)) {
+                return;
             }
 
+            // Verfügbarkeit prüfen
             List<MeetingRoom> availableRooms = meetingRoomService.findAvailableRoomsInTimeframe(start, end);
             boolean isAvailable = availableRooms.stream()
                     .anyMatch(room -> room.getRoomId().equals(roomId));
@@ -171,23 +210,8 @@ public class RoomBookingDialog extends Dialog {
                 throw new RuntimeException("Room is not available in the selected timeframe.");
             }
 
+            // Buchungsobjekt vorbereiten und speichern
             MeetingRoom room = meetingRoomService.findRoomForEdit(roomId);
-            Exit selectedExit = exitDropdown.getValue();
-
-            LocalDateTime now = LocalDateTime.now();
-            if (start.isBefore(now.plusMinutes(60))) {
-                if (selectedExit == null) {
-                    throw new RuntimeException("Please select your starting exit.");
-                }
-
-                Integer travelTime = exitService.getDistanceBetweenExits(selectedExit.getId(), room.getNearestExit().getId());
-
-                if (travelTime == null || travelTime > Duration.between(now, start).toSeconds()) {
-                    Notification.show("The room cannot be reached within the remaining time.", 5000, Notification.Position.TOP_CENTER)
-                            .addThemeVariants(NotificationVariant.LUMO_ERROR);
-                    return;
-                }
-            }
 
             Booking booking = new Booking();
             booking.setMeetingRoom(room);
@@ -198,7 +222,8 @@ public class RoomBookingDialog extends Dialog {
             booking.setPurpose(purposeField.getValue());
             booking.setBookingStatus("CONFIRMED");
 
-            Optional<Long> startExitId = Optional.empty();
+            Optional<Long> startExitId = resolveStartExitId();
+
             bookingService.createBooking(booking, startExitId);
 
             Notification.show("Room booked successfully!", 3000, Notification.Position.TOP_CENTER)
@@ -235,6 +260,31 @@ public class RoomBookingDialog extends Dialog {
         return addListener(BookingCreatedEvent.class, listener);
     }
 
+    // Blueprint Lageplan PNG suchen
+    private Image buildBlueprint(String roomName) {
+        String src = "room_blueprint/" + roomName + ".png";
+
+        Image img = new Image(src, "Blueprint of " + roomName + src);
+
+        img.setWidthFull();
+        img.getStyle().set("max-height", "600px");
+        img.getStyle().set("min-height", "300px");
+        img.getStyle()
+                .set("object-fit", "contain")
+                .set("background-color", "#f5f5f5")
+                .set("border-radius", "12px")
+                .set("box-shadow", "var(--lumo-box-shadow-m)");
+
+        // Fallback: Generischer Lageplan
+        img.getElement().executeJs(
+                "this.addEventListener('error', function() {" +
+                        "  this.src = 'room_blueprint/Generic_Map.png';" +
+                        "});"
+        );
+
+        return img;
+    }
+
     private void updateExitVisibility() {
         if (datePicker.getValue() == null || startTime.getValue() == null) {
             exitDropdown.setVisible(false);
@@ -244,6 +294,29 @@ public class RoomBookingDialog extends Dialog {
         LocalDateTime start = datePicker.getValue().atTime(startTime.getValue());
         boolean lessThan60 = start.isBefore(LocalDateTime.now().plusMinutes(60));
 
-        exitDropdown.setVisible(lessThan60);
+        if (lessThan60) {
+            if (exitDropdown.getListDataView().getItems().count() == 0) {
+                List<Exit> exits = fetchExits();
+                exitDropdown.setItems(exits);
+            }
+            exitDropdown.setVisible(true);
+        } else {
+            exitDropdown.setVisible(false);
+            exitDropdown.clear();
+        }
+    }
+
+    private Optional<Long> resolveStartExitId() {
+        if (!exitDropdown.isVisible()) {
+            return Optional.empty();
+        }
+
+        Exit selectedExit = exitDropdown.getValue();
+
+        if (selectedExit == null) {
+            throw new RuntimeException("Please select your starting exit.");
+        }
+
+        return Optional.of(selectedExit.getId());
     }
 }

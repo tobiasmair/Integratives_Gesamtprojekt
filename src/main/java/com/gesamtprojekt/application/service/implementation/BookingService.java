@@ -9,16 +9,20 @@ import com.gesamtprojekt.application.repositories.BookingRepository;
 import com.gesamtprojekt.application.repositories.MeetingRoomRepository;
 import com.gesamtprojekt.application.repositories.ExitDistanceRepository;
 import com.gesamtprojekt.application.service.BookingServiceInterface;
-import com.gesamtprojekt.application.repositories.ExitRepository;
 import com.gesamtprojekt.application.service.dto.NotificationType;
+import com.gesamtprojekt.application.repositories.ExitRepository;
 import com.gesamtprojekt.application.exceptions.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.awt.print.Book;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+
+import java.util.Collections;
+import java.awt.print.Book;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Optional;
 
 @Service
@@ -35,6 +39,9 @@ public class BookingService implements BookingServiceInterface {
 
     @Transactional
     public void createBooking(Booking booking, Optional<Long> startExitId) {
+
+        validateOpeningTimes(booking);
+
         validateBookingTime(booking);
 
         if (isBookingWithinOneHour(booking)) {
@@ -50,6 +57,19 @@ public class BookingService implements BookingServiceInterface {
         bookingRepository.save(booking);
 
         createNotifications(booking);
+    }
+
+    // Öffnungszeiten überprüfen
+    private void validateOpeningTimes(Booking booking) {
+        LocalTime start = booking.getStartTime().toLocalTime();
+        LocalTime end = booking.getEndTime().toLocalTime();
+
+        LocalTime opensAt = LocalTime.of(7, 0);
+        LocalTime closesAt = LocalTime.of(22, 0);
+
+        if (start.isBefore(opensAt) || end.isAfter(closesAt)) {
+            throw new RuntimeException("The building is closed. Bookings are only allowed between 07:00 and 22:00.");
+        }
     }
 
     private void validateBookingTime(Booking booking) {
@@ -137,17 +157,38 @@ public class BookingService implements BookingServiceInterface {
     }
 
     // Booking updaten
+    @Transactional
     public void updateBooking(Booking booking) {
-        boolean conflict = bookingRepository.existsOverlappingBookingExcludingId(
-                booking.getMeetingRoom().getRoomId(),
-                booking.getStartTime(), booking.getEndTime(),
-                booking.getBookingId()
-        );
-        if (conflict) {
-            throw new BookingValidationException("Booking conflict detected for the selected room and time.");
-        }
+        try {
+            // check for conflicting bookings
+            boolean conflict = bookingRepository.existsOverlappingBookingExcludingId(
+                    booking.getMeetingRoom().getRoomId(),
+                    booking.getStartTime(), booking.getEndTime(),
+                    booking.getBookingId()
+            );
+            if (conflict) {
+                throw new BookingValidationException("Booking conflict detected for the selected room and time");
+            }
 
-        bookingRepository.save(booking);
+            // save in database
+            bookingRepository.save(booking);
+
+            // update cache after successful update to avoid having old data in the cache
+            refreshCacheForRoom(booking.getMeetingRoom().getRoomId());
+
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    // helper method to avoid redundancy in cached data
+    private void refreshCacheForRoom(Long roomId) {
+        try {
+            List<Booking> fresh = bookingRepository.findByMeetingRoom_RoomIdAndIsActiveTrueOrderByStartTimeAsc(roomId);
+            roomCache.put(roomId, fresh);
+        } catch (Exception ignored) {
+            // if database dies during refresh, keep old data
+        }
     }
 
     // Anzahl der aktiven Buchungen zählen
@@ -160,9 +201,18 @@ public class BookingService implements BookingServiceInterface {
         return bookingRepository.countByClient_UserIdAndIsActiveTrueAndBookingStatusAndEndTimeAfter(clientId, "CONFIRMED", java.time.LocalDateTime.now());
     }
 
+    // In-Memory Cache für Bookings
+    private final Map<Long, List<Booking>> roomCache = new ConcurrentHashMap<>();
+
     // Diese Methode wird von der RoomServiceView aufgerufen
     public List<Booking> findAllActiveBookingsForRoom(Long roomId) {
-        return bookingRepository.findByMeetingRoom_RoomIdAndIsActiveTrueOrderByStartTimeAsc(roomId);
+        List<Booking> bookings = bookingRepository.findByMeetingRoom_RoomIdAndIsActiveTrueOrderByStartTimeAsc(roomId);
+        roomCache.put(roomId, bookings);
+        return bookings;
+    }
+
+    public List<Booking> getCachedBookings(Long roomId) {
+        return roomCache.getOrDefault(roomId, Collections.emptyList());
     }
 
     public List<Booking> getBookingsForDoorDisplayByRoomName(String roomName) {
@@ -170,5 +220,4 @@ public class BookingService implements BookingServiceInterface {
         LocalDateTime to = from.plusHours(24);
         return bookingRepository.findActiveBookingsForRoomNameBetween(roomName, from, to);
     }
-
 }

@@ -24,19 +24,11 @@ public class RoomImageStorageService {
         return new StoredImage(fileName, normalizeMime(mime, fileName), originalName);
     }
 
-    /**
-     * Speichert das Bild mit dem Raumnamen als Dateiname.
-     * Überschreibt existierende Bilder mit demselben Raumnamen.
-     * Normalisiert problematische Zeichen im Raumnamen (/, \, :, *, ?, ", <, >, |).
-     */
     public StoredImage saveWithRoomName(InputStream in, String roomName, String originalName, String mime) {
-        // Normalisiere den Raumnamen für Dateisystem
         String safeName = roomName.replaceAll("[/\\\\:*?\"<>|]", "_");
 
-        // Verwende Extension aus Original-Dateiname
         String extension = ext(originalName);
         if (extension.isEmpty()) {
-            // Fallback: Extension aus MIME-Type ableiten
             if (mime != null) {
                 if (mime.contains("png")) extension = ".png";
                 else if (mime.contains("webp")) extension = ".webp";
@@ -49,23 +41,21 @@ public class RoomImageStorageService {
         String fileName = safeName + extension;
         Path target = baseDir.resolve(fileName);
 
-        // Lösche existierendes Bild mit gleichem Raumnamen (alle Extensions)
+
         deleteExistingRoomImages(safeName);
 
         copy(in, target);
         return new StoredImage(fileName, normalizeMime(mime, fileName), originalName);
     }
 
-    /**
-     * Löscht alle existierenden Bilder für einen Raum (alle Extensions).
-     */
+
     private void deleteExistingRoomImages(String safeName) {
         for (String ext : new String[]{".jpeg", ".jpg", ".png", ".webp"}) {
             Path existingFile = baseDir.resolve(safeName + ext);
             try {
                 Files.deleteIfExists(existingFile);
             } catch (IOException e) {
-                // Ignoriere Fehler beim Löschen
+
             }
         }
     }

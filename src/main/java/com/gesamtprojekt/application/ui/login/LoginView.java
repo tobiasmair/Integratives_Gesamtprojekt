@@ -33,7 +33,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         Image logo = new Image("/icons/mci_logo_transparent.png", "MCI Logo");
         logo.addClassName("login-logo");
 
-        H1 title = new H1("MCI - Meeting Booker\"");
+        H1 title = new H1("MCI - Booking Service");
         title.getStyle().set("font-size", "var(--lumo-font-size-l)")
                 .set("margin", "0 0 var(--lumo-space-m) 0")
                 .set("color", "var(--mci-blue)");

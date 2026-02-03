@@ -82,14 +82,40 @@ public class RoomDetailsDialog extends Dialog {
         infoSection.add(infoRow(VaadinIcon.LINES, "Floor: " + (room.floor() != null ? room.floor() : 0)));
 
         // Lageplan Link
-        Anchor mapLink = new Anchor("#", "Show Floor Plan");
+        Button mapLink = new Button("Show Floor Plan");
+        mapLink.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
         mapLink.getStyle().set("font-size", "var(--lumo-font-size-xs)");
         Icon mapIcon = VaadinIcon.MAP_MARKER.create();
         mapIcon.setSize("12px");
         HorizontalLayout mapWrapper = new HorizontalLayout(mapIcon, mapLink);
         mapWrapper.setSpacing(false);
         mapWrapper.setAlignItems(HorizontalLayout.Alignment.CENTER);
-        mapWrapper.addClickListener(e -> Notification.show("Opening floor plan for floor " + (room.floor() != null ? room.floor() : "unknown")));
+        mapWrapper.addClickListener(e -> {
+            if (room == null) {
+                Notification.show("No floor plan available");
+                return;
+            }
+
+            // Dialog erstellen
+            Dialog dialog = new Dialog();
+            dialog.setHeaderTitle("Floor Plan: " + room.name());
+
+            Image floorPlan = buildBlueprint(room.name());
+
+            // Layout im Dialog
+            VerticalLayout dialogLayout = new VerticalLayout(floorPlan);
+            dialogLayout.setPadding(false);
+            dialogLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+
+            dialog.add(dialogLayout);
+
+            // Schließen-Button im Footer
+            Button closeButtonWrapper = new Button("Close", event -> dialog.close());
+            dialog.getFooter().add(closeButtonWrapper);
+
+            dialog.open();
+        });
+
         infoSection.add(mapWrapper);
 
         if (room.tags() != null && !room.tags().isEmpty()) {
@@ -306,5 +332,30 @@ public class RoomDetailsDialog extends Dialog {
         chip.getStyle().set("background", "var(--lumo-primary-color-10pct)");
         chip.getStyle().set("color", "var(--lumo-primary-text-color)");
         return chip;
+    }
+
+    // Blueprint Lageplan PNG suchen
+    private Image buildBlueprint(String roomName) {
+        String src = "room_blueprint/" + roomName + ".png";
+
+        Image img = new Image(src, "Blueprint of " + roomName + src);
+
+        img.setWidthFull();
+        img.getStyle().set("max-height", "600px");
+        img.getStyle().set("min-height", "300px");
+        img.getStyle()
+                .set("object-fit", "contain")
+                .set("background-color", "#f5f5f5")
+                .set("border-radius", "12px")
+                .set("box-shadow", "var(--lumo-box-shadow-m)");
+
+        // Fallback: Generischer Lageplan
+        img.getElement().executeJs(
+                "this.addEventListener('error', function() {" +
+                        "  this.src = 'room_blueprint/Generic_Map.png';" +
+                        "});"
+        );
+
+        return img;
     }
 }

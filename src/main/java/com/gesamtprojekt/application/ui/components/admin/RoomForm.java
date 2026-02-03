@@ -50,7 +50,7 @@ public class RoomForm extends FormLayout {
     public final TextField name = new TextField("Room Name *");
     public final IntegerField capacity = new IntegerField("Capacity *");
     public final ComboBox<String> building = new ComboBox<>("Building *");
-    public final IntegerField floor = new IntegerField("Floor");
+    public final ComboBox<Integer> floor = new ComboBox<>("Floor *");
 
     public final ComboBox<String> status = new ComboBox<>("Status");
 
@@ -225,10 +225,8 @@ public class RoomForm extends FormLayout {
         status.setItems("ACTIVE", "INACTIVE");
         status.setValue("ACTIVE");
         status.setWidthFull();
-        floor.setStepButtonsVisible(true);
-        floor.setMin(-10);
-        floor.setMax(50);
-        floor.setHelperText(null);
+        floor.setItems(0, 1, 2, 3, 4, 5);
+        floor.setRequiredIndicatorVisible(true);
         floor.setWidthFull();
 
         roomUsername.setLabel("Username *");

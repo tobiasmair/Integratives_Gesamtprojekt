@@ -2,6 +2,7 @@ package com.gesamtprojekt.application.ui.components.calendar;
 
 import com.gesamtprojekt.application.model.Equipment;
 import com.gesamtprojekt.application.service.implementation.EquipmentService;
+import com.gesamtprojekt.application.util.BookingValidator;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -12,6 +13,8 @@ import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -93,7 +96,29 @@ public class CalendarControlsBar extends VerticalLayout {
 
     private void addValueChangeListeners() {
         date.addValueChangeListener(e -> fireEvent(new FilterChangedEvent(this)));
-        start.addValueChangeListener(e -> fireEvent(new FilterChangedEvent(this)));
+
+        // Logik für automatische Endzeit-Anpassung
+        start.addValueChangeListener(e -> {
+            LocalTime startTimeValue = e.getValue();
+            if (startTimeValue == null) return;
+
+            LocalTime clampedStart = BookingValidator.clampToOpeningHours(startTimeValue);
+
+            if (!clampedStart.equals(startTimeValue)) {
+                start.setValue(clampedStart);
+                return;
+            }
+
+            // Automatische Endzeit (+1 Stunde)
+            LocalTime proposedEnd = clampedStart.plusHours(1);
+            if (proposedEnd.isAfter(BookingValidator.CLOSES_AT)) {
+                proposedEnd = BookingValidator.CLOSES_AT;
+            }
+
+            end.setValue(proposedEnd);
+            fireEvent(new FilterChangedEvent(this));
+        });
+
         end.addValueChangeListener(e -> fireEvent(new FilterChangedEvent(this)));
         building.addValueChangeListener(e -> fireEvent(new FilterChangedEvent(this)));
         floor.addValueChangeListener(e -> fireEvent(new FilterChangedEvent(this)));
@@ -102,23 +127,35 @@ public class CalendarControlsBar extends VerticalLayout {
     }
 
     private FormLayout buildTopRow() {
-        LocalTime nowRounded = roundToNextHalfHour(LocalTime.now());
+        LocalTime nowRounded = BookingValidator.roundToNextHalfHour(LocalTime.now());
 
-        // Nächste gerundete Stunde als Startzeit
-        start = time("Start Time", nowRounded);
-
-        // End Time: 1 Stunde später, aber maximal 23:30 (um Mitternachts-Problem zu vermeiden)
-        LocalTime endTimeCalculated = nowRounded.plusHours(1);
-        if (endTimeCalculated.isBefore(nowRounded) || endTimeCalculated.equals(LocalTime.MIDNIGHT)) {
-            // Über Mitternacht:    setze auf 23:30 statt 0 Uhr
-            endTimeCalculated = LocalTime.of(23, 30);
+        // Startzeit an Öffnungszeiten anpassen
+        if (nowRounded.isBefore(BookingValidator.OPENS_AT) ||
+                nowRounded.isAfter(BookingValidator.CLOSES_AT.minusMinutes(30))) {
+            nowRounded = BookingValidator.OPENS_AT;
         }
-        end = time("End Time", endTimeCalculated);
 
+        // Start TimePicker konfigurieren
+        start = time("Start Time", nowRounded);
+        start.setMin(BookingValidator.OPENS_AT);
+        start.setMax(BookingValidator.CLOSES_AT.minusMinutes(30));
         start.setStep(Duration.ofMinutes(30));
+
+        // Endzeit berechnen
+        LocalTime endTimeCalculated = nowRounded.plusHours(1);
+        if (endTimeCalculated.isAfter(BookingValidator.CLOSES_AT)) {
+            endTimeCalculated = BookingValidator.CLOSES_AT;
+        }
+
+        // End TimePicker konfigurieren
+        end = time("End Time", endTimeCalculated);
+        end.setMin(BookingValidator.OPENS_AT.plusMinutes(30));
+        end.setMax(BookingValidator.CLOSES_AT);
         end.setStep(Duration.ofMinutes(30));
 
+        // Datum konfigurieren
         date.setValue(LocalDate.now());
+        date.setMin(LocalDate.now());
         date.setWidthFull();
 
         FormLayout top = new FormLayout(date, start, end);
@@ -132,7 +169,7 @@ public class CalendarControlsBar extends VerticalLayout {
 
     private FormLayout buildFiltersRow() {
         building = combo("Building", List.of("All Buildings", "MCI I", "MCI II", "MCI III", "MCI IV", "MCI V"));
-        floor = combo("Floor", List.of("Any Floor", "1", "2", "3"));
+        floor = combo("Floor", List.of("Any Floor", "0", "1", "2", "3", "4", "5"));
         capacity = combo("Min Capacity", List.of("Any", "5+", "10+", "20+", "50+"));
 
         // Equipment aus Datenbank laden
@@ -201,7 +238,7 @@ public class CalendarControlsBar extends VerticalLayout {
         toggleBar.setPadding(false);
         toggleBar.setSpacing(true);
         toggleBar.getStyle().set("margin-bottom", "4px");
-        toggleBar.getStyle().set("background-color", "var(--lumo-contrast-5pct)");
+        //toggleBar.getStyle().set("background-color", "var(--lumo-contrast-5pct)");
 
         calendarModeBtn = new Button("Book by Date", new Icon(VaadinIcon.CALENDAR));
         calendarModeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);

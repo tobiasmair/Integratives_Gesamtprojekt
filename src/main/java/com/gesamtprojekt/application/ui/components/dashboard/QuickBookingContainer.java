@@ -5,6 +5,7 @@ import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.security.SecurityService;
 import com.gesamtprojekt.application.service.implementation.BookingService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
+import com.gesamtprojekt.application.util.BookingValidator;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.html.Div;
@@ -54,6 +55,9 @@ public class QuickBookingContainer extends Div {
 
     private Long currentEditingBookingId = null;
 
+    private LocalTime opensAt = BookingValidator.OPENS_AT;
+    private LocalTime closesAt = BookingValidator.CLOSES_AT;
+
     public QuickBookingContainer(BookingService bookingService, MeetingRoomService meetingRoomService, SecurityService securityService) {
         this.bookingService = bookingService;
         this.meetingRoomService = meetingRoomService;
@@ -94,19 +98,24 @@ public class QuickBookingContainer extends Div {
         content.setFlexGrow(0, bookButton);
 
         // Initialwerte setzen
-        LocalTime nowRounded = roundToNextHalfHour(LocalTime.now());
+        LocalTime nowRounded = BookingValidator.roundToNextHalfHour(LocalTime.now());
+        nowRounded = BookingValidator.clampToOpeningHours(nowRounded);
 
-        datePicker.setValue(java.time.LocalDate.now());
+        datePicker.setValue(LocalDate.now());
         datePicker.setMin(LocalDate.now());
 
-        // Nächste gerundete Stunde als Startzeit
+        // Einschränkungen basierend auf Öffnungszeiten
+        startTime.setMin(opensAt);
+        startTime.setMax(closesAt.minusMinutes(30));
+        endTime.setMin(opensAt.plusMinutes(30));
+        endTime.setMax(closesAt);
+
         startTime.setValue(nowRounded);
 
-        // End Time: 1 Stunde später, aber maximal 23:30 (um Mitternachts-Problem zu vermeiden)
+        // End Time setzen: Start + 1 Stunde, maximal Schließzeit
         LocalTime endTimeCalculated = nowRounded.plusHours(1);
-        if (endTimeCalculated.isBefore(nowRounded) || endTimeCalculated.equals(LocalTime.MIDNIGHT)) {
-            // Über Mitternacht - setze auf 23:30 statt
-            endTimeCalculated = LocalTime.of(23, 30);
+        if (endTimeCalculated.isAfter(closesAt) || endTimeCalculated.isBefore(nowRounded)) {
+            endTimeCalculated = closesAt;
         }
         endTime.setValue(endTimeCalculated);
 
@@ -162,7 +171,28 @@ public class QuickBookingContainer extends Div {
     // Wenn sich Datum ändert -> lade die Räume neu
     private void setupEventListeners() {
         datePicker.addValueChangeListener(e -> loadRooms());
-        startTime.addValueChangeListener(e -> loadRooms());
+
+        startTime.addValueChangeListener(e -> {
+            if (startTime.getValue() == null) return;
+
+            // Start Öffnungszeiten halten
+            LocalTime s = BookingValidator.clampToOpeningHours(startTime.getValue());
+
+            if (!s.equals(startTime.getValue())) {
+                startTime.setValue(s);
+            }
+
+            // End = Start + 60min, max closesAt
+            LocalTime proposedEnd = s.plusHours(1);
+            if (proposedEnd.isAfter(closesAt)) {
+                proposedEnd = closesAt;
+            }
+
+            endTime.setValue(proposedEnd);
+
+            loadRooms();
+        });
+
         endTime.addValueChangeListener(e -> loadRooms());
     }
 
@@ -176,32 +206,24 @@ public class QuickBookingContainer extends Div {
         LocalDateTime end = datePicker.getValue().atTime(endTime.getValue());
         LocalDateTime now = LocalDateTime.now();
 
-        if (end.isBefore(start) || end.isEqual(start)) {
-            Notification.show("End time must be after start time.", 3000, Notification.Position.TOP_CENTER)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-            roomGroup.setItems(List.of());
-            return;
-        }
+        // Validierung über die Utility-Klasse
+        boolean isValid = BookingValidator.isTimeRangeValid(start, end, currentEditingBookingId != null);
 
-        // Alte Buchungen darf Start in der Vergangenheit liegen
-        if (currentEditingBookingId == null && start.isBefore(now)) {
-            Notification.show("Start time must be in the future.", 3000, Notification.Position.TOP_CENTER)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        if (!isValid) {
             roomGroup.setItems(List.of());
             return;
         }
 
         List<MeetingRoom> availableRooms;
 
-        // Beim editieren aktuelle Buchung ignorieren
         if (currentEditingBookingId != null) {
             availableRooms = meetingRoomService.findAvailableRoomsExcludingBooking(start, end, currentEditingBookingId);
         } else {
             availableRooms = meetingRoomService.findAvailableRoomsInTimeframe(start, end);
         }
 
+        // UI aktualisieren
         MeetingRoom selectedRoom = roomGroup.getValue();
-
         roomGroup.setItems(availableRooms);
 
         if (selectedRoom != null && availableRooms.contains(selectedRoom)) {
@@ -287,13 +309,15 @@ public class QuickBookingContainer extends Div {
             fireEvent(new BookingChangedEvent(this));
 
             // Formular zurücksetzen
-            LocalTime nowRounded = roundToNextHalfHour(LocalTime.now());
+            LocalTime nowRounded = BookingValidator.roundToNextHalfHour(LocalTime.now());
+            nowRounded = BookingValidator.clampToOpeningHours(nowRounded);
+
             startTime.setValue(nowRounded);
 
-            // End Time: 1 Stunde später, aber maximal 23:30 (um Mitternachts-Problem zu vermeiden)
+            // Endzeit berechnen: Start + 1 Stunde, aber maximal closesAt
             LocalTime endTimeReset = nowRounded.plusHours(1);
-            if (endTimeReset.isBefore(nowRounded) || endTimeReset.equals(LocalTime.MIDNIGHT)) {
-                endTimeReset = LocalTime.of(23, 30);
+            if (endTimeReset.isAfter(closesAt) || endTimeReset.isBefore(nowRounded)) {
+                endTimeReset = closesAt;
             }
             endTime.setValue(endTimeReset);
 

@@ -185,12 +185,20 @@ public class SideNavbar extends FlexLayout {
         });
         logoutItem.getStyle().set("cursor", "pointer");
 
+        Component helpItem = buildFooterItem(VaadinIcon.QUESTION_CIRCLE, "Help");
+        helpItem.getElement().addEventListener("click", e -> {
+            UI.getCurrent().navigate("help");
+        });
+        helpItem.getStyle().set("cursor", "pointer");
+
         Component profileItem = buildFooterItem(VaadinIcon.USER, "My Profile");
         profileItem.getElement().addEventListener("click", e -> {
             UI.getCurrent().navigate("profile");
         });
+        profileItem.getStyle().set("cursor", "pointer");
 
         footer.add(
+                helpItem,
                 profileItem,
                 logoutItem
         );
