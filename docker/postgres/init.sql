@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict XywtlTOQ9UKvejO0yG4felBldhkjICv1CWNotL54y8g0Mlk6ud9guod2n52hva0
+\restrict pmkvCKi6qBDTVVekFqUwMqZKYsMYE5oCCMMI18KTmitpvYbFUG5ZfIAol5Mczht
 
 -- Dumped from database version 16.11 (Debian 16.11-1.pgdg13+1)
 -- Dumped by pg_dump version 16.11 (Debian 16.11-1.pgdg13+1)
@@ -322,14 +322,9 @@ COPY public.equipment (equipment_id, description) FROM stdin;
 --
 
 COPY public.meeting_room (room_id, capacity, floor, has_door_control, has_light_control, has_ventilation_control, image_mime, image_original_name, image_path, is_active, location, name, status, client_id, has_beamer_control, has_blind_control, has_vacuum_robot, has_whiteboard) FROM stdin;
-2	132	3	f	f	f	\N	\N	\N	t	MCI I	301/302	ACTIVE	6	f	f	f	f
-49	44	1	f	f	f	\N	\N	\N	t	MCI V	184	ACTIVE	59	f	f	f	f
-50	52	1	f	f	f	\N	\N	\N	t	MCI V	185	ACTIVE	60	f	f	f	f
-51	40	2	f	f	f	\N	\N	\N	t	MCI V	283	ACTIVE	61	f	f	f	f
 28	30	0	f	t	f	\N	\N	\N	t	MCI IV	4B-003	ACTIVE	38	f	f	f	f
 1	26	2	t	t	t	\N	\N	\N	t	MCI I	234	ACTIVE	5	t	t	t	t
 4	54	3	t	t	t	\N	\N	\N	t	MCI I	304	ACTIVE	8	t	t	t	t
-5	60	3	t	f	f	\N	\N	\N	t	MCI I	305	ACTIVE	9	f	f	f	f
 6	56	3	f	t	f	\N	\N	\N	t	MCI I	306	ACTIVE	10	f	f	f	f
 7	32	3	f	t	f	\N	\N	\N	t	MCI I	307	ACTIVE	11	f	f	f	f
 8	18	3	f	t	f	\N	\N	\N	t	MCI I	308	ACTIVE	12	f	f	f	f
@@ -373,6 +368,11 @@ COPY public.meeting_room (room_id, capacity, floor, has_door_control, has_light_
 47	40	1	f	t	f	\N	\N	\N	t	MCI V	182	ACTIVE	57	f	f	f	f
 48	40	1	f	t	f	\N	\N	\N	t	MCI V	183	ACTIVE	58	f	f	f	f
 3	54	3	t	t	f	\N	\N	\N	t	MCI I	303	ACTIVE	7	f	t	t	f
+2	132	3	f	t	f	\N	\N	\N	t	MCI I	301/302	ACTIVE	6	f	f	f	f
+49	44	1	f	t	f	\N	\N	\N	t	MCI V	184	ACTIVE	59	f	f	f	f
+50	52	1	f	t	f	\N	\N	\N	t	MCI V	185	ACTIVE	60	f	f	f	f
+51	40	2	f	t	f	\N	\N	\N	t	MCI V	283	ACTIVE	61	f	f	f	f
+5	60	3	f	t	f	\N	\N	\N	t	MCI I	305	ACTIVE	9	f	f	f	f
 \.
 
 
@@ -398,7 +398,6 @@ COPY public.meeting_room_equipment (room_id, equipment_id) FROM stdin;
 4	4
 4	7
 4	2
-5	1
 6	3
 7	3
 8	3
@@ -443,6 +442,11 @@ COPY public.meeting_room_equipment (room_id, equipment_id) FROM stdin;
 47	3
 48	3
 3	7
+2	3
+49	3
+50	3
+51	3
+5	3
 \.
 
 
@@ -620,5 +624,5 @@ ALTER TABLE ONLY public.booking
 -- PostgreSQL database dump complete
 --
 
-\unrestrict XywtlTOQ9UKvejO0yG4felBldhkjICv1CWNotL54y8g0Mlk6ud9guod2n52hva0
+\unrestrict pmkvCKi6qBDTVVekFqUwMqZKYsMYE5oCCMMI18KTmitpvYbFUG5ZfIAol5Mczht
 
