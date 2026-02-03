@@ -237,10 +237,12 @@ public class MeetingRoomService implements MeetingRoomServiceInterface {
         Set<Equipment> eq = room.getEquipment();
 
         // Wird Equipment mit Bezeichnung hinterlegt, wird Flag gesetzt
+        room.setHasDoorControl(hasEquipment(eq, "Door Control"));
         room.setHasBlindControl(hasEquipment(eq, "Blind Control"));
         room.setHasLightControl(hasEquipment(eq, "Light Control"));
         room.setHasVentilationControl(hasEquipment(eq, "Ventilation Control"));
         room.setHasBeamerControl(hasEquipment(eq, "Beamer Control"));
+        room.setHasWhiteboard(hasEquipment(eq, "Whiteboard"));
         room.setHasVacuumRobot(hasEquipment(eq, "Vacuum Robot"));
     }
 

@@ -1,6 +1,7 @@
 package com.gesamtprojekt.application.ui.room.components;
 
 import com.gesamtprojekt.application.model.Booking;
+import com.gesamtprojekt.application.model.MeetingRoom;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H3;
@@ -17,7 +18,10 @@ import java.time.format.DateTimeFormatter;
  */
 public class BookingInfoBox extends VerticalLayout {
 
-    public BookingInfoBox(Booking booking, Runnable onFinish) {
+    private final MeetingRoom room;
+
+    public BookingInfoBox(Booking booking, Runnable onFinish, MeetingRoom room) {
+        this.room = room;
 
         // styling of the box
         setWidth("300px");
@@ -41,16 +45,24 @@ public class BookingInfoBox extends VerticalLayout {
         topText.add(new Span("Current Meeting"));
         topText.add(new H3("End Time: " + booking.getEndTime().format(formatter)));
 
+
         // checks the remaining time till the end of the booking
         LocalDateTime now = LocalDateTime.now();
         long minutesUntilEnd = Duration.between(now, booking.getEndTime()).toMinutes();
 
-        // if the time is 5 mins or fewer, show the reminder
+        // if the meeting ends is 5 mins or less, show the reminder
         if (minutesUntilEnd <= 5 && minutesUntilEnd >= 0) {
             Span warning = new Span("Reminder: Your booking is ending soon!");
             warning.getStyle().set("margin-top", "25px");
 
             topText.add(warning);
+
+            if (room.getHasVacuumRobot()){
+            Span vacuum_robot_message = new Span("Attention: Vacuum Robot released");
+            vacuum_robot_message.getStyle().set("margin-top", "25px");
+            topText.add(vacuum_robot_message);
+            }
+
         }
 
         // finish booking button to end meeting manually
