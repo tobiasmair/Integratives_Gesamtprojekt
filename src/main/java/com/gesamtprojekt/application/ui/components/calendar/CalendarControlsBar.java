@@ -2,6 +2,7 @@ package com.gesamtprojekt.application.ui.components.calendar;
 
 import com.gesamtprojekt.application.model.Equipment;
 import com.gesamtprojekt.application.service.implementation.EquipmentService;
+import com.gesamtprojekt.application.util.BookingValidator;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -95,7 +96,29 @@ public class CalendarControlsBar extends VerticalLayout {
 
     private void addValueChangeListeners() {
         date.addValueChangeListener(e -> fireEvent(new FilterChangedEvent(this)));
-        start.addValueChangeListener(e -> fireEvent(new FilterChangedEvent(this)));
+
+        // Logik für automatische Endzeit-Anpassung
+        start.addValueChangeListener(e -> {
+            LocalTime startTimeValue = e.getValue();
+            if (startTimeValue == null) return;
+
+            LocalTime clampedStart = BookingValidator.clampToOpeningHours(startTimeValue);
+
+            if (!clampedStart.equals(startTimeValue)) {
+                start.setValue(clampedStart);
+                return;
+            }
+
+            // Automatische Endzeit (+1 Stunde)
+            LocalTime proposedEnd = clampedStart.plusHours(1);
+            if (proposedEnd.isAfter(BookingValidator.CLOSES_AT)) {
+                proposedEnd = BookingValidator.CLOSES_AT;
+            }
+
+            end.setValue(proposedEnd);
+            fireEvent(new FilterChangedEvent(this));
+        });
+
         end.addValueChangeListener(e -> fireEvent(new FilterChangedEvent(this)));
         building.addValueChangeListener(e -> fireEvent(new FilterChangedEvent(this)));
         floor.addValueChangeListener(e -> fireEvent(new FilterChangedEvent(this)));
@@ -104,38 +127,33 @@ public class CalendarControlsBar extends VerticalLayout {
     }
 
     private FormLayout buildTopRow() {
-        // Öffnungszeiten definieren
-        LocalTime opensAt = LocalTime.of(7, 0);
-        LocalTime closesAt = LocalTime.of(22, 0);
+        LocalTime nowRounded = BookingValidator.roundToNextHalfHour(LocalTime.now());
 
-        LocalTime nowRounded = roundToNextHalfHour(LocalTime.now());
-
-        // jetzt vor Öffnung
-        if (nowRounded.isBefore(opensAt)) {
-            nowRounded = opensAt;
-        }
-        // jetzt vor oder nach Öffnung
-        else if (nowRounded.isAfter(closesAt.minusMinutes(30))) {
-            nowRounded = opensAt;
+        // Startzeit an Öffnungszeiten anpassen
+        if (nowRounded.isBefore(BookingValidator.OPENS_AT) ||
+                nowRounded.isAfter(BookingValidator.CLOSES_AT.minusMinutes(30))) {
+            nowRounded = BookingValidator.OPENS_AT;
         }
 
-        // Nächste gerundete Stunde als Startzeit
+        // Start TimePicker konfigurieren
         start = time("Start Time", nowRounded);
-        start.setMin(opensAt);
-        start.setMax(closesAt.minusMinutes(30));
+        start.setMin(BookingValidator.OPENS_AT);
+        start.setMax(BookingValidator.CLOSES_AT.minusMinutes(30));
+        start.setStep(Duration.ofMinutes(30));
 
+        // Endzeit berechnen
         LocalTime endTimeCalculated = nowRounded.plusHours(1);
-        if (endTimeCalculated.isAfter(closesAt)) {
-            endTimeCalculated = closesAt;
+        if (endTimeCalculated.isAfter(BookingValidator.CLOSES_AT)) {
+            endTimeCalculated = BookingValidator.CLOSES_AT;
         }
 
+        // End TimePicker konfigurieren
         end = time("End Time", endTimeCalculated);
-        end.setMin(opensAt.plusMinutes(30));
-        end.setMax(closesAt);
-
-        start.setStep(Duration.ofMinutes(30));
+        end.setMin(BookingValidator.OPENS_AT.plusMinutes(30));
+        end.setMax(BookingValidator.CLOSES_AT);
         end.setStep(Duration.ofMinutes(30));
 
+        // Datum konfigurieren
         date.setValue(LocalDate.now());
         date.setMin(LocalDate.now());
         date.setWidthFull();

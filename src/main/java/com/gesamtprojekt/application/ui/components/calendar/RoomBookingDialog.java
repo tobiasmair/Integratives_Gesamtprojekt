@@ -5,6 +5,7 @@ import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.security.SecurityService;
 import com.gesamtprojekt.application.service.implementation.BookingService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
+import com.gesamtprojekt.application.util.BookingValidator;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
@@ -137,30 +138,24 @@ public class RoomBookingDialog extends Dialog {
     }
 
     private void initializeFields(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        // Read only
+        datePicker.setReadOnly(true);
+        startTime.setReadOnly(true);
+        endTime.setReadOnly(true);
+
         // Öffnungszeiten setzen
-        LocalTime opensAt = LocalTime.of(7, 0);
-        LocalTime closesAt = LocalTime.of(22, 0);
+        LocalTime opensAt = BookingValidator.OPENS_AT;
+        LocalTime closesAt = BookingValidator.CLOSES_AT;
 
-        startTime.setMin(opensAt);
-        startTime.setMax(closesAt.minusMinutes(30));
-
-        endTime.setMin(opensAt.plusMinutes(30));
-        endTime.setMax(closesAt);
-
-        startTime.setStep(Duration.ofMinutes(30));
-        endTime.setStep(Duration.ofMinutes(30));
-
-        // Initialisierung Werte
-        if (startDateTime != null) {
+        // Werte aus der CalendarRoomCard übernehmen
+        if (startDateTime != null && endDateTime != null) {
             datePicker.setValue(startDateTime.toLocalDate());
             startTime.setValue(startDateTime.toLocalTime());
             endTime.setValue(endDateTime.toLocalTime());
         } else {
-            LocalTime now = roundToNextHalfHour(LocalTime.now());
-            // vor 7 auf 7 setzen
-            if (now.isBefore(opensAt)) now = opensAt;
-            // nach 22 setze auf morgen 7 Uhr
-            if (now.isAfter(closesAt.minusHours(1))) now = opensAt;
+            // Fallback
+            LocalTime now = BookingValidator.roundToNextHalfHour(LocalTime.now());
+            now = BookingValidator.clampToOpeningHours(now);
 
             datePicker.setValue(LocalDate.now());
             startTime.setValue(now);
@@ -177,10 +172,12 @@ public class RoomBookingDialog extends Dialog {
             LocalDateTime start = datePicker.getValue().atTime(startTime.getValue());
             LocalDateTime end = datePicker.getValue().atTime(endTime.getValue());
 
-            if (end.isBefore(start) || end.isEqual(start)) {
-                throw new RuntimeException("End time must be after start time.");
+            // Zentrale Validierung
+            if (!BookingValidator.isTimeRangeValid(start, end, false)) {
+                return;
             }
 
+            // Verfügbarkeit prüfen
             List<MeetingRoom> availableRooms = meetingRoomService.findAvailableRoomsInTimeframe(start, end);
             boolean isAvailable = availableRooms.stream()
                     .anyMatch(room -> room.getRoomId().equals(roomId));
@@ -189,8 +186,8 @@ public class RoomBookingDialog extends Dialog {
                 throw new RuntimeException("Room is not available in the selected timeframe.");
             }
 
+            // Buchungsobjekt vorbereiten und speichern
             MeetingRoom room = meetingRoomService.findRoomForEdit(roomId);
-
             Booking booking = new Booking();
             booking.setMeetingRoom(room);
             booking.setClient(securityService.getAuthenticatedClient()
@@ -206,7 +203,6 @@ public class RoomBookingDialog extends Dialog {
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
             fireEvent(new BookingCreatedEvent(this));
-
             close();
 
         } catch (Exception ex) {
