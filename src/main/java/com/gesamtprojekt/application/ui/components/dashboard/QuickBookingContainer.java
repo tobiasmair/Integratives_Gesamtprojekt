@@ -5,6 +5,7 @@ import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.security.SecurityService;
 import com.gesamtprojekt.application.service.implementation.BookingService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
+import com.gesamtprojekt.application.util.BookingValidator;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.html.Div;
@@ -27,6 +28,7 @@ import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -37,8 +39,6 @@ public class QuickBookingContainer extends Div {
     private final MeetingRoomService meetingRoomService;
     private final SecurityService securityService;
 
-    //private final Tab favTab = new Tab("Favourite rooms");
-    //private final Tabs tabs = new Tabs(favTab, allTab);
     private final Tab allTab = new Tab("All available rooms");
     private final Tabs tabs = new Tabs(allTab);
 
@@ -53,6 +53,9 @@ public class QuickBookingContainer extends Div {
     private Button bookButton;
 
     private Long currentEditingBookingId = null;
+
+    private LocalTime opensAt = BookingValidator.OPENS_AT;
+    private LocalTime closesAt = BookingValidator.CLOSES_AT;
 
     public QuickBookingContainer(BookingService bookingService, MeetingRoomService meetingRoomService, SecurityService securityService) {
         this.bookingService = bookingService;
@@ -72,6 +75,7 @@ public class QuickBookingContainer extends Div {
         content.setSpacing(false);
         content.setWidthFull();
         content.setHeightFull();
+        content.getStyle().set("overflow", "hidden");
 
         this.title = createHeader();
         this.bookButton = createBookButton();
@@ -80,12 +84,10 @@ public class QuickBookingContainer extends Div {
         var roomsSection = createRoomsSection();
         var purposeField = createMeetingPurposeField();
 
-        //content.add(createHeader());
         content.add(title);
         content.add(dateTimeRow);
         content.add(roomsSection);
         content.add(purposeField);
-        //content.add(createBookButton());
         content.add(bookButton);
 
         content.setFlexGrow(0, title);
@@ -95,13 +97,26 @@ public class QuickBookingContainer extends Div {
         content.setFlexGrow(0, bookButton);
 
         // Initialwerte setzen
-        LocalTime nowRounded = roundToNextHalfHour(LocalTime.now());
+        LocalTime nowRounded = BookingValidator.roundToNextHalfHour(LocalTime.now());
+        nowRounded = BookingValidator.clampToOpeningHours(nowRounded);
 
-        datePicker.setValue(java.time.LocalDate.now());
+        datePicker.setValue(LocalDate.now());
+        datePicker.setMin(LocalDate.now());
 
-        // Nächste gerundete Stunde als Startzeit
+        // Einschränkungen basierend auf Öffnungszeiten
+        startTime.setMin(opensAt);
+        startTime.setMax(closesAt.minusMinutes(30));
+        endTime.setMin(opensAt.plusMinutes(30));
+        endTime.setMax(closesAt);
+
         startTime.setValue(nowRounded);
-        endTime.setValue(nowRounded.plusHours(1));
+
+        // End Time setzen: Start + 1 Stunde, maximal Schließzeit
+        LocalTime endTimeCalculated = nowRounded.plusHours(1);
+        if (endTimeCalculated.isAfter(closesAt) || endTimeCalculated.isBefore(nowRounded)) {
+            endTimeCalculated = closesAt;
+        }
+        endTime.setValue(endTimeCalculated);
 
         startTime.setStep(Duration.ofMinutes(30));
         endTime.setStep(Duration.ofMinutes(30));
@@ -118,6 +133,14 @@ public class QuickBookingContainer extends Div {
     private HorizontalLayout createDateTimeRow() {
         var row = new HorizontalLayout(datePicker, startTime, endTime);
         row.setWidthFull();
+        // Responsive untereinander
+        row.getStyle().set("flex-wrap", "wrap");
+
+        // volle breite auf mobilen Geräten
+        datePicker.getStyle().set("min-width", "120px").set("flex", "1");
+        startTime.getStyle().set("min-width", "100px").set("flex", "1");
+        endTime.getStyle().set("min-width", "100px").set("flex", "1");
+
         return row;
     }
 
@@ -144,20 +167,31 @@ public class QuickBookingContainer extends Div {
         return box;
     }
 
-    /*
-    private void onTabChanged() {
-        if (tabs.getSelectedTab() == favTab) {
-            loadFavouriteRooms();
-            return;
-        }
-        loadAllRooms();
-    }
-     */
-
     // Wenn sich Datum ändert -> lade die Räume neu
     private void setupEventListeners() {
         datePicker.addValueChangeListener(e -> loadRooms());
-        startTime.addValueChangeListener(e -> loadRooms());
+
+        startTime.addValueChangeListener(e -> {
+            if (startTime.getValue() == null) return;
+
+            // Start Öffnungszeiten halten
+            LocalTime s = BookingValidator.clampToOpeningHours(startTime.getValue());
+
+            if (!s.equals(startTime.getValue())) {
+                startTime.setValue(s);
+            }
+
+            // End = Start + 60min, max closesAt
+            LocalTime proposedEnd = s.plusHours(1);
+            if (proposedEnd.isAfter(closesAt)) {
+                proposedEnd = closesAt;
+            }
+
+            endTime.setValue(proposedEnd);
+
+            loadRooms();
+        });
+
         endTime.addValueChangeListener(e -> loadRooms());
     }
 
@@ -170,83 +204,56 @@ public class QuickBookingContainer extends Div {
         LocalDateTime start = datePicker.getValue().atTime(startTime.getValue());
         LocalDateTime end = datePicker.getValue().atTime(endTime.getValue());
 
-        if (end.isBefore(start) || end.isEqual(start)) {
-            Notification.show("End time must be after start time.", 3000, Notification.Position.TOP_CENTER)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        // Validierung über die Utility-Klasse
+        boolean isValid = BookingValidator.isTimeRangeValid(start, end, currentEditingBookingId != null);
+
+        if (!isValid) {
             roomGroup.setItems(List.of());
             return;
         }
 
-        List<MeetingRoom> availableRooms = meetingRoomService.findAvailableRoomsInTimeframe(start, end);
+        List<MeetingRoom> availableRooms;
 
+        if (currentEditingBookingId != null) {
+            availableRooms = meetingRoomService.findAvailableRoomsExcludingBooking(start, end, currentEditingBookingId);
+        } else {
+            availableRooms = meetingRoomService.findAvailableRoomsInTimeframe(start, end);
+        }
+
+        // UI aktualisieren
+        MeetingRoom selectedRoom = roomGroup.getValue();
         roomGroup.setItems(availableRooms);
-        if (!availableRooms.isEmpty()) {
+
+        if (selectedRoom != null && availableRooms.contains(selectedRoom)) {
+            roomGroup.setValue(selectedRoom);
+        } else if (!availableRooms.isEmpty()) {
             roomGroup.setValue(availableRooms.get(0));
         }
     }
-
-    /*
-    private void loadFavouriteRooms() {
-        setRooms(java.util.List.of(
-                new RoomItem("A", "Meeting Room A", "Up to 90", true),
-                new RoomItem("B", "Meeting Room B", "Up to 12", true),
-                new RoomItem("C", "Meeting Room C", "Up to 20", true)
-        ));
-    }
-
-    private void loadAllRooms() {
-        setRooms(java.util.List.of(
-                new RoomItem("A", "Meeting Room A", "Up to 90", true),
-                new RoomItem("D", "Lecture Room D", "Up to 120", false),
-                new RoomItem("E", "Focus Room E", "Up to 4", false)
-        ));
-    }
-
-    private void setRooms(List<RoomItem> rooms) {
-        roomGroup.setItems(rooms);
-        roomGroup.setValue(rooms.isEmpty() ? null : rooms.getFirst());
-    }
-
-    private HorizontalLayout createRoomRow(RoomItem room) {
-        var title = new Span(room.name());
-        title.addClassName("room-title");
-
-        var cap = new Span(room.capacity());
-        cap.addClassName("room-capacity");
-
-        var text = new VerticalLayout(title, cap);
-        text.setPadding(false);
-        text.setSpacing(false);
-
-        Icon star = room.favourite() ? VaadinIcon.STAR.create() : VaadinIcon.STAR_O.create();
-        star.addClassName("room-star");
-
-        var row = new HorizontalLayout(text, star);
-        row.addClassName("room-row");
-        row.setWidthFull();
-        row.setAlignItems(FlexComponent.Alignment.CENTER);
-        row.expand(text);
-
-        return row;
-    }
-     */
 
     private void setupRoomGroup() {
         roomGroup.setLabel(null);
         roomGroup.addClassName("rooms-radio");
         roomGroup.setRenderer(new ComponentRenderer<>(room -> {
-            var title = new Span(room.getName());
+            Span roomName = new Span(room.getName());
+
+            Span locationInfo = new Span(room.getLocation() + " | Floor " + room.getFloor());
+            locationInfo.getStyle().set("margin-left", "auto");
+
+            HorizontalLayout topRow = new HorizontalLayout(roomName, locationInfo);
+            topRow.setWidthFull();
+            topRow.setPadding(false);
 
             var cap = new Span("Capacity: " + room.getCapacity());
 
-            var text = new VerticalLayout(title, cap);
-            text.setPadding(false);
-            text.setSpacing(false);
+            VerticalLayout container = new VerticalLayout(topRow, cap);
+            container.setPadding(false);
+            container.setSpacing(false);
+            container.setWidthFull();
 
-            var row = new HorizontalLayout(text);
+            HorizontalLayout row = new HorizontalLayout(container);
             row.setWidthFull();
             row.setAlignItems(FlexComponent.Alignment.CENTER);
-            row.expand(text);
 
             return row;
         }));
@@ -299,9 +306,18 @@ public class QuickBookingContainer extends Div {
             fireEvent(new BookingChangedEvent(this));
 
             // Formular zurücksetzen
-            LocalTime nowRounded = roundToNextHalfHour(LocalTime.now());
+            LocalTime nowRounded = BookingValidator.roundToNextHalfHour(LocalTime.now());
+            nowRounded = BookingValidator.clampToOpeningHours(nowRounded);
+
             startTime.setValue(nowRounded);
-            endTime.setValue(nowRounded.plusHours(1));
+
+            // Endzeit berechnen: Start + 1 Stunde, aber maximal closesAt
+            LocalTime endTimeReset = nowRounded.plusHours(1);
+            if (endTimeReset.isAfter(closesAt) || endTimeReset.isBefore(nowRounded)) {
+                endTimeReset = closesAt;
+            }
+            endTime.setValue(endTimeReset);
+
             purposeField.clear();
             loadRooms();
 

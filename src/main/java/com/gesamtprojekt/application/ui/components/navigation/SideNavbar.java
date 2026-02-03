@@ -5,14 +5,9 @@ import com.gesamtprojekt.application.security.SecurityService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Footer;
-import com.vaadin.flow.component.html.Header;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexLayout;
-import com.vaadin.flow.component.orderedlayout.Scroller;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.*;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -38,6 +33,10 @@ public class SideNavbar extends FlexLayout {
         Footer footer = buildFooter();
 
         add(header, buildProfileSection(), scroller, footer);
+
+        setFlexGrow(0, header);
+        setFlexGrow(1, scroller);
+        setFlexGrow(0, footer);
     }
 
     public void setCollapsed(boolean collapsed) {
@@ -54,11 +53,19 @@ public class SideNavbar extends FlexLayout {
     }
 
     private Header buildHeader(Button collapse) {
-        Span appName = new Span("MCI - meeting room booker");
-        appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.SMALL);
+        Span appName = new Span("MCI - Booking Service");
+        appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.SMALL, LumoUtility.Padding.Horizontal.MEDIUM, LumoUtility.Padding.Vertical.SMALL);
         appName.addClassName("app-name");
+        //getStyle().set("padding-left", "var(--lumo-space-m");
 
-        Header header = new Header(appName, collapse);
+        Image logo = new Image("icons/mci_logo.png", "MCI Logo");
+        logo.setHeight("28px");
+        logo.addClassName("app-logo");
+        HorizontalLayout logoContainer = new HorizontalLayout(logo, appName);
+        logoContainer.setAlignItems(FlexComponent.Alignment.CENTER);
+        logoContainer.setSpacing(true);
+
+        Header header = new Header(logoContainer, collapse);
         header.addClassName("drawer-header");
         return header;
     }
@@ -66,7 +73,7 @@ public class SideNavbar extends FlexLayout {
     private Scroller buildScroller(Component content) {
         Scroller scroller = new Scroller(content);
         scroller.addClassName("drawer-scroller");
-        scroller.setSizeFull();
+        //scroller.setSizeFull();
         return scroller;
     }
 
@@ -96,7 +103,6 @@ public class SideNavbar extends FlexLayout {
 
             Div box = new Div(avatar, text);
             box.addClassName("profile-box");
-            box.getStyle().setHeight("50px");
             return box;
 
         }).orElse(new Div());
@@ -106,7 +112,9 @@ public class SideNavbar extends FlexLayout {
         Avatar avatar = new Avatar();
         avatar.setName(fullName);
         avatar.setAbbreviation(getInitials(fullName));
-        avatar.setColorIndex(3); // fixe Farbe, später dynamisch
+
+        avatar.addClassName("profile-avatar");
+
         return avatar;
     }
 
@@ -152,15 +160,15 @@ public class SideNavbar extends FlexLayout {
 
     private void addClientSection(SideNav nav) {
         nav.addItem(new SideNavItem("My Dashboard", "", VaadinIcon.DASHBOARD.create()));
-        nav.addItem(new SideNavItem("Calendar", "calendar", VaadinIcon.CALENDAR.create()));
-        nav.addItem(new SideNavItem("Browse Rooms", "browserooms", VaadinIcon.SEARCH.create()));
+        nav.addItem(new SideNavItem("Book Rooms", "calendar", VaadinIcon.CALENDAR.create()));
+        //nav.addItem(new SideNavItem("Browse Rooms", "browserooms", VaadinIcon.SEARCH.create()));
     }
 
     private void addAdminSection(SideNav nav) {
         nav.addItem(new SideNavItem("Statistics & Reports", "statistics", VaadinIcon.CHART.create()));
         nav.addItem(new SideNavItem("Room Management", "roommanagement", VaadinIcon.BUILDING.create()));
         nav.addItem(new SideNavItem("User Management", "usermanagement", VaadinIcon.USERS.create()));
-        nav.addItem(new SideNavItem("System Settings", "systemsettings", VaadinIcon.TOOLS.create()));
+        //nav.addItem(new SideNavItem("System Settings", "systemsettings", VaadinIcon.TOOLS.create()));
     }
 
     private void addRoomUserSection(SideNav nav) {
@@ -177,12 +185,20 @@ public class SideNavbar extends FlexLayout {
         });
         logoutItem.getStyle().set("cursor", "pointer");
 
+        Component helpItem = buildFooterItem(VaadinIcon.QUESTION_CIRCLE, "Help");
+        helpItem.getElement().addEventListener("click", e -> {
+            UI.getCurrent().navigate("help");
+        });
+        helpItem.getStyle().set("cursor", "pointer");
+
         Component profileItem = buildFooterItem(VaadinIcon.USER, "My Profile");
         profileItem.getElement().addEventListener("click", e -> {
             UI.getCurrent().navigate("profile");
         });
+        profileItem.getStyle().set("cursor", "pointer");
 
         footer.add(
+                helpItem,
                 profileItem,
                 logoutItem
         );

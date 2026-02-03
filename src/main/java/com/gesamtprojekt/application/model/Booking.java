@@ -28,14 +28,15 @@ public class Booking {
     @Column(name = "checkInTime")
     private LocalDateTime checkInTime;
 
+    // CONFIRMED, CANCELLED, MISSED, COMPLETED
     @Column(name = "bookingStatus")
     private String bookingStatus;
 
     @Column(name = "purpose")
     private String purpose;
 
-    @Column(name = "attendees")
-    private Integer attendees;
+    @Column(name = "bookingCode")
+    private String bookingCode;     // 1234-5678
 
     @Column(name = "isActive")
     private Boolean isActive = true;

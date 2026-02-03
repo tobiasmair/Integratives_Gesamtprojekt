@@ -12,7 +12,7 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.RolesAllowed;
 
 @Route(value = "roommanagement", layout = MainLayout.class)
-@PageTitle("Room Management")
+@PageTitle("Room Management | MCI Meeting Booker")
 @RolesAllowed("ADMIN")
 public class RoomManagementView extends VerticalLayout {
 

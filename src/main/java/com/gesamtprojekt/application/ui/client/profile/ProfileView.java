@@ -16,7 +16,7 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.RolesAllowed;
 
 @Route(value = "profile", layout = MainLayout.class)
-@PageTitle("Profile")
+@PageTitle("Profile | MCI Meeting Booker")
 @RolesAllowed({"USER", "ADMIN", "ROOM"})
 public class ProfileView extends VerticalLayout {
 
@@ -93,7 +93,7 @@ public class ProfileView extends VerticalLayout {
                     clientService.updateClientWithPassword(currentClient, pass);
                 }
 
-                Notification.show("Profile successfully updated!")
+                Notification.show("Profile successfully updated!", 3000, Notification.Position.TOP_CENTER)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
                 // Felder leeren
@@ -101,7 +101,7 @@ public class ProfileView extends VerticalLayout {
                 registrationForm.confirmPassword.clear();
 
             } catch (Exception ex) {
-                Notification.show("Error: " + ex.getMessage())
+                Notification.show("Error: " + ex.getMessage(), 3000, Notification.Position.TOP_CENTER)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         }

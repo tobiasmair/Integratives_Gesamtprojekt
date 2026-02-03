@@ -24,4 +24,13 @@ public class RoomImageController {
                 .contentType(MediaType.parseMediaType(img.mime()))
                 .body(new InputStreamResource(img.stream()));
     }
+
+    @GetMapping("/by-room")
+    public ResponseEntity<InputStreamResource> getByRoomName(@RequestParam String roomName) {
+        var img = storage.getRoomImage(roomName);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(img.mime()))
+                .body(new InputStreamResource(img.stream()));
+    }
 }

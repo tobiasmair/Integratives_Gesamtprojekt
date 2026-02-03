@@ -1,6 +1,7 @@
 package com.gesamtprojekt.application.service.implementation;
 
 import com.gesamtprojekt.application.model.Client;
+import com.gesamtprojekt.application.model.Equipment;
 import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.repositories.MeetingRoomRepository;
 import com.gesamtprojekt.application.service.MeetingRoomServiceInterface;
@@ -9,9 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.time.LocalTime;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +31,11 @@ public class MeetingRoomService implements MeetingRoomServiceInterface {
             LocalDateTime endTime) {
         if (startTime == null || endTime == null) {
             return findAvailableRooms();
+        }
+        // Auserhalb Öffnungszeiten leere Liste
+        if (startTime.toLocalTime().isBefore(LocalTime.of(7, 0)) ||
+                endTime.toLocalTime().isAfter(LocalTime.of(22, 0))) {
+            return Collections.emptyList();
         }
         return meetingRoomRepository.findAvailableRoomsInTimeframe(startTime, endTime);
     }
@@ -86,6 +91,7 @@ public class MeetingRoomService implements MeetingRoomServiceInterface {
         if (room.getStatus() == null || room.getStatus().isBlank()) {
             room.setStatus("ACTIVE");
         }
+        syncSmartFlags(room);   // Steuerungs-Flags setzen
         return meetingRoomRepository.save(room);
     }
 
@@ -102,6 +108,7 @@ public class MeetingRoomService implements MeetingRoomServiceInterface {
                 clientService.updateClientWithPassword(user, currentInput);
             }
         }
+        syncSmartFlags(room);   // Steuerungs-Flags setzen
         meetingRoomRepository.save(room);
     }
 
@@ -192,5 +199,60 @@ public class MeetingRoomService implements MeetingRoomServiceInterface {
                 equipmentSet,
                 equipmentCount);
     }
+
+    public List<MeetingRoom> findAllRoomsByFilters(
+            String building,
+            String floorStr,
+            String minCapStr,
+            Set<String> equipmentSet) {
+
+        // Floor-String zu Integer konvertieren
+        Integer floor = null;
+        if (floorStr != null && !floorStr.equals("Any Floor")) {
+            try {
+                floor = Integer.valueOf(floorStr);
+            } catch (NumberFormatException e) {
+                floor = null;
+            }
+        }
+
+        // Min capacity Logik
+        int minCap = 0;
+        if (minCapStr != null && minCapStr.endsWith("+")) {
+            minCap = Integer.parseInt(minCapStr.replace("+", ""));
+        }
+
+        // Equipment Count für Query
+        long equipmentCount = (equipmentSet != null && !equipmentSet.isEmpty()) ? equipmentSet.size() : 0;
+
+        return meetingRoomRepository.findFilteredRooms(
+                building,
+                floor,
+                minCap,
+                equipmentSet,
+                equipmentCount);
+    }
+    // Steuerungs Flags syncen
+    private void syncSmartFlags(MeetingRoom room) {
+        Set<Equipment> eq = room.getEquipment();
+
+        // Wird Equipment mit Bezeichnung hinterlegt, wird Flag gesetzt
+        room.setHasDoorControl(hasEquipment(eq, "Door Control"));
+        room.setHasBlindControl(hasEquipment(eq, "Blind Control"));
+        room.setHasLightControl(hasEquipment(eq, "Light Control"));
+        room.setHasVentilationControl(hasEquipment(eq, "Ventilation Control"));
+        room.setHasBeamerControl(hasEquipment(eq, "Beamer Control"));
+        room.setHasWhiteboard(hasEquipment(eq, "Whiteboard"));
+        room.setHasVacuumRobot(hasEquipment(eq, "Vacuum Robot"));
+    }
+
+    private boolean hasEquipment(Set<Equipment> equipmentSet, String name) {
+        return equipmentSet.stream()
+                .anyMatch(e -> e.getDescription().equalsIgnoreCase(name));
+    }
+    public Optional<MeetingRoom> findRoomByClient(Client client) {
+        return meetingRoomRepository.findByRoomUser_UserId(client.getUserId());
+    }
+
 
 }

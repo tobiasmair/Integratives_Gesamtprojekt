@@ -71,7 +71,7 @@ public class MyBookingsContainer extends Div {
     }
 
     private H3 createHeader() {
-        var title = new H3("My Bookings:");
+        var title = new H3("My Bookings");
         title.getStyle().set("margin", "0");
         return title;
     }
@@ -79,6 +79,7 @@ public class MyBookingsContainer extends Div {
     private HorizontalLayout createTopRow() {
         var row = new HorizontalLayout(tabs, customDate);
         row.setWidthFull();
+        row.getStyle().set("flex-wrap", "wrap");    // Zeilenumbruch aktivieren
         row.setAlignItems(HorizontalLayout.Alignment.END);
         row.expand(tabs);
         return row;
