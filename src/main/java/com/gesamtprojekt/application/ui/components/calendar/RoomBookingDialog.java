@@ -18,6 +18,7 @@ import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -35,6 +36,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,6 +54,7 @@ public class RoomBookingDialog extends Dialog {
     private final TimePicker endTime = new TimePicker("End");
     private final TextArea purposeField = new TextArea("Meeting purpose");
     private final ComboBox<Exit> exitDropdown = new ComboBox<>("Select Exit");
+    private final Span travelTimeInfo = new Span();
 
     public RoomBookingDialog(Long roomId, String roomName, BookingService bookingService,
                              MeetingRoomService meetingRoomService, SecurityService securityService,
@@ -145,25 +148,41 @@ public class RoomBookingDialog extends Dialog {
 
         exitDropdown.addValueChangeListener(event -> {
             Exit selectedExit = event.getValue();
-            if (selectedExit == null || defaultNavigationService == null) return;
+            if (selectedExit == null || defaultNavigationService == null) {
+                travelTimeInfo.setVisible(false);
+                return;
+            }
 
             try {
-                Long startExitId = selectedExit.getExitId();
-
                 MeetingRoom room_nav = meetingRoomService.findRoomForEdit(roomId);
-
                 int totalSeconds = defaultNavigationService.calculateTravelTime(selectedExit, room_nav);
 
                 if (totalSeconds < Integer.MAX_VALUE) {
                     int minutes = (int) Math.ceil(totalSeconds / 60.0);
-                    Notification.show("Travel time: " + minutes + " min");
-                }
-                if (totalSeconds == Integer.MAX_VALUE) {
-                    Notification.show("No travel path defined for this exit.");
+                    LocalTime arrivalTime = LocalTime.now().plusMinutes(minutes);
+
+                    travelTimeInfo.setText(String.format(
+                            "⏱ Estimated walk: %d min | Estimated arrival: %s",
+                            minutes,
+                            arrivalTime.format(DateTimeFormatter.ofPattern("HH:mm"))
+                    ));
+
+                    // Check if late
+                    LocalTime meetingStart = startTime.getValue();
+                    if (arrivalTime.isAfter(meetingStart)) {
+                        travelTimeInfo.getStyle().set("color", "var(--lumo-error-text-color)");
+                        travelTimeInfo.setText(travelTimeInfo.getText() + " (Late!)");
+                    } else {
+                        travelTimeInfo.getStyle().set("color", "var(--lumo-success-text-color)");
+                    }
+                    travelTimeInfo.setVisible(true);
+                } else {
+                    travelTimeInfo.setText("No travel path found.");
+                    travelTimeInfo.getStyle().set("color", "var(--lumo-error-text-color)");
+                    travelTimeInfo.setVisible(true);
                 }
             } catch (Exception ex) {
-                Notification.show("Error calculating time. Please check database data.");
-                ex.printStackTrace();
+                travelTimeInfo.setVisible(false);
             }
         });
 
@@ -180,7 +199,7 @@ public class RoomBookingDialog extends Dialog {
         buttonRow.setWidthFull();
         buttonRow.setJustifyContentMode(JustifyContentMode.END);
 
-        content.add(header, mapWrapper, datePicker, timeRow, exitDropdown, purposeField, buttonRow);
+        content.add(header, mapWrapper, datePicker, timeRow, exitDropdown, travelTimeInfo, purposeField, buttonRow);
         content.setWidth("450px");
         return content;
     }

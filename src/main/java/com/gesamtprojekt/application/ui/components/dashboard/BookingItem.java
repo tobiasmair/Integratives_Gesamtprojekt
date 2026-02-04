@@ -120,12 +120,12 @@ public class BookingItem extends Div {
             int minutes = (int) Math.ceil(booking.getCalculatedTravelTime() / 60.0);
             walkTime.setText("approx. " + minutes + " min walk");
 
-            // Optional: Wenn der Start-Exit bekannt ist, zeigen wir ihn an
+            // Start-Exit + Gebäude anzeigen
             if (booking.getStartExit() != null) {
-                walkTime.setText(walkTime.getText() + " (from " + booking.getStartExit().getName() + ")");
+                walkTime.setText(walkTime.getText() + " (from " + booking.getStartExit().getName() + " " +  booking.getStartExit().getBuilding().getName() + ")");
             }
         } else {
-            // Fallback für Buchungen, die nicht kurzfristig waren
+            // Fallback für Buchungen ohne Startpunkt
             walkTime.setText("Standard travel info");
         }
 
@@ -235,7 +235,7 @@ public class BookingItem extends Div {
         dialog.setHeaderTitle("Edit Booking: " + booking.getPurpose());
         dialog.setWidth("800px");
 
-        QuickBookingContainer editForm = new QuickBookingContainer(bookingService, meetingRoomService, null, null);
+        QuickBookingContainer editForm = new QuickBookingContainer(bookingService, meetingRoomService, null, null, null);
         // Daten laden
         editForm.setBooking(booking);
         // Button + Titel verstecken

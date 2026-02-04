@@ -6,6 +6,7 @@ import com.gesamtprojekt.application.model.Exit;
 import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.security.SecurityService;
 import com.gesamtprojekt.application.service.implementation.BookingService;
+import com.gesamtprojekt.application.service.implementation.DefaultNavigationService;
 import com.gesamtprojekt.application.service.implementation.ExitService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.gesamtprojekt.application.util.BookingValidator;
@@ -44,6 +45,7 @@ public class QuickBookingContainer extends Div {
     private final MeetingRoomService meetingRoomService;
     private final SecurityService securityService;
     private final ExitService exitService;
+    private final DefaultNavigationService defaultNavigationService;
 
     private final Tab allTab = new Tab("All available rooms");
     private final Tabs tabs = new Tabs(allTab);
@@ -65,11 +67,14 @@ public class QuickBookingContainer extends Div {
     private LocalTime opensAt = BookingValidator.OPENS_AT;
     private LocalTime closesAt = BookingValidator.CLOSES_AT;
 
-    public QuickBookingContainer(BookingService bookingService, MeetingRoomService meetingRoomService, SecurityService securityService, ExitService exitService) {
+    private final Span travelTimeInfo = new Span();
+
+    public QuickBookingContainer(BookingService bookingService, MeetingRoomService meetingRoomService, SecurityService securityService, ExitService exitService, DefaultNavigationService defaultNavigationService) {
         this.bookingService = bookingService;
         this.meetingRoomService = meetingRoomService;
         this.securityService = securityService;
         this.exitService = exitService;
+        this.defaultNavigationService = defaultNavigationService;
 
         addClassName("quick-booking-container");
         add(createContent());
@@ -87,8 +92,11 @@ public class QuickBookingContainer extends Div {
         content.getStyle().set("overflow", "hidden");
 
         exitDropdown.setVisible(false);
-        exitDropdown.setItemLabelGenerator(Exit::getName);
         exitDropdown.setWidthFull();
+        exitDropdown.setPlaceholder("Select your starting exit");
+        exitDropdown.setItemLabelGenerator(exit ->
+                exit.getBuilding().getName() + " - " + exit.getName()
+        );
 
         this.title = createHeader();
         this.bookButton = createBookButton();
@@ -97,11 +105,19 @@ public class QuickBookingContainer extends Div {
         var roomsSection = createRoomsSection();
         var purposeField = createMeetingPurposeField();
 
+        // Navigation
+        travelTimeInfo.getStyle()
+                .set("font-size", "var(--lumo-font-size-s)")
+                .set("color", "var(--lumo-secondary-text-color)")
+                .set("margin-top", "4px");
+        travelTimeInfo.setVisible(false);
+
         content.add(title);
         content.add(dateTimeRow);
         content.add(roomsSection);
         content.add(purposeField);
         content.add(exitDropdown);
+        content.add(travelTimeInfo);
         content.add(bookButton);
 
         content.setFlexGrow(0, title);
@@ -183,40 +199,98 @@ public class QuickBookingContainer extends Div {
 
     // Wenn sich Datum ändert -> lade die Räume neu
     private void setupEventListeners() {
-        datePicker.addValueChangeListener(e -> loadRooms());
+        datePicker.addValueChangeListener(e -> {
+            loadRooms();
+            updateExitVisibility();
+        });
 
         startTime.addValueChangeListener(e -> {
             if (startTime.getValue() == null) return;
-
-            // Start Öffnungszeiten halten
             LocalTime s = BookingValidator.clampToOpeningHours(startTime.getValue());
-
             if (!s.equals(startTime.getValue())) {
                 startTime.setValue(s);
             }
-
-            // End = Start + 60min, max closesAt
             LocalTime proposedEnd = s.plusHours(1);
             if (proposedEnd.isAfter(closesAt)) {
                 proposedEnd = closesAt;
             }
-
             endTime.setValue(proposedEnd);
 
             loadRooms();
+            updateExitVisibility();
         });
 
         endTime.addValueChangeListener(e -> loadRooms());
 
-        exitDropdown.addValueChangeListener(e -> {
-            if (e.getValue() != null) {
-                Notification.show(
-                        "Exit selected. Please confirm booking.",
-                        3000,
-                        Notification.Position.TOP_CENTER
-                );
+        // Reisezeitberechnung
+        exitDropdown.addValueChangeListener(event -> {
+            Exit selectedExit = event.getValue();
+            MeetingRoom selectedRoom = roomGroup.getValue();
+
+            if (selectedExit == null || selectedRoom == null) {
+                travelTimeInfo.setVisible(false);
+                return;
+            }
+
+            try {
+                int totalSeconds = defaultNavigationService.calculateTravelTime(selectedExit, selectedRoom);
+
+                if (totalSeconds < Integer.MAX_VALUE) {
+                    int minutes = (int) Math.ceil(totalSeconds / 60.0);
+
+                    // Ankunftszeit berechnen
+                    LocalTime arrivalTime = LocalTime.now().plusMinutes(minutes);
+
+                    travelTimeInfo.setText(String.format(
+                            "⏱ Estimated walk: %d min | Estimated arrival: %s",
+                            minutes,
+                            arrivalTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))
+                    ));
+
+                    // Farbe je nach Zeitpunkt (Rot = zu spät)
+                    LocalTime meetingStart = startTime.getValue();
+                    if (arrivalTime.isAfter(meetingStart)) {
+                        travelTimeInfo.getStyle().set("color", "var(--lumo-error-text-color)");
+                        travelTimeInfo.setText(travelTimeInfo.getText() + " (Late!)");
+                    } else {
+                        travelTimeInfo.getStyle().set("color", "var(--lumo-success-text-color)");
+                    }
+
+                    travelTimeInfo.setVisible(true);
+                } else {
+                    travelTimeInfo.setText("No travel path found.");
+                    travelTimeInfo.getStyle().set("color", "var(--lumo-error-text-color)");
+                    travelTimeInfo.setVisible(true);
+                }
+            } catch (Exception ex) {
+                travelTimeInfo.setVisible(false);
             }
         });
+    }
+
+    private void updateExitVisibility() {
+        if (datePicker.getValue() == null || startTime.getValue() == null) {
+            exitDropdown.setVisible(false);
+            return;
+        }
+
+        LocalDateTime start = datePicker.getValue().atTime(startTime.getValue());
+        // Sichtbar bei Meeting in unter 60 Minuten
+        boolean lessThan60 = start.isBefore(LocalDateTime.now().plusMinutes(60));
+
+        if (lessThan60) {
+            if (exitDropdown.getListDataView().getItems().count() == 0) {
+                exitDropdown.setItems(exitService.getAllExits());
+            }
+            exitDropdown.setVisible(true);
+        } else {
+            exitDropdown.setVisible(false);
+            exitDropdown.clear();
+        }
+
+        if (!exitDropdown.isVisible()) {
+            travelTimeInfo.setVisible(false);
+        }
     }
 
     // Nur freie Räume laden
