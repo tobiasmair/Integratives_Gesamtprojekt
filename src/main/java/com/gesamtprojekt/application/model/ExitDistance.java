@@ -2,9 +2,15 @@ package com.gesamtprojekt.application.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
+@Table(name = "exitDistance")
 public class ExitDistance {
 
     @Id

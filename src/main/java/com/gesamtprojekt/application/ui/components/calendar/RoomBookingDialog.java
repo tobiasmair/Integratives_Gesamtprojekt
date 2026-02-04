@@ -5,6 +5,7 @@ import com.gesamtprojekt.application.model.Exit;
 import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.security.SecurityService;
 import com.gesamtprojekt.application.service.implementation.BookingService;
+import com.gesamtprojekt.application.service.implementation.DefaultNavigationService;
 import com.gesamtprojekt.application.service.implementation.ExitService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.gesamtprojekt.application.util.BookingValidator;
@@ -15,7 +16,6 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.Icon;
@@ -45,6 +45,7 @@ public class RoomBookingDialog extends Dialog {
     private final SecurityService securityService;
     private final Long roomId;
     private final ExitService exitService;
+    private final DefaultNavigationService defaultNavigationService;
 
     private final DatePicker datePicker = new DatePicker("Date");
     private final TimePicker startTime = new TimePicker("Start");
@@ -54,19 +55,20 @@ public class RoomBookingDialog extends Dialog {
 
     public RoomBookingDialog(Long roomId, String roomName, BookingService bookingService,
                              MeetingRoomService meetingRoomService, SecurityService securityService,
-                             ExitService exitService) {
-        this(roomId, roomName, bookingService, meetingRoomService, securityService, exitService, null, null);
+                             ExitService exitService, DefaultNavigationService defaultNavigationService) {
+        this(roomId, roomName, bookingService, meetingRoomService, securityService, exitService, defaultNavigationService, null, null);
     }
 
 
     public RoomBookingDialog(Long roomId, String roomName, BookingService bookingService,
                              MeetingRoomService meetingRoomService, SecurityService securityService, ExitService exitService,
-                             LocalDateTime startDateTime, LocalDateTime endDateTime) {
+                             DefaultNavigationService defaultNavigationService, LocalDateTime startDateTime, LocalDateTime endDateTime) {
         this.roomId = roomId;
         this.bookingService = bookingService;
         this.meetingRoomService = meetingRoomService;
         this.securityService = securityService;
         this.exitService = exitService;
+        this.defaultNavigationService = defaultNavigationService;
 
         setCloseOnEsc(true);
         setCloseOnOutsideClick(false);
@@ -136,8 +138,34 @@ public class RoomBookingDialog extends Dialog {
         // Exit dropdown
         exitDropdown.setVisible(false);
         exitDropdown.setWidthFull();
-        exitDropdown.setItemLabelGenerator(Exit::getName);
+        exitDropdown.setItemLabelGenerator(exit ->
+                exit.getBuilding().getName() + " - " + exit.getName()
+        );
         exitDropdown.setPlaceholder("Select your starting exit");
+
+        exitDropdown.addValueChangeListener(event -> {
+            Exit selectedExit = event.getValue();
+            if (selectedExit == null || defaultNavigationService == null) return;
+
+            try {
+                Long startExitId = selectedExit.getExitId();
+
+                MeetingRoom room_nav = meetingRoomService.findRoomForEdit(roomId);
+
+                int totalSeconds = defaultNavigationService.calculateTravelTime(selectedExit, room_nav);
+
+                if (totalSeconds < Integer.MAX_VALUE) {
+                    int minutes = (int) Math.ceil(totalSeconds / 60.0);
+                    Notification.show("Travel time: " + minutes + " min");
+                }
+                if (totalSeconds == Integer.MAX_VALUE) {
+                    Notification.show("No travel path defined for this exit.");
+                }
+            } catch (Exception ex) {
+                Notification.show("Error calculating time. Please check database data.");
+                ex.printStackTrace();
+            }
+        });
 
         datePicker.addValueChangeListener(e -> updateExitVisibility());
         startTime.addValueChangeListener(e -> updateExitVisibility());

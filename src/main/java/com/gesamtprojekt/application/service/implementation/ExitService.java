@@ -4,6 +4,7 @@ import com.gesamtprojekt.application.model.Exit;
 import com.gesamtprojekt.application.repositories.ExitRepository;
 import com.gesamtprojekt.application.repositories.ExitDistanceRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.Table;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

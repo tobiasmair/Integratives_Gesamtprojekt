@@ -2,6 +2,8 @@ package com.gesamtprojekt.application.ui.components.calendar;
 
 import com.gesamtprojekt.application.security.SecurityService;
 import com.gesamtprojekt.application.service.implementation.BookingService;
+import com.gesamtprojekt.application.service.implementation.DefaultNavigationService;
+import com.gesamtprojekt.application.service.implementation.ExitService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -22,14 +24,18 @@ public class CalendarRoomCard extends Div {
     private final BookingService bookingService;
     private final MeetingRoomService meetingRoomService;
     private final SecurityService securityService;
+    private final ExitService exitService;
+    private final DefaultNavigationService defaultNavigationService;
     private LocalDateTime startDateTime;
     private LocalDateTime endDateTime;
 
     public CalendarRoomCard(CalendarRoomCardModel room, BookingService bookingService,
-                            MeetingRoomService meetingRoomService, SecurityService securityService) {
+                            MeetingRoomService meetingRoomService, SecurityService securityService, ExitService exitService, DefaultNavigationService defaultNavigationService) {
         this.bookingService = bookingService;
         this.meetingRoomService = meetingRoomService;
         this.securityService = securityService;
+        this.exitService = exitService;
+        this.defaultNavigationService = defaultNavigationService;
 
         addClassName("calendar-room-card");
         add(buildCard(room));
@@ -151,7 +157,8 @@ public class CalendarRoomCard extends Div {
                     bookingService,
                     meetingRoomService,
                     securityService,
-                    null,
+                    exitService,
+                    defaultNavigationService,
                     startDateTime,
                     endDateTime
             );
