@@ -15,6 +15,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -22,6 +23,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.timepicker.TimePicker;
 
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -69,6 +71,9 @@ public class QuickBookingContainer extends Div {
 
     private final Span travelTimeInfo = new Span();
 
+    private final TextField roomSearchField = new TextField("Search room number");
+    private List<MeetingRoom> allAvailableRooms = new java.util.ArrayList<>();
+
     public QuickBookingContainer(BookingService bookingService, MeetingRoomService meetingRoomService, SecurityService securityService, ExitService exitService, DefaultNavigationService defaultNavigationService) {
         this.bookingService = bookingService;
         this.meetingRoomService = meetingRoomService;
@@ -115,9 +120,9 @@ public class QuickBookingContainer extends Div {
         content.add(title);
         content.add(dateTimeRow);
         content.add(roomsSection);
-        content.add(purposeField);
         content.add(exitDropdown);
         content.add(travelTimeInfo);
+        content.add(purposeField);
         content.add(bookButton);
 
         content.setFlexGrow(0, title);
@@ -183,6 +188,14 @@ public class QuickBookingContainer extends Div {
             .set("flex-grow", "1")
             .set("overflow", "hidden");
 
+        // Suchfeld konfigurieren
+        roomSearchField.setPlaceholder("e.g. 301...");
+        roomSearchField.setClearButtonVisible(true);
+        roomSearchField.setPrefixComponent(VaadinIcon.SEARCH.create());
+        roomSearchField.setWidthFull();
+        roomSearchField.setValueChangeMode(com.vaadin.flow.data.value.ValueChangeMode.EAGER);
+        roomSearchField.addValueChangeListener(e -> filterRooms());
+
         //tabs.addSelectedChangeListener(e -> onTabChanged());
         tabs.addSelectedChangeListener(e -> loadRooms());
         roomGroup.setLabel("Select a room");
@@ -193,7 +206,7 @@ public class QuickBookingContainer extends Div {
         scroller.setWidthFull();
         scroller.getStyle().set("flex-grow", "1");
 
-        box.add(tabs, scroller);
+        box.add(tabs, roomSearchField, scroller);
         return box;
     }
 
@@ -307,32 +320,42 @@ public class QuickBookingContainer extends Div {
         boolean isValid = BookingValidator.isTimeRangeValid(start, end, currentEditingBookingId != null);
 
         if (!isValid) {
+            allAvailableRooms = List.of();
             roomGroup.setItems(List.of());
             return;
         }
 
-        List<MeetingRoom> availableRooms;
-
         if (currentEditingBookingId != null) {
-            availableRooms = meetingRoomService.findAvailableRoomsExcludingBooking(start, end, currentEditingBookingId);
+            allAvailableRooms = meetingRoomService.findAvailableRoomsExcludingBooking(start, end, currentEditingBookingId);
         } else {
-            availableRooms = meetingRoomService.findAvailableRoomsInTimeframe(start, end);
+            allAvailableRooms = meetingRoomService.findAvailableRoomsInTimeframe(start, end);
         }
 
-        // UI aktualisieren
-        MeetingRoom selectedRoom = roomGroup.getValue();
-        roomGroup.setItems(availableRooms);
+        filterRooms();
+    }
 
-        if (selectedRoom != null && availableRooms.contains(selectedRoom)) {
+    private void filterRooms() {
+        String filter = roomSearchField.getValue().trim().toLowerCase();
+
+        List<MeetingRoom> filteredRooms = allAvailableRooms.stream()
+                .filter(room -> filter.isEmpty() || room.getName().toLowerCase().contains(filter))
+                .toList();
+
+        MeetingRoom selectedRoom = roomGroup.getValue();
+        roomGroup.setItems(filteredRooms);
+
+        if (selectedRoom != null && filteredRooms.contains(selectedRoom)) {
             roomGroup.setValue(selectedRoom);
-        } else if (!availableRooms.isEmpty()) {
-            roomGroup.setValue(availableRooms.get(0));
+        } else if (!filteredRooms.isEmpty() && filter.isEmpty()) {
+            roomGroup.setValue(filteredRooms.get(0));
         }
     }
 
     private void setupRoomGroup() {
         roomGroup.setLabel(null);
         roomGroup.addClassName("rooms-radio");
+        //roomGroup.setWidthFull();
+
         roomGroup.setRenderer(new ComponentRenderer<>(room -> {
             Span roomName = new Span(room.getName());
 
@@ -353,6 +376,8 @@ public class QuickBookingContainer extends Div {
             HorizontalLayout row = new HorizontalLayout(container);
             row.setWidthFull();
             row.setAlignItems(FlexComponent.Alignment.CENTER);
+
+            //row.getStyle().set("flex-shrink", "0");
 
             return row;
         }));
