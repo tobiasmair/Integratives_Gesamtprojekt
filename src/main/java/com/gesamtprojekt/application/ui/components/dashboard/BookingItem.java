@@ -3,6 +3,8 @@ package com.gesamtprojekt.application.ui.components.dashboard;
 import com.gesamtprojekt.application.model.Booking;
 import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.service.implementation.BookingService;
+import com.gesamtprojekt.application.service.implementation.DefaultNavigationService;
+import com.gesamtprojekt.application.service.implementation.ExitService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -26,12 +28,18 @@ public class BookingItem extends Div {
     private final Booking booking;
     private final BookingService bookingService;
     private final MeetingRoomService meetingRoomService;
+    private final ExitService exitService;
+    private final DefaultNavigationService defaultNavigationService;
     private final Runnable runnable;
 
-    public BookingItem(Booking booking, BookingService bookingService, MeetingRoomService meetingRoomService, Runnable runnable, String title, String room, String dateText, String timeRange, String status) {
+    public BookingItem(Booking booking, BookingService bookingService, MeetingRoomService meetingRoomService,
+                       ExitService exitService, DefaultNavigationService defaultNavigationService,
+                       Runnable runnable, String title, String room, String dateText, String timeRange, String status) {
         this.booking = booking;
         this.bookingService = bookingService;
         this.meetingRoomService = meetingRoomService;
+        this.exitService = exitService;
+        this.defaultNavigationService = defaultNavigationService;
         this.runnable = runnable;
 
         addClassName("booking-item");
@@ -235,7 +243,7 @@ public class BookingItem extends Div {
         dialog.setHeaderTitle("Edit Booking: " + booking.getPurpose());
         dialog.setWidth("800px");
 
-        QuickBookingContainer editForm = new QuickBookingContainer(bookingService, meetingRoomService, null, null, null);
+        QuickBookingContainer editForm = new QuickBookingContainer(bookingService, meetingRoomService, null, exitService, defaultNavigationService);
         // Daten laden
         editForm.setBooking(booking);
         // Button + Titel verstecken

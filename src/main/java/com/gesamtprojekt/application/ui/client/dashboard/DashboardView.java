@@ -59,7 +59,7 @@ public class DashboardView extends VerticalLayout implements BeforeEnterObserver
 
     private HorizontalLayout createTwoColumnLayout() {
         var quick = new QuickBookingContainer(bookingService, meetingRoomService, securityService, exitService, defaultNavigationService);
-        var bookings = new MyBookingsContainer(bookingService, meetingRoomService, securityService);
+        var bookings = new MyBookingsContainer(bookingService, meetingRoomService, securityService, exitService, defaultNavigationService);
 
         // Listener registrieren
         quick.addBookingChangedListener(event -> bookings.refresh());

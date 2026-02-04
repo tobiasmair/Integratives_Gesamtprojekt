@@ -282,6 +282,11 @@ public class QuickBookingContainer extends Div {
     }
 
     private void updateExitVisibility() {
+        // im Edit Modus
+        if (currentEditingBookingId != null && exitDropdown.isReadOnly()) {
+            return;
+        }
+
         if (datePicker.getValue() == null || startTime.getValue() == null) {
             exitDropdown.setVisible(false);
             return;
@@ -525,6 +530,50 @@ public class QuickBookingContainer extends Div {
                     .filter(room -> room.getRoomId().equals(booking.getMeetingRoom().getRoomId()))
                     .findFirst()
                     .ifPresent(roomGroup::setValue);
+        }
+
+        // Exit Logik im Edit Modus
+        if (booking.getStartExit() != null) {
+            // gespeicherten Exit im Dropdown setzen
+            exitDropdown.setItems(List.of(booking.getStartExit()));
+            exitDropdown.setValue(booking.getStartExit());
+            exitDropdown.setVisible(true);
+            exitDropdown.setReadOnly(true); // Verhindert Änderungen
+
+            // Reisezeit-Info für den alten Exit anzeigen
+            updateTravelTimeDisplay(booking.getStartExit(), booking.getMeetingRoom());
+        }
+    }
+
+    private void updateTravelTimeDisplay(Exit selectedExit, MeetingRoom selectedRoom) {
+        if (selectedExit == null || selectedRoom == null) {
+            travelTimeInfo.setVisible(false);
+            return;
+        }
+
+        try {
+            int totalSeconds = defaultNavigationService.calculateTravelTime(selectedExit, selectedRoom);
+            if (totalSeconds < Integer.MAX_VALUE) {
+                int minutes = (int) Math.ceil(totalSeconds / 60.0);
+                LocalTime arrivalTime = LocalTime.now().plusMinutes(minutes);
+
+                travelTimeInfo.setText(String.format(
+                        "⏱ Estimated walk: %d min | Estimated arrival: %s",
+                        minutes,
+                        arrivalTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))
+                ));
+
+                // Logik für Farbe (Rot wenn zu spät)
+                LocalTime meetingStart = startTime.getValue();
+                if (arrivalTime.isAfter(meetingStart)) {
+                    travelTimeInfo.getStyle().set("color", "var(--lumo-error-text-color)");
+                } else {
+                    travelTimeInfo.getStyle().set("color", "var(--lumo-success-text-color)");
+                }
+                travelTimeInfo.setVisible(true);
+            }
+        } catch (Exception ignored) {
+            travelTimeInfo.setVisible(false);
         }
     }
 
