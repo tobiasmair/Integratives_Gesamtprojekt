@@ -43,13 +43,24 @@ public class BookingService implements BookingServiceInterface {
         validateOpeningTimes(booking);
         validateBookingTime(booking);
 
+        // Innerhalb 1 Stunde
         if (isBookingWithinOneHour(booking)) {
             if (startExitId.isEmpty()) {
-                List<Exit> availableExits = exitRepository.findAllByIsActiveTrue(); // Controller erstellt Label building + exit name
+                List<Exit> availableExits = exitRepository.findAllByIsActiveTrue();
                 throw new MissingStartExitException(availableExits);
             }
 
-            validateTravelTime(booking, startExitId.get());
+            // Exit aus DB laden
+            Exit startExit = exitRepository.findById(startExitId.get())
+                    .orElseThrow(() -> new BookingValidationException("Selected start exit not found."));
+
+            // Validierung der Reisezeit
+            validateTravelTime(booking, startExit);
+
+            // Startpunkt und berechnete Zeit in der Buchung speichern
+            int time = navigationService.calculateTravelTime(startExit, booking.getMeetingRoom());
+            booking.setStartExit(startExit);
+            booking.setCalculatedTravelTime(time);
         }
 
         booking.setBookingCode(generateRandomBookingCode());
@@ -82,30 +93,30 @@ public class BookingService implements BookingServiceInterface {
     }
 
     private boolean isBookingWithinOneHour(Booking booking) {
-        long currentTimeInSeconds = System.currentTimeMillis() / 1000;
-        long bookingTimeInSeconds = booking.getStartTime().toEpochSecond(java.time.ZoneOffset.UTC);
-        return (bookingTimeInSeconds - currentTimeInSeconds) <= 3600;
+        LocalDateTime now = LocalDateTime.now();
+        // Dauer zwishen jetzt und Buchungsstart
+        java.time.Duration duration = java.time.Duration.between(now, booking.getStartTime());
+
+        return !duration.isNegative() && duration.toMinutes() <= 60;
     }
 
-    private void validateTravelTime(Booking booking, Long startExitId) {
-        Exit startExit = exitRepository.findByIdAndIsActiveTrue(startExitId)
-                .orElseThrow(() -> new BookingValidationException("Start exit not found."));
-        MeetingRoom meetingRoom = meetingRoomRepository.findById(booking.getMeetingRoom().getRoomId())
-                .orElseThrow(() -> new BookingValidationException("Meeting room not found."));
+    private void validateTravelTime(Booking booking, Exit startExit) {
+        MeetingRoom meetingRoom = booking.getMeetingRoom();
 
-        Integer timeToNearestExit = meetingRoom.getTimeToNearestExit();
-        Integer timeBetweenExits = exitDistanceRepository.findTimeBetweenExits(startExit.getId(), meetingRoom.getNearestExit().getId());
+        int totalTravelTimeSeconds = navigationService.calculateTravelTime(startExit, meetingRoom);
 
-        if (timeToNearestExit == null || timeBetweenExits == null) {
-            throw new BookingValidationException("Travel time data is missing for the selected room or exits.");
+        if (totalTravelTimeSeconds == Integer.MAX_VALUE) {
+            throw new BookingValidationException("No travel path defined between your start point and the room.");
         }
 
-        int totalTravelTime = timeToNearestExit + timeBetweenExits;
-        long currentTimeInSeconds = System.currentTimeMillis() / 1000;
-        long bookingTimeInSeconds = booking.getStartTime().toEpochSecond(java.time.ZoneOffset.UTC);
+        LocalDateTime now = LocalDateTime.now();
+        // Zeit bis Meeting start berechnen
+        long secondsUntilStart = java.time.Duration.between(now, booking.getStartTime()).getSeconds();
 
-        if ((bookingTimeInSeconds - currentTimeInSeconds) < totalTravelTime) {
-            throw new BookingValidationException("Booking not possible. Travel time exceeds booking time.");
+        if (secondsUntilStart < totalTravelTimeSeconds) {
+            int minutesNeeded = (int) Math.ceil(totalTravelTimeSeconds / 60.0);
+            throw new BookingValidationException("Booking not possible. You need at least " +
+                    minutesNeeded + " minutes to reach the room, but the meeting starts sooner.");
         }
     }
 

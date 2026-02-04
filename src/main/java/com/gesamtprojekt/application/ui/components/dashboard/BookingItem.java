@@ -113,8 +113,24 @@ public class BookingItem extends Div {
 
         Icon walkIcon = VaadinIcon.MALE.create();
         walkIcon.setSize("12px");
-        Span walkTime = new Span("approx. 10 min walk");
-        walkTime.getStyle().set("font-size", "var(--lumo-font-size-xs)").set("color", "var(--lumo-tertiary-text-color)");
+
+        // Dynamische Gehzeit
+        Span walkTime = new Span();
+        if (booking.getCalculatedTravelTime() != null && booking.getCalculatedTravelTime() > 0) {
+            int minutes = (int) Math.ceil(booking.getCalculatedTravelTime() / 60.0);
+            walkTime.setText("approx. " + minutes + " min walk");
+
+            // Optional: Wenn der Start-Exit bekannt ist, zeigen wir ihn an
+            if (booking.getStartExit() != null) {
+                walkTime.setText(walkTime.getText() + " (from " + booking.getStartExit().getName() + ")");
+            }
+        } else {
+            // Fallback für Buchungen, die nicht kurzfristig waren
+            walkTime.setText("Standard travel info");
+        }
+
+        walkTime.getStyle().set("font-size", "var(--lumo-font-size-xs)")
+                .set("color", "var(--lumo-tertiary-text-color)");
 
         // Lageplan Link
         Button mapLink = new Button("Show Floor Plan");
