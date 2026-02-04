@@ -3,6 +3,8 @@ package com.gesamtprojekt.application.ui.components.dashboard;
 import com.gesamtprojekt.application.model.Booking;
 import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.service.implementation.BookingService;
+import com.gesamtprojekt.application.service.implementation.DefaultNavigationService;
+import com.gesamtprojekt.application.service.implementation.ExitService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -26,12 +28,18 @@ public class BookingItem extends Div {
     private final Booking booking;
     private final BookingService bookingService;
     private final MeetingRoomService meetingRoomService;
+    private final ExitService exitService;
+    private final DefaultNavigationService defaultNavigationService;
     private final Runnable runnable;
 
-    public BookingItem(Booking booking, BookingService bookingService, MeetingRoomService meetingRoomService, Runnable runnable, String title, String room, String dateText, String timeRange, String status) {
+    public BookingItem(Booking booking, BookingService bookingService, MeetingRoomService meetingRoomService,
+                       ExitService exitService, DefaultNavigationService defaultNavigationService,
+                       Runnable runnable, String title, String room, String dateText, String timeRange, String status) {
         this.booking = booking;
         this.bookingService = bookingService;
         this.meetingRoomService = meetingRoomService;
+        this.exitService = exitService;
+        this.defaultNavigationService = defaultNavigationService;
         this.runnable = runnable;
 
         addClassName("booking-item");
@@ -113,8 +121,24 @@ public class BookingItem extends Div {
 
         Icon walkIcon = VaadinIcon.MALE.create();
         walkIcon.setSize("12px");
-        Span walkTime = new Span("approx. 10 min walk");
-        walkTime.getStyle().set("font-size", "var(--lumo-font-size-xs)").set("color", "var(--lumo-tertiary-text-color)");
+
+        // Dynamische Gehzeit
+        Span walkTime = new Span();
+        if (booking.getCalculatedTravelTime() != null && booking.getCalculatedTravelTime() > 0) {
+            int minutes = (int) Math.ceil(booking.getCalculatedTravelTime() / 60.0);
+            walkTime.setText("approx. " + minutes + " min walk");
+
+            // Start-Exit + Gebäude anzeigen
+            if (booking.getStartExit() != null) {
+                walkTime.setText(walkTime.getText() + " (from " + booking.getStartExit().getName() + " " +  booking.getStartExit().getBuilding().getName() + ")");
+            }
+        } else {
+            // Fallback für Buchungen ohne Startpunkt
+            walkTime.setText("Standard travel info");
+        }
+
+        walkTime.getStyle().set("font-size", "var(--lumo-font-size-xs)")
+                .set("color", "var(--lumo-tertiary-text-color)");
 
         // Lageplan Link
         Button mapLink = new Button("Show Floor Plan");
@@ -219,7 +243,7 @@ public class BookingItem extends Div {
         dialog.setHeaderTitle("Edit Booking: " + booking.getPurpose());
         dialog.setWidth("800px");
 
-        QuickBookingContainer editForm = new QuickBookingContainer(bookingService, meetingRoomService, null);
+        QuickBookingContainer editForm = new QuickBookingContainer(bookingService, meetingRoomService, null, exitService, defaultNavigationService);
         // Daten laden
         editForm.setBooking(booking);
         // Button + Titel verstecken

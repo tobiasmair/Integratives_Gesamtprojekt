@@ -3,6 +3,8 @@ package com.gesamtprojekt.application.ui.components.calendar;
 import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.security.SecurityService;
 import com.gesamtprojekt.application.service.implementation.BookingService;
+import com.gesamtprojekt.application.service.implementation.DefaultNavigationService;
+import com.gesamtprojekt.application.service.implementation.ExitService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -26,14 +28,18 @@ public class CalendarRoomsSection extends VerticalLayout {
     private final MeetingRoomService meetingRoomService;
     private final BookingService bookingService;
     private final SecurityService securityService;
+    private final ExitService exitService;
+    private final DefaultNavigationService defaultNavigationService;
     private final FlexLayout grid = new FlexLayout();
     private final H4 heading = new H4("Available Meeting Rooms");
 
     public CalendarRoomsSection(MeetingRoomService meetingRoomService, BookingService bookingService,
-                                SecurityService securityService) {
+                                SecurityService securityService, ExitService exitService, DefaultNavigationService defaultNavigationService) {
         this.meetingRoomService = meetingRoomService;
         this.bookingService = bookingService;
         this.securityService = securityService;
+        this.exitService = exitService;
+        this.defaultNavigationService = defaultNavigationService;
 
         setWidthFull();
         setPadding(false);
@@ -188,7 +194,7 @@ public class CalendarRoomsSection extends VerticalLayout {
     }
 
     private CalendarRoomCard buildCard(CalendarRoomCardModel r) {
-        CalendarRoomCard card = new CalendarRoomCard(r, bookingService, meetingRoomService, securityService);
+        CalendarRoomCard card = new CalendarRoomCard(r, bookingService, meetingRoomService, securityService, exitService, defaultNavigationService);
         card.getStyle().set("width", "260px");
 
         // Event-Listener für Buchungserstellung

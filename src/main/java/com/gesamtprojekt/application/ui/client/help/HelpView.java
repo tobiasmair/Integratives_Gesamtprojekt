@@ -159,7 +159,7 @@ public class HelpView extends VerticalLayout {
         // FAQ 10
         Paragraph p10 = new Paragraph(
                 "Yes, rooms can only be booked during official MCI opening hours:\n" +
-                        "Monday to Sunday from 7:00 a.m. to 11:00 p.m.\n" +
+                        "Monday to Sunday from 7:00 a.m. to 10:00 p.m.\n" +
                         "If you would like to book rooms outside these times, please send a written request to roombooking@mci.edu at least 48 hours before the start of the meeting."
         );
         p10.getStyle().set("white-space", "pre-line");
