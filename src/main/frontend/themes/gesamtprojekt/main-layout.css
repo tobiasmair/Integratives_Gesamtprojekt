@@ -283,7 +283,7 @@ vaadin-app-layout.drawer-collapsed vaadin-side-nav-item::part(label) {
   border: 1px solid var(--lumo-contrast-20pct);
   border-radius: var(--lumo-border-radius-l);
   padding: var(--lumo-space-s);
-  /*width: stretch;*/
+  width: stretch;
 }
 
 .rooms-list {
