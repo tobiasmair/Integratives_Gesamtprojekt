@@ -229,4 +229,16 @@ public class BookingService implements BookingServiceInterface {
         LocalDateTime to = from.plusHours(24);
         return bookingRepository.findActiveBookingsForRoomNameBetween(roomName, from, to);
     }
+
+    public String getGoogleMapsUrlForRoom(Long roomId) {
+        return meetingRoomRepository.findById(roomId)
+                .map(room -> {
+                    if (room.getNearestExit() != null &&
+                            room.getNearestExit().getBuilding() != null) {
+                        return room.getNearestExit().getBuilding().getGoogleMapsUrl();
+                    }
+                    return null;
+                })
+                .orElse(null);
+    }
 }

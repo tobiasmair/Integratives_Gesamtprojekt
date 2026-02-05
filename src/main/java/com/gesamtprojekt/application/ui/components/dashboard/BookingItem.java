@@ -114,6 +114,21 @@ public class BookingItem extends Div {
         roomSpan.getStyle().set("font-size", "var(--lumo-font-size-s)").set("color", "var(--lumo-secondary-text-color)");
         locationRow.add(roomIcon, roomSpan);
 
+        // Google Map Link
+        if (roomEntity != null && roomEntity.getNearestExit().getBuilding() != null && roomEntity.getNearestExit().getBuilding().getGoogleMapsUrl() != null) {
+            com.vaadin.flow.component.html.Anchor mapsLink = new com.vaadin.flow.component.html.Anchor(
+                    roomEntity.getNearestExit().getBuilding().getGoogleMapsUrl(),
+                    "View on Maps"
+            );
+            mapsLink.setTarget("_blank"); // In neuem Tab öffnen
+            mapsLink.getStyle()
+                    .set("font-size", "var(--lumo-font-size-xxs)")
+                    .set("margin-left", "8px")
+                    .set("color", "var(--lumo-primary-color)");
+
+            locationRow.add(mapsLink);
+        }
+
         // Gehzeit & Lageplan
         var navigationRow = new HorizontalLayout();
         navigationRow.setSpacing(true);

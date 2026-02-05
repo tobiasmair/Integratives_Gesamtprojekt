@@ -1,6 +1,7 @@
 package com.gesamtprojekt.application.ui.components.calendar;
 
 import com.gesamtprojekt.application.model.Booking;
+import com.gesamtprojekt.application.model.MeetingRoom;
 import com.gesamtprojekt.application.service.implementation.BookingService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -77,7 +78,27 @@ public class RoomDetailsDialog extends Dialog {
         VerticalLayout infoSection = new VerticalLayout();
         infoSection.setPadding(false);
         infoSection.setSpacing(true);
-        infoSection.add(infoRow(VaadinIcon.BUILDING, "Building: " + (room.building() != null ? room.building() : "")));
+
+        HorizontalLayout buildingRow = infoRow(VaadinIcon.BUILDING, "Building: " + (room.building() != null ? room.building() : ""));
+
+        // Google Maps URL holen
+        if (bookingService != null && room.roomId() != null) {
+            String mapsUrl = bookingService.getGoogleMapsUrlForRoom(room.roomId());
+
+            if (mapsUrl != null && !mapsUrl.isEmpty()) {
+                Anchor mapsLink = new Anchor(mapsUrl, " (View on Maps)");
+                mapsLink.setTarget("_blank");
+                mapsLink.getStyle()
+                        .set("font-size", "var(--lumo-font-size-s)")
+                        .set("color", "var(--lumo-primary-color)")
+                        .set("font-weight", "500");
+
+                buildingRow.add(mapsLink);
+            }
+        }
+
+        infoSection.add(buildingRow);
+
         infoSection.add(infoRow(VaadinIcon.USERS, "Capacity: " + (room.capacity() != null ? room.capacity() : 0) + " people"));
         infoSection.add(infoRow(VaadinIcon.LINES, "Floor: " + (room.floor() != null ? room.floor() : 0)));
 

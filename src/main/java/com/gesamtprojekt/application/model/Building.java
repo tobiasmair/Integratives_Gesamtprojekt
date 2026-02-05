@@ -20,4 +20,8 @@ public class Building {
 
     @Column(name = "name", nullable = false, unique = true)
     private String name;
+
+    // Google Maps Hyperlink
+    @Column(name = "google_maps_url", length = 500)
+    private String googleMapsUrl;
 }
