@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict MJGukJSOV6uBiffQec74Uh1O9FOZhFbBv5NezmXz3oUceHMBhEcRYY8Y2eoAThd
+\restrict IxNkfjNGRzyXF1TANNbZA40678WJkibggrVHVNMSXrh7bCEbsoWgdAc69SPZCXh
 
 -- Dumped from database version 16.11 (Debian 16.11-1.pgdg13+1)
 -- Dumped by pg_dump version 16.11 (Debian 16.11-1.pgdg13+1)
@@ -345,11 +345,11 @@ COPY public.booking (booking_id, attendees, booking_status, check_in_time, end_t
 --
 
 COPY public.building (id, address, name, google_maps_url) FROM stdin;
-1	Universitaetsstrasse 15, 6020 Innsbruck, Austria	MCI I	https://maps.app.goo.gl/LtGFuuBGKCLWzUiP8
 2	Universitaetsstrasse 15, 6020 Innsbruck, Austria	MCI II	https://maps.app.goo.gl/K5122bwhdzwriYbn7
 3	Weiherburggasse 8, 6020 Innsbruck, Austria	MCI III	https://maps.app.goo.gl/N3ex7tvPejvdZ5686
 4	Maximilianstrasse 2, 6020 Innsbruck, Austria	MCI IV	https://maps.app.goo.gl/cio5WYFfUPTG4Ygn8
 5	Kapuzinergasse 9, 6020 Innsbruck, Austria	MCI V	https://maps.app.goo.gl/LtGFuuBGKCLWzUiP8
+1	Universitaetsstrasse 15, 6020 Innsbruck, Austria	MCI I	https://maps.app.goo.gl/m7er4eTDUR4tiGjx8
 \.
 
 
@@ -914,5 +914,5 @@ ALTER TABLE ONLY public.exit_distance
 -- PostgreSQL database dump complete
 --
 
-\unrestrict MJGukJSOV6uBiffQec74Uh1O9FOZhFbBv5NezmXz3oUceHMBhEcRYY8Y2eoAThd
+\unrestrict IxNkfjNGRzyXF1TANNbZA40678WJkibggrVHVNMSXrh7bCEbsoWgdAc69SPZCXh
 
