@@ -3,6 +3,8 @@ package com.gesamtprojekt.application.ui.components.dashboard;
 import com.gesamtprojekt.application.model.Booking;
 import com.gesamtprojekt.application.security.SecurityService;
 import com.gesamtprojekt.application.service.implementation.BookingService;
+import com.gesamtprojekt.application.service.implementation.DefaultNavigationService;
+import com.gesamtprojekt.application.service.implementation.ExitService;
 import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -32,6 +34,8 @@ public class MyBookingsContainer extends Div {
     private final BookingService bookingService;
     private final MeetingRoomService meetingRoomService;
     private final SecurityService securityService;
+    private final ExitService exitService;
+    private final DefaultNavigationService defaultNavigationService;
 
     private final Tab todayTab = new Tab("Today");
     private final Tab weekTab = new Tab("This week");
@@ -43,10 +47,12 @@ public class MyBookingsContainer extends Div {
     private final Div bookingsList = new Div();
     private final Scroller bookingsScroller = new Scroller();
 
-    public MyBookingsContainer(BookingService bookingService, MeetingRoomService meetingRoomService, SecurityService securityService) {
+    public MyBookingsContainer(BookingService bookingService, MeetingRoomService meetingRoomService, SecurityService securityService, ExitService exitService, DefaultNavigationService defaultNavigationService) {
         this.bookingService = bookingService;
         this.meetingRoomService = meetingRoomService;
         this.securityService = securityService;
+        this.exitService = exitService;
+        this.defaultNavigationService = defaultNavigationService;
 
         addClassName("my-bookings-container");
         add(createContent());
@@ -221,6 +227,8 @@ public class MyBookingsContainer extends Div {
                 booking,
                 bookingService,
                 meetingRoomService,
+                exitService,
+                defaultNavigationService,
                 this::refresh,  // Runnable event: Liste aktualisieren
                 booking.getPurpose(),
                 meetingRoomName,

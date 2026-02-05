@@ -41,6 +41,10 @@ public class Booking {
     @Column(name = "isActive")
     private Boolean isActive = true;
 
+    // Navigation Zeit
+    @Column(name = "calculated_travel_time")
+    private Integer calculatedTravelTime;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "userId")
     private Client client;
@@ -48,4 +52,8 @@ public class Booking {
     @ManyToOne(optional = false)
     @JoinColumn(name = "roomId")
     private MeetingRoom meetingRoom;
+
+    @ManyToOne
+    @JoinColumn(name = "start_exit_id")
+    private Exit startExit;
 }

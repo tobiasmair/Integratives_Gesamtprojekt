@@ -2,9 +2,7 @@ package com.gesamtprojekt.application.ui.client.calendar;
 
 import com.gesamtprojekt.application.events.RoomChangedBroadcaster;
 import com.gesamtprojekt.application.security.SecurityService;
-import com.gesamtprojekt.application.service.implementation.BookingService;
-import com.gesamtprojekt.application.service.implementation.EquipmentService;
-import com.gesamtprojekt.application.service.implementation.MeetingRoomService;
+import com.gesamtprojekt.application.service.implementation.*;
 import com.gesamtprojekt.application.ui.client.MainLayout;
 import com.gesamtprojekt.application.ui.components.calendar.CalendarControlsBar;
 import com.gesamtprojekt.application.ui.components.calendar.CalendarRoomsSection;
@@ -27,13 +25,13 @@ public class CalendarView extends VerticalLayout {
     private CalendarRoomsSection rooms;
 
     public CalendarView(MeetingRoomService meetingRoomService, BookingService bookingService,
-                        SecurityService securityService, EquipmentService equipmentService) {
+                        SecurityService securityService, EquipmentService equipmentService, ExitService exitService, DefaultNavigationService defaultNavigationService) {
         setSizeFull();
         setPadding(true);
         setSpacing(true);
 
         controls = new CalendarControlsBar(equipmentService);
-        rooms = new CalendarRoomsSection(meetingRoomService, bookingService, securityService);
+        rooms = new CalendarRoomsSection(meetingRoomService, bookingService, securityService, exitService, defaultNavigationService);
 
         // Initiales laden der Daten
         rooms.reload(

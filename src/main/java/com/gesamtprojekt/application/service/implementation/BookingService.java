@@ -1,29 +1,75 @@
 package com.gesamtprojekt.application.service.implementation;
 
 import com.gesamtprojekt.application.model.Booking;
+import com.gesamtprojekt.application.model.Client;
+import com.gesamtprojekt.application.model.Exit;
+import com.gesamtprojekt.application.model.MeetingRoom;
+import com.gesamtprojekt.application.model.Notification;
 import com.gesamtprojekt.application.repositories.BookingRepository;
+import com.gesamtprojekt.application.repositories.MeetingRoomRepository;
+import com.gesamtprojekt.application.repositories.ExitDistanceRepository;
 import com.gesamtprojekt.application.service.BookingServiceInterface;
 import com.gesamtprojekt.application.service.dto.NotificationType;
+import com.gesamtprojekt.application.repositories.ExitRepository;
+import com.gesamtprojekt.application.exceptions.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+
 import java.util.Collections;
+import java.awt.print.Book;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class BookingService implements BookingServiceInterface {
 
     private final BookingRepository bookingRepository;
+    private final DefaultNavigationService navigationService;
+    private final ExitService exitService;
     private final NotificationService notificationService;
+    private final MeetingRoomRepository meetingRoomRepository;
+    private final ExitRepository exitRepository;
+    private final ExitDistanceRepository exitDistanceRepository;
 
     @Transactional
-    public void createBooking(Booking booking) {
-        // Öffnungszeiten überprüfen
+    public void createBooking(Booking booking, Optional<Long> startExitId) {
+
+        validateOpeningTimes(booking);
+        validateBookingTime(booking);
+
+        // Innerhalb 1 Stunde
+        if (isBookingWithinOneHour(booking)) {
+            if (startExitId.isEmpty()) {
+                List<Exit> availableExits = exitRepository.findAllByIsActiveTrue();
+                throw new MissingStartExitException(availableExits);
+            }
+
+            // Exit aus DB laden
+            Exit startExit = exitRepository.findById(startExitId.get())
+                    .orElseThrow(() -> new BookingValidationException("Selected start exit not found."));
+
+            // Validierung der Reisezeit
+            validateTravelTime(booking, startExit);
+
+            // Startpunkt und berechnete Zeit in der Buchung speichern
+            int time = navigationService.calculateTravelTime(startExit, booking.getMeetingRoom());
+            booking.setStartExit(startExit);
+            booking.setCalculatedTravelTime(time);
+        }
+
+        booking.setBookingCode(generateRandomBookingCode());
+        bookingRepository.save(booking);
+        createNotifications(booking);
+    }
+
+    // Öffnungszeiten überprüfen
+    private void validateOpeningTimes(Booking booking) {
         LocalTime start = booking.getStartTime().toLocalTime();
         LocalTime end = booking.getEndTime().toLocalTime();
 
@@ -33,23 +79,49 @@ public class BookingService implements BookingServiceInterface {
         if (start.isBefore(opensAt) || end.isAfter(closesAt)) {
             throw new RuntimeException("The building is closed. Bookings are only allowed between 07:00 and 22:00.");
         }
+    }
 
-        // Auf Überschneidung prüfen
+    private void validateBookingTime(Booking booking) {
         boolean conflict = bookingRepository.existsOverlappingBooking(
                 booking.getMeetingRoom().getRoomId(),
                 booking.getStartTime(), booking.getEndTime()
         );
 
         if (conflict) {
-            throw new RuntimeException("Booking conflict detected for the selected room and time.");
+            throw new BookingValidationException("Booking conflict detected for the selected room and time.");
+        }
+    }
+
+    private boolean isBookingWithinOneHour(Booking booking) {
+        LocalDateTime now = LocalDateTime.now();
+        // Dauer zwishen jetzt und Buchungsstart
+        java.time.Duration duration = java.time.Duration.between(now, booking.getStartTime());
+
+        return !duration.isNegative() && duration.toMinutes() <= 60;
+    }
+
+    private void validateTravelTime(Booking booking, Exit startExit) {
+        MeetingRoom meetingRoom = booking.getMeetingRoom();
+
+        int totalTravelTimeSeconds = navigationService.calculateTravelTime(startExit, meetingRoom);
+
+        if (totalTravelTimeSeconds == Integer.MAX_VALUE) {
+            throw new BookingValidationException("No travel path defined between your start point and the room.");
         }
 
-        // Code setzen
-        booking.setBookingCode(generateRandomBookingCode());
+        LocalDateTime now = LocalDateTime.now();
+        // Zeit bis Meeting start berechnen
+        long secondsUntilStart = java.time.Duration.between(now, booking.getStartTime()).getSeconds();
 
-        bookingRepository.save(booking);
+        if (secondsUntilStart < totalTravelTimeSeconds) {
+            int minutesNeeded = (int) Math.ceil(totalTravelTimeSeconds / 60.0);
+            throw new BookingValidationException("Booking not possible. You need at least " +
+                    minutesNeeded + " minutes to reach the room, but the meeting starts sooner.");
+        }
+    }
 
-        // Notification
+    private void createNotifications(Booking booking) {
+        // Confirmation notification
         notificationService.createNotification(
                 booking,
                 NotificationType.CONFIRMATION
@@ -58,7 +130,7 @@ public class BookingService implements BookingServiceInterface {
         // Notification für kurzfristige Buchunen
         LocalDateTime now = LocalDateTime.now();
         if (booking.getStartTime().isBefore(now.plusMinutes(15)) &&
-            booking.getStartTime().isAfter(now)) {
+                booking.getStartTime().isAfter(now)) {
 
             notificationService.createNotification(
                     booking,
@@ -66,6 +138,7 @@ public class BookingService implements BookingServiceInterface {
             );
         }
     }
+
 
     // Buchungs Code generieren
     private String generateRandomBookingCode() {
@@ -103,7 +176,7 @@ public class BookingService implements BookingServiceInterface {
                     booking.getBookingId()
             );
             if (conflict) {
-                throw new RuntimeException("Booking conflict detected for the selected room and time");
+                throw new BookingValidationException("Booking conflict detected for the selected room and time");
             }
 
             // save in database
@@ -155,5 +228,17 @@ public class BookingService implements BookingServiceInterface {
         LocalDateTime from = LocalDateTime.now();
         LocalDateTime to = from.plusHours(24);
         return bookingRepository.findActiveBookingsForRoomNameBetween(roomName, from, to);
+    }
+
+    public String getGoogleMapsUrlForRoom(Long roomId) {
+        return meetingRoomRepository.findById(roomId)
+                .map(room -> {
+                    if (room.getNearestExit() != null &&
+                            room.getNearestExit().getBuilding() != null) {
+                        return room.getNearestExit().getBuilding().getGoogleMapsUrl();
+                    }
+                    return null;
+                })
+                .orElse(null);
     }
 }
