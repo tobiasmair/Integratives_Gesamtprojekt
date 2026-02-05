@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict SEbDBFdhRxWxC47fye7abcCRf5SuxC2TA2pIxyMunxfWT4IXc9wSlRqz5BWAFVx
+\restrict MJGukJSOV6uBiffQec74Uh1O9FOZhFbBv5NezmXz3oUceHMBhEcRYY8Y2eoAThd
 
 -- Dumped from database version 16.11 (Debian 16.11-1.pgdg13+1)
 -- Dumped by pg_dump version 16.11 (Debian 16.11-1.pgdg13+1)
@@ -335,7 +335,8 @@ COPY public.booking (booking_id, attendees, booking_status, check_in_time, end_t
 7	\N	CONFIRMED	\N	2026-02-04 13:30:00	t		2026-02-04 12:30:00	4	1	4198-1015	\N	\N
 8	\N	CONFIRMED	\N	2026-02-04 13:30:00	t		2026-02-04 12:30:00	4	11	3043-2314	\N	\N
 9	\N	CONFIRMED	\N	2026-02-04 13:40:00	t		2026-02-04 12:40:00	4	3	8470-1741	60	1
-10	\N	CONFIRMED	\N	2026-02-05 11:00:00	t		2026-02-05 10:00:00	4	11	7670-5688	560	8
+10	\N	MISSED	\N	2026-02-05 10:37:21.865969	t		2026-02-05 10:00:00	4	11	7670-5688	560	8
+11	\N	CONFIRMED	\N	2026-02-06 12:30:00	t		2026-02-06 11:30:00	4	60	9321-8680	\N	\N
 \.
 
 
@@ -379,7 +380,6 @@ COPY public.client (user_id, department, email, is_active, password, role, user_
 3	MCI 1	tobi2@mail.com	t	$2a$10$bM5CFj76wSCOjOlHexzEButyJeoVTyri8mSIJxuQq55H.FVizxRKO	USER	EXTERNAL	tobi2
 2	IT-Services	tobiadmin@mail.com	t	$2a$10$sAgSAZVm9dUwb9W2gdrcD.F2/ZROw6NbWaOxpEJcErEehT6J/Eu5y	ADMIN	STAFF	tobiadmin
 5	\N	room_234@system.local	t	$2a$10$/X6hvDMnymJgipzdYkgxfej96bjMthk1SZa78MNu86Pp93NMl/Wye	ROOM	ROOM_SCREEN	room_234
-6	\N	room_301/302@system.local	t	$2a$10$aAmXW4i8MxbjZiMXq9tMXOiLnF9esl7E9/TZkcy.dC0r0FYkRgtgK	ROOM	ROOM_SCREEN	room_301/302
 7	\N	room_303@system.local	t	$2a$10$M4uD7agD2oTbRoj/XO7Tte0.4skRGptL2HlUZjUAoPKUNUfAg98w2	ROOM	ROOM_SCREEN	room_303
 8	\N	room_304@system.local	t	$2a$10$pPpXetiq1aeH5tfeSGpd.e8ylawfLCg/HcPWCuLe38c0c520XZVRi	ROOM	ROOM_SCREEN	room_304
 9	\N	room_305@system.local	t	$2a$10$7cL7kTqXc0sqAayGUVlx2.Ny9Sl3y8nqh5MDRZSVMuvnYvka1/nva	ROOM	ROOM_SCREEN	room_305
@@ -388,22 +388,18 @@ COPY public.client (user_id, department, email, is_active, password, role, user_
 12	\N	room_308@system.local	t	$2a$10$ISxmCkGP7CvdWmntR5S/IeVfN.7Cs8k9Q2FvKuOiP/g2.x0YRvmWy	ROOM	ROOM_SCREEN	room_308
 13	\N	room_309@system.local	t	$2a$10$Vao.Uy1IpHyZ/VYWO8hM9eJpvd6xvdv5KTTHT1jYXWRmX2H4UC49u	ROOM	ROOM_SCREEN	room_309
 14	\N	room_310@system.local	t	$2a$10$C/4SiulxZsCoNl7paEnOzOM/9Vey.T9gJTKCY0gHFVNvHmxNGkNsu	ROOM	ROOM_SCREEN	room_310
-15	\N	room_401/402@system.local	t	$2a$10$r1M8PFgMWRCtZK0xAC1JYuQOOTZ8CLSx0GbaKFaLQhzs5sVAN/ava	ROOM	ROOM_SCREEN	room_401/402
 16	\N	room_403@system.local	t	$2a$10$83Gv1XCyF6qZFM5rYAxQReGrW/6rAFnu47lLDxJWqrtMEVdRpvzcC	ROOM	ROOM_SCREEN	room_403
 17	\N	room_404@system.local	t	$2a$10$sM8dQ3dNghj/4QcckfHF3Ol6KjKavxLFHplL.odL0f3pY2scSTU5C	ROOM	ROOM_SCREEN	room_404
 18	\N	room_405@system.local	t	$2a$10$buR3.JTtKVrUlmqEd6lLmuJVoe6fkvs5j1ZoPv4MyqIBTRjYGa6Ly	ROOM	ROOM_SCREEN	room_405
 19	\N	room_406@system.local	t	$2a$10$BW81QUdTvo73MJSvuJPOUuY9rDQeBLqhZNYrh/eSqSgPe1OjNaNLK	ROOM	ROOM_SCREEN	room_406
-20	\N	room_051/052/053@system.local	t	$2a$10$hhjpyByZKOoPFhQRUSfl4.CB9jX0ktPa.zev0gnjpiWdlrgkr.MQW	ROOM	ROOM_SCREEN	room_051/052/053
 21	\N	room_162@system.local	t	$2a$10$vTUH43ZXMRQjJ9nHGyHYdedu7591nMo.fgitNqXyE/PRvYsV1w72u	ROOM	ROOM_SCREEN	room_162
 22	\N	room_163@system.local	t	$2a$10$vN1DdtqXK29aO0Wwbmil8uau9cO0Y2ed/i2JKFPUUjPHgwoQgK46q	ROOM	ROOM_SCREEN	room_163
 23	\N	room_164@system.local	t	$2a$10$Jk56SzebWHtg26pLclYH8uw83HzKWZ0l06aPhDEHjWZot7caOaFEa	ROOM	ROOM_SCREEN	room_164
-24	\N	room_551/552@system.local	t	$2a$10$rgl6mw3rxWxNwKrK9JhN4.JmDtnCkM5gXnmTUZvAsvNP.LpO.tP7W	ROOM	ROOM_SCREEN	room_551/552
 25	\N	room_011@system.local	t	$2a$10$UIMMlJCSyGsgg9UX/UsviO5MY0EPVHlA218YOmDHVFzyXfh5QkhCa	ROOM	ROOM_SCREEN	room_011
 26	\N	room_012@system.local	t	$2a$10$7m.O0amaSejJw/5OmFdjQOLe71y5lTAw6SpVTncrWbdfsOOrvbq9y	ROOM	ROOM_SCREEN	room_012
 27	\N	room_013@system.local	t	$2a$10$kTd0iTpMMMs84zlzx6Z3M.ab7w68g8K8T2d7R8CBiXMkRtHS7IIn6	ROOM	ROOM_SCREEN	room_013
 28	\N	room_014@system.local	t	$2a$10$HqoyqTi0e.QShMY0PfRuE.tBbHVGG1V9R1AMJwwbJqeqPbUA5s29O	ROOM	ROOM_SCREEN	room_014
 29	\N	room_111@system.local	t	$2a$10$tMGa9HCEOo7bvYY5atA9Y.77URoyQDpvI7OS9qiU8liGGhFVU6usC	ROOM	ROOM_SCREEN	room_111
-30	\N	room_112/113@system.local	t	$2a$10$bBzXiK10BRobXXCJ6upP7.d7/on6GoAmc.v4gnfcDymWQ7/V3jHsW	ROOM	ROOM_SCREEN	room_112/113
 31	DiBSE	peter@mail.com	t	$2a$10$3cH8cs/yY3rK/XFolm1vV.kHbRN152KlWUr61nR5Aswzhgn1.7qnu	USER	STUDENT	peter
 32	DiBSE	matthias@mail.com	t	$2a$10$ixw77LM6v8Ak6pvIZZJe.uK9M4vAbY3aeLFdP5cK8L2dzVxwbUfRm	USER	STUDENT	matthias
 33	DiBSE	alessandro@mail.com	t	$2a$10$shrut4r13COsRucrwMTNGO/.9Xj9GQQGfypdWXQuOGLQNZywC5dui	USER	STUDENT	alessandro
@@ -429,6 +425,9 @@ COPY public.client (user_id, department, email, is_active, password, role, user_
 52	\N	room_4c-502@system.local	t	$2a$10$vmEDcTMiddodvDUNNI6/uuXWYqAHe.GiknScdTzZTgCl.yPB7loGW	ROOM	ROOM_SCREEN	room_4c-502
 53	\N	room_4c-503@system.local	t	$2a$10$NQsqozT1PTeyLfTBqI744eXErr/0QSZHxKe2hmB0aGQ8EPUxmdNoK	ROOM	ROOM_SCREEN	room_4c-503
 54	\N	room_4c-504@system.local	t	$2a$10$P9Oj9S3G8PhSdqjCdFfs.OpZDS/HBMQgoEGjFk7sC1oK9tn11byYm	ROOM	ROOM_SCREEN	room_4c-504
+24	\N	room_551/552@system.local	f	$2a$10$rgl6mw3rxWxNwKrK9JhN4.JmDtnCkM5gXnmTUZvAsvNP.LpO.tP7W	ROOM	ROOM_SCREEN	room_551/552
+30	\N	room_112/113@system.local	f	$2a$10$bBzXiK10BRobXXCJ6upP7.d7/on6GoAmc.v4gnfcDymWQ7/V3jHsW	ROOM	ROOM_SCREEN	room_112/113
+15	\N	room_401/402@system.local	f	$2a$10$r1M8PFgMWRCtZK0xAC1JYuQOOTZ8CLSx0GbaKFaLQhzs5sVAN/ava	ROOM	ROOM_SCREEN	room_401/402
 55	\N	room_4c-505@system.local	t	$2a$10$EWkhoRGFItwHF90Z7zjxguWRvt.DwCYQXvnaSTp/A16zfiLs3Pi0i	ROOM	ROOM_SCREEN	room_4c-505
 56	\N	room_181@system.local	t	$2a$10$HnqFs9ZvAf8GyWbMpzcmSO5Mls08XQseAPDlq1pfXhl7YWTMFGgxy	ROOM	ROOM_SCREEN	room_181
 57	\N	room_182@system.local	t	$2a$10$9bW45bdGPETRz8rs4Fjkruzc/OSds/t7WwKA6zi3ixD17Bn5enGnS	ROOM	ROOM_SCREEN	room_182
@@ -436,6 +435,17 @@ COPY public.client (user_id, department, email, is_active, password, role, user_
 59	\N	room_184@system.local	t	$2a$10$3Ph5jcfIUneAQMRVsjr3ZOgpwcnw1kPUJZBRXYDwMi1Svb4NidSwC	ROOM	ROOM_SCREEN	room_184
 60	\N	room_185@system.local	t	$2a$10$U9WTEqVKy.hDr4N8UbMapu0smDkPfS.p6O505eKrG2LAP6aYBHCvK	ROOM	ROOM_SCREEN	room_185
 61	\N	room_283@system.local	t	$2a$10$VwqTjB2Gi1BsRD5mp5nKbOCSK.C0s3IJT3A7lLp.V76bTyR4VEAKq	ROOM	ROOM_SCREEN	room_283
+6	\N	room_301/302@system.local	f	$2a$10$aAmXW4i8MxbjZiMXq9tMXOiLnF9esl7E9/TZkcy.dC0r0FYkRgtgK	ROOM	ROOM_SCREEN	room_301/302
+62	\N	room_301@system.local	t	$2a$10$VRpYAE5gql9EbmTatz6LD.nB.tQDMLEn5OgPjvOuGBZc4tPj7P9ui	ROOM	ROOM_SCREEN	room_301
+63	\N	room_302@system.local	t	$2a$10$4lLNzSBxzt7LuhEoB8hUiOrPjCbRvYMlNZj3UDrSCGSPNSVTrwn0O	ROOM	ROOM_SCREEN	room_302
+64	\N	room_051@system.local	t	$2a$10$KpEzq8yFUZzxXiLOPTm4e.kVeYJVaucJhMugsMXdt4y2B51VhMTH.	ROOM	ROOM_SCREEN	room_051
+65	\N	room_052@system.local	t	$2a$10$LcTMX/K/n12GCQUSwjZYD.9vDg5Uj0.XvAlPMJWYKd8/4JFrZpMMG	ROOM	ROOM_SCREEN	room_052
+66	\N	room_053@system.local	t	$2a$10$FKNnfRTD1zICVE8LievJMO9c4YK0dDp2g0G6usJISSg59.D3cDbtG	ROOM	ROOM_SCREEN	room_053
+20	\N	room_051/052/053@system.local	f	$2a$10$hhjpyByZKOoPFhQRUSfl4.CB9jX0ktPa.zev0gnjpiWdlrgkr.MQW	ROOM	ROOM_SCREEN	room_051/052/053
+67	\N	room_551@system.local	t	$2a$10$a.K2Ekgw3.ayboC8eprafOnX0bhvIJjMPdS5dc.QJh16FqHRPa4Lm	ROOM	ROOM_SCREEN	room_551
+68	\N	room_552@system.local	t	$2a$10$NyQHR.vaqFFOnaAZAGcdKeng6FtSW8QzRIhscfC1KcDaj6griyXcC	ROOM	ROOM_SCREEN	room_552
+69	\N	room_112@system.local	t	$2a$10$e6N3q8yaA6QzSqX1g4ZL5.aRQ58xQ37wtgEj9JB4/gpL2.rtPHYYi	ROOM	ROOM_SCREEN	room_112
+70	\N	room_113@system.local	t	$2a$10$bNlprSk05DuxQNIc564LYOGwEqunnt2gayP4OMACDI9WSkLEh4Bri	ROOM	ROOM_SCREEN	room_113
 \.
 
 
@@ -477,14 +487,6 @@ COPY public.exit_distance (id, time_in_seconds, exit_from_id, exit_to_id) FROM s
 --
 
 COPY public.meeting_room (room_id, capacity, floor, has_door_control, has_light_control, has_ventilation_control, image_mime, image_original_name, image_path, is_active, location, name, status, client_id, has_beamer_control, has_blind_control, has_vacuum_robot, has_whiteboard, time_to_nearest_exit, exit_id) FROM stdin;
-11	20	4	f	t	f	\N	\N	\N	t	MCI I	401/402	ACTIVE	15	f	f	f	f	80	1
-12	28	4	f	t	f	\N	\N	\N	t	MCI I	403	ACTIVE	16	f	f	f	f	70	1
-1	26	2	t	t	t	\N	\N	\N	t	MCI I	234	ACTIVE	5	t	t	t	t	60	1
-4	54	3	t	t	t	\N	\N	\N	t	MCI I	304	ACTIVE	8	t	t	t	t	50	1
-6	56	3	f	t	f	\N	\N	\N	t	MCI I	306	ACTIVE	10	f	f	f	f	65	1
-13	28	4	f	t	f	\N	\N	\N	t	MCI I	404	ACTIVE	17	f	f	f	f	90	1
-14	28	4	f	t	f	\N	\N	\N	t	MCI I	405	ACTIVE	18	f	f	f	f	85	1
-15	32	4	f	t	f	\N	\N	\N	t	MCI I	406	ACTIVE	19	f	f	f	f	120	1
 27	29	0	f	t	f	\N	\N	\N	t	MCI IV	4B-001	ACTIVE	37	f	f	f	f	60	6
 28	30	0	f	t	f	\N	\N	\N	t	MCI IV	4B-003	ACTIVE	38	f	f	f	f	55	6
 29	23	0	f	t	f	\N	\N	\N	t	MCI IV	4B-005	ACTIVE	39	f	f	f	f	50	6
@@ -492,24 +494,6 @@ COPY public.meeting_room (room_id, capacity, floor, has_door_control, has_light_
 31	30	0	f	t	f	\N	\N	\N	t	MCI IV	4B-007	ACTIVE	41	f	f	f	f	40	6
 32	16	0	f	t	f	\N	\N	\N	t	MCI IV	4B-008	ACTIVE	42	f	f	f	f	50	6
 33	58	0	f	t	f	\N	\N	\N	t	MCI IV	4A-020	ACTIVE	43	f	f	f	f	65	6
-21	54	0	f	t	f	\N	\N	\N	t	MCI III	011	ACTIVE	25	f	f	f	f	95	8
-22	54	0	f	t	f	\N	\N	\N	t	MCI III	012	ACTIVE	26	f	f	f	f	90	8
-23	54	0	f	t	f	\N	\N	\N	t	MCI III	013	ACTIVE	27	f	f	f	f	100	8
-24	30	0	f	t	f	\N	\N	\N	t	MCI III	014	ACTIVE	28	f	f	f	f	105	8
-25	54	1	f	t	f	\N	\N	\N	t	MCI III	111	ACTIVE	29	f	f	f	f	115	8
-26	90	1	f	t	f	\N	\N	\N	t	MCI III	112/113	ACTIVE	30	f	f	f	f	120	8
-16	100	0	f	t	f	\N	\N	\N	t	MCI II	051/052/053	ACTIVE	20	f	f	f	f	110	3
-17	8	1	f	t	f	\N	\N	\N	t	MCI II	162	ACTIVE	21	f	f	f	f	115	3
-18	8	1	f	t	f	\N	\N	\N	t	MCI II	163	ACTIVE	22	f	f	f	f	110	3
-19	12	1	f	t	f	\N	\N	\N	t	MCI II	164	ACTIVE	23	f	f	f	f	100	3
-20	94	5	f	t	f	\N	\N	\N	t	MCI II	551/552	ACTIVE	24	f	f	f	f	105	3
-3	54	3	t	t	f	\N	\N	\N	t	MCI I	303	ACTIVE	7	f	t	t	f	60	1
-5	60	3	f	t	f	\N	\N	\N	t	MCI I	305	ACTIVE	9	f	f	f	f	65	1
-7	32	3	f	t	f	\N	\N	\N	t	MCI I	307	ACTIVE	11	f	f	f	f	80	1
-8	18	3	f	t	f	\N	\N	\N	t	MCI I	308	ACTIVE	12	f	f	f	f	65	1
-9	45	3	f	t	f	\N	\N	\N	t	MCI I	309	ACTIVE	13	f	f	f	f	85	1
-10	32	3	f	t	f	\N	\N	\N	t	MCI I	310	ACTIVE	14	f	f	f	f	70	1
-2	132	3	f	t	f	\N	\N	\N	t	MCI I	301/302	ACTIVE	6	f	f	f	f	65	1
 34	68	0	f	t	f	\N	\N	\N	t	MCI IV	4A-024	ACTIVE	44	f	f	f	f	60	6
 35	60	0	f	t	f	\N	\N	\N	t	MCI IV	4A-027	ACTIVE	45	f	f	f	f	55	6
 36	45	1	f	t	f	\N	\N	\N	t	MCI IV	1A-135	ACTIVE	46	f	f	f	f	70	6
@@ -528,6 +512,41 @@ COPY public.meeting_room (room_id, capacity, floor, has_door_control, has_light_
 49	44	1	f	t	f	\N	\N	\N	t	MCI V	184	ACTIVE	59	f	f	f	f	110	7
 50	52	1	f	t	f	\N	\N	\N	t	MCI V	185	ACTIVE	60	f	f	f	f	115	7
 51	40	2	f	t	f	\N	\N	\N	t	MCI V	283	ACTIVE	61	f	f	f	f	120	7
+21	54	0	f	t	f	\N	\N	\N	t	MCI III	011	ACTIVE	25	f	f	f	f	95	8
+22	54	0	f	t	f	\N	\N	\N	t	MCI III	012	ACTIVE	26	f	f	f	f	90	8
+23	54	0	f	t	f	\N	\N	\N	t	MCI III	013	ACTIVE	27	f	f	f	f	100	8
+24	30	0	f	t	f	\N	\N	\N	t	MCI III	014	ACTIVE	28	f	f	f	f	105	8
+12	28	4	f	t	f	\N	\N	\N	t	MCI I	403	ACTIVE	16	f	f	f	f	70	1
+1	26	2	t	t	t	\N	\N	\N	t	MCI I	234	ACTIVE	5	t	t	t	t	60	1
+4	54	3	t	t	t	\N	\N	\N	t	MCI I	304	ACTIVE	8	t	t	t	t	50	1
+6	56	3	f	t	f	\N	\N	\N	t	MCI I	306	ACTIVE	10	f	f	f	f	65	1
+13	28	4	f	t	f	\N	\N	\N	t	MCI I	404	ACTIVE	17	f	f	f	f	90	1
+14	28	4	f	t	f	\N	\N	\N	t	MCI I	405	ACTIVE	18	f	f	f	f	85	1
+15	32	4	f	t	f	\N	\N	\N	t	MCI I	406	ACTIVE	19	f	f	f	f	120	1
+3	54	3	t	t	f	\N	\N	\N	t	MCI I	303	ACTIVE	7	f	t	t	f	60	1
+5	60	3	f	t	f	\N	\N	\N	t	MCI I	305	ACTIVE	9	f	f	f	f	65	1
+7	32	3	f	t	f	\N	\N	\N	t	MCI I	307	ACTIVE	11	f	f	f	f	80	1
+8	18	3	f	t	f	\N	\N	\N	t	MCI I	308	ACTIVE	12	f	f	f	f	65	1
+9	45	3	f	t	f	\N	\N	\N	t	MCI I	309	ACTIVE	13	f	f	f	f	85	1
+10	32	3	f	t	f	\N	\N	\N	t	MCI I	310	ACTIVE	14	f	f	f	f	70	1
+2	132	3	f	t	f	\N	\N	\N	f	MCI I	301/302	ACTIVE	6	f	f	f	f	65	1
+17	8	1	f	t	f	\N	\N	\N	t	MCI II	162	ACTIVE	21	f	f	f	f	115	3
+18	8	1	f	t	f	\N	\N	\N	t	MCI II	163	ACTIVE	22	f	f	f	f	110	3
+19	12	1	f	t	f	\N	\N	\N	t	MCI II	164	ACTIVE	23	f	f	f	f	100	3
+54	50	0	f	f	f	\N	\N	\N	t	MCI II	051	ACTIVE	64	f	f	f	f	\N	3
+55	25	0	f	f	f	\N	\N	\N	t	MCI II	052	ACTIVE	65	f	f	f	f	\N	3
+56	25	0	f	f	f	\N	\N	\N	t	MCI II	053	ACTIVE	66	f	f	f	f	\N	3
+25	54	1	f	t	f	\N	\N	\N	t	MCI III	111	ACTIVE	29	f	f	f	f	115	8
+59	50	1	f	f	f	\N	\N	\N	t	MCI III	112	ACTIVE	69	f	f	f	f	\N	8
+60	40	1	f	f	f	\N	\N	\N	t	MCI III	113	ACTIVE	70	f	f	f	f	\N	8
+26	90	1	f	t	f	\N	\N	\N	f	MCI III	112/113	ACTIVE	30	f	f	f	f	120	8
+52	50	3	t	t	t	\N	\N	\N	t	MCI I	301	ACTIVE	62	t	t	f	t	\N	1
+53	82	3	t	t	t	\N	\N	\N	t	MCI I	302	ACTIVE	63	t	t	f	t	\N	1
+11	20	4	f	t	f	\N	\N	\N	f	MCI I	401/402	ACTIVE	15	f	f	f	f	80	1
+16	100	0	f	t	f	\N	\N	\N	f	MCI II	051/052/053	ACTIVE	20	f	f	f	f	110	3
+57	50	5	f	f	f	\N	\N	\N	t	MCI II	551	ACTIVE	67	f	f	f	f	\N	3
+58	69	5	f	f	f	\N	\N	\N	t	MCI II	552	ACTIVE	68	f	f	f	f	\N	3
+20	94	5	f	t	f	\N	\N	\N	f	MCI II	551/552	ACTIVE	24	f	f	f	f	105	3
 \.
 
 
@@ -602,6 +621,18 @@ COPY public.meeting_room_equipment (room_id, equipment_id) FROM stdin;
 50	3
 51	3
 5	3
+52	1
+52	2
+52	6
+52	5
+52	3
+52	4
+53	4
+53	3
+53	1
+53	6
+53	5
+53	2
 \.
 
 
@@ -625,8 +656,9 @@ COPY public.notification (id, created_at, is_read, type, booking_id) FROM stdin;
 15	2026-02-04 12:27:10.959215	f	REMINDER_START	8
 16	2026-02-04 12:30:24.244357	f	CONFIRMATION	9
 17	2026-02-04 12:30:24.249039	f	REMINDER_START	9
-18	2026-02-05 09:34:46.072284	f	CONFIRMATION	10
-19	2026-02-05 09:45:00.071717	f	REMINDER_START	10
+19	2026-02-05 09:45:00.071717	t	REMINDER_START	10
+18	2026-02-05 09:34:46.072284	t	CONFIRMATION	10
+20	2026-02-05 11:23:21.715077	f	CONFIRMATION	11
 \.
 
 
@@ -634,7 +666,7 @@ COPY public.notification (id, created_at, is_read, type, booking_id) FROM stdin;
 -- Name: booking_booking_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.booking_booking_id_seq', 10, true);
+SELECT pg_catalog.setval('public.booking_booking_id_seq', 11, true);
 
 
 --
@@ -655,7 +687,7 @@ SELECT pg_catalog.setval('public.building_id_seq', 5, true);
 -- Name: client_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.client_user_id_seq', 61, true);
+SELECT pg_catalog.setval('public.client_user_id_seq', 70, true);
 
 
 --
@@ -676,14 +708,14 @@ SELECT pg_catalog.setval('public.exit_distance_id_seq', 39, true);
 -- Name: meeting_room_room_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.meeting_room_room_id_seq', 51, true);
+SELECT pg_catalog.setval('public.meeting_room_room_id_seq', 60, true);
 
 
 --
 -- Name: notification_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.notification_id_seq', 19, true);
+SELECT pg_catalog.setval('public.notification_id_seq', 20, true);
 
 
 --
@@ -882,5 +914,5 @@ ALTER TABLE ONLY public.exit_distance
 -- PostgreSQL database dump complete
 --
 
-\unrestrict SEbDBFdhRxWxC47fye7abcCRf5SuxC2TA2pIxyMunxfWT4IXc9wSlRqz5BWAFVx
+\unrestrict MJGukJSOV6uBiffQec74Uh1O9FOZhFbBv5NezmXz3oUceHMBhEcRYY8Y2eoAThd
 

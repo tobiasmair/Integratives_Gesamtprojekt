@@ -344,11 +344,21 @@ public class QuickBookingContainer extends Div {
 
         List<MeetingRoom> filteredRooms = allAvailableRooms.stream()
                 .filter(room -> filter.isEmpty() || room.getName().toLowerCase().contains(filter))
+                // Sortierung nach Gebäudename
+                .sorted((r1, r2) -> {
+                    String b1 = (r1.getNearestExit() != null && r1.getNearestExit().getBuilding() != null)
+                            ? r1.getNearestExit().getBuilding().getName() : "";
+                    String b2 = (r2.getNearestExit() != null && r2.getNearestExit().getBuilding() != null)
+                            ? r2.getNearestExit().getBuilding().getName() : "";
+
+                    return b1.compareToIgnoreCase(b2);
+                })
                 .toList();
 
         MeetingRoom selectedRoom = roomGroup.getValue();
         roomGroup.setItems(filteredRooms);
 
+        // Selektion beibehalten
         if (selectedRoom != null && filteredRooms.contains(selectedRoom)) {
             roomGroup.setValue(selectedRoom);
         } else if (!filteredRooms.isEmpty() && filter.isEmpty()) {
@@ -432,10 +442,6 @@ public class QuickBookingContainer extends Div {
                         booking,
                         Optional.ofNullable(exitDropdown.getValue()).map(Exit::getId)
                 );
-
-                Notification.show("Room booked successfully!", 3000, Notification.Position.TOP_CENTER)
-                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-
             } catch (MissingStartExitException ex) {
 
                 exitDropdown.setItems(ex.getAvailableExits());
