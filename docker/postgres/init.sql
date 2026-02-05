@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict SjhOoowsuCWW86MyZcWDUgX9rdgyrMtEBeiRtTtMlMSkxxvzj1HCVE2mhpyLBJW
+\restrict SEbDBFdhRxWxC47fye7abcCRf5SuxC2TA2pIxyMunxfWT4IXc9wSlRqz5BWAFVx
 
 -- Dumped from database version 16.11 (Debian 16.11-1.pgdg13+1)
 -- Dumped by pg_dump version 16.11 (Debian 16.11-1.pgdg13+1)
@@ -459,31 +459,16 @@ COPY public.equipment (equipment_id, description) FROM stdin;
 --
 
 COPY public.exit_distance (id, time_in_seconds, exit_from_id, exit_to_id) FROM stdin;
-1	45	1	2
-2	300	3	4
-3	120	8	5
-4	300	6	9
-5	300	7	10
-6	120	1	3
-7	480	1	8
-8	720	1	6
-9	900	1	7
-10	420	3	8
-11	660	3	6
-12	840	3	7
-13	60	8	6
-14	420	8	7
-15	300	6	7
-16	360	2	4
-17	510	2	6
-18	500	4	8
-19	160	2	3
-20	520	2	8
-21	760	2	6
-22	130	1	4
-23	520	1	5
-24	800	1	9
-25	960	1	10
+30	120	1	3
+31	1500	1	8
+32	900	1	6
+39	360	1	7
+36	2100	8	6
+37	1740	8	7
+38	1200	6	7
+33	1380	3	8
+34	960	3	6
+35	420	3	7
 \.
 
 
@@ -641,6 +626,7 @@ COPY public.notification (id, created_at, is_read, type, booking_id) FROM stdin;
 16	2026-02-04 12:30:24.244357	f	CONFIRMATION	9
 17	2026-02-04 12:30:24.249039	f	REMINDER_START	9
 18	2026-02-05 09:34:46.072284	f	CONFIRMATION	10
+19	2026-02-05 09:45:00.071717	f	REMINDER_START	10
 \.
 
 
@@ -683,7 +669,7 @@ SELECT pg_catalog.setval('public.equipment_equipment_id_seq', 7, true);
 -- Name: exit_distance_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.exit_distance_id_seq', 25, true);
+SELECT pg_catalog.setval('public.exit_distance_id_seq', 39, true);
 
 
 --
@@ -697,7 +683,7 @@ SELECT pg_catalog.setval('public.meeting_room_room_id_seq', 51, true);
 -- Name: notification_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.notification_id_seq', 18, true);
+SELECT pg_catalog.setval('public.notification_id_seq', 19, true);
 
 
 --
@@ -896,5 +882,5 @@ ALTER TABLE ONLY public.exit_distance
 -- PostgreSQL database dump complete
 --
 
-\unrestrict SjhOoowsuCWW86MyZcWDUgX9rdgyrMtEBeiRtTtMlMSkxxvzj1HCVE2mhpyLBJW
+\unrestrict SEbDBFdhRxWxC47fye7abcCRf5SuxC2TA2pIxyMunxfWT4IXc9wSlRqz5BWAFVx
 
