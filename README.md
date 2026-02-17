@@ -81,6 +81,21 @@ Fix it by making the wrapper executable:
 chmod u+x mvnw
 ```
 
+## ️👤 Users to try out
+### User
+Username: user
+
+Password: 123
+
+### Admin
+Username: admin
+
+Password: 123
+
+### Room
+Username: room_303
+
+Password: room_303
 
 ## 🛑 Stopping Containers & Resetting the Database
 
@@ -106,7 +121,7 @@ docker compose down -v
 docker compose down --rmi all
 ```
 
-## 💡Updating the database
+## 💡Updating the database dump
 To add newly added data into the database dump, run
 ```bash
 docker exec -t gesamtprojekt_db pg_dump -U postgres -d postgres_database --clean --if-exists > docker/postgres/init.sql
